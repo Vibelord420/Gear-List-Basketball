@@ -61,7 +61,7 @@ h3{margin:20px 0 2px;font-size:15px;color:var(--mut)}
 const K="gearcheck.v1",$=id=>document.getElementById(id),uid=()=>Math.random().toString(36).slice(2,9);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const B=[["Basketball Shoes","👟"],["Jersey","🎽"],["Shorts","🩳"],["Boxer","🩲"],["Socks","🧦"],["Undershirt","👕"],["Undershorts","🩲"],["Shooting Shirt","👚"],["Track Top","🧥"],["Suspensorium","🛡️"],["Headband","🎀"],["Other Accessories","🎒"],["T-Shirt","👕"],["Warm Top","🧶"],["Pants","👖"],["Hat","🧢"],["Small Towel","🧻"],["Big Towel","🛁"],["Slippers","👡"],["Shower Gel","🧴"],["Magnesium","🧂"],["Drinks","🥤"]];
-const PICK=["👟","🎽","👕","👚","🩳","🩲","🧦","🧥","🧶","👖","🧢","🎀","🛡️","🎒","🧻","🛁","🩴","👡","🥿","🧴","🧂","🥤","🍌","🏀","🔑","🔋","🎧","💳","⌚","🩹","🧊","📱","🕶️","🧳"];
+const PICK=["👟","🎽","👕","👚","🩳","🩲","🧦","🧥","🧶","👖","🧢","🎀","🛡️","🎒","🧻","🛁","🩴","👡","🥿","🧴","🧂","🥤","🍌","🏀","👛","🔑","🔋","🎧","💳","⌚","🩹","🧊","📱","🕶️","🧳"];
 const iso=t=>{const d=new Date(t);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")},today=()=>iso(Date.now()),byd=(a,b)=>a.dt<b.dt?-1:a.dt>b.dt?1:0;
 const mkI=(n,i,q)=>({id:uid(),n,i,q:q||1,d:false});
 const mkL=(type,items,note,dt)=>({id:uid(),type,note:note||"",dt:dt||today(),t:Date.now(),items:items.map(x=>mkI(x.n,x.i,x.q))});
@@ -78,6 +78,13 @@ function pick(t){
 function fix(){
  S.lists.forEach(l=>{if(!l.dt)l.dt=iso(l.t)});S.wd=S.wd||[2,4];S.act=S.act||{};
  if(!S.v&&S.tpl){const sw=x=>{if(x.n==="Slippers"&&x.i==="🩴")x.i="👡"};S.tpl.game.forEach(sw);S.tpl.practice.forEach(sw);S.lists.forEach(l=>l.items.forEach(sw));S.v=2}
+ if((S.v||0)<3&&S.tpl){
+  const X={game:[["ID Card","💳"],["Keys","🔑"],["Wallet","👛"],["Phone","📱"]],practice:[["Basketball","🏀"],["Keys","🔑"],["Wallet","👛"],["Phone","📱"]]},td=today(),has=(L,n)=>L.some(x=>x.n.toLowerCase()===n.toLowerCase());
+  for(const t in X)X[t].forEach(([n,i])=>{
+   if(!has(S.tpl[t],n))S.tpl[t].push({n,i,q:1});
+   S.lists.forEach(l=>{if(l.type===t&&l.dt>=td&&!has(l.items,n))l.items.push(mkI(n,i,1))})
+  });
+  S.v=3}
  pick("game");pick("practice");
  const u=S.lists.filter(l=>l.dt>=today()).sort(byd)[0];if(u)S.tab=u.type;
 }

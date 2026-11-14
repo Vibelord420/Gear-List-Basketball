@@ -65,9 +65,9 @@ const PICK=["👟","🎽","👕","👚","🩳","🩲","🧦","🧥","🧶","👖
 const iso=t=>{const d=new Date(t);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")},today=()=>iso(Date.now()),byd=(a,b)=>a.dt<b.dt?-1:a.dt>b.dt?1:0;
 const mkI=(n,i,q)=>({id:uid(),n,i,q:q||1,d:false});
 const mkL=(type,items,note,dt)=>({id:uid(),type,note:note||"",dt:dt||today(),t:Date.now(),items:items.map(x=>mkI(x.n,x.i,x.q))});
-let S,sheet=null,sm="",sid="",sd="",sn="",ico="🎒",fq=1,view="l",edit=false,confirmId=null,flash=false;
+let S,sheet=null,eid=null,sm="",sid="",sd="",sn="",ico="🎒",fq=1,view="l",edit=false,confirmId=null,flash=false;
 function seed(){
- const p=B.map(([n,i])=>({n,i,q:1})),g=p.concat([{n:"Snacks",i:"🍌",q:1}]);
+ const p=B.map(([n,i])=>({n,i,q:1})),g=p.map(x=>({...x})).concat([{n:"Snacks",i:"🍌",q:1}]);
  const a=mkL("game",g),b=mkL("practice",p);
  return{tab:"game",wd:[2,4],tpl:{game:g,practice:p},lists:[a,b],act:{game:a.id,practice:b.id}};
 }
@@ -173,8 +173,8 @@ function R(){
   <div class="seg">${["game","practice"].map(k=>`<button class="${S.tab===k?"on":""}" data-a="tab" data-id="${k}">${tl(k)}</button>`).join("")}</div>
   <button class="tl" data-a="ses">📅 ${ds(l.dt)}${l.note?" – "+esc(l.note):""} ✎</button>
   <div class="bar"><i class="${t&&n===t?"ok":""}" style="width:${t?n/t*100:0}%"></i></div>
-  <p class="sub">${t&&n===t?"All packed. Ready to go.":n+" of "+t+" packed"}</p>`+
-  l.items.map(x=>`<div class="row ${x.d?"done":""}" data-a="chk" data-id="${x.id}"><span class="ck">${x.d?"✓":""}</span><span class="ic">${x.i}</span><span class="nm">${esc(x.n)}</span><span class="q"><button data-a="qm" data-id="${x.id}" aria-label="Less">−</button><b>${x.q}</b><button data-a="qp" data-id="${x.id}" aria-label="More">+</button></span>${edit?`<button class="x" data-a="del" data-id="${x.id}" aria-label="Remove">✕</button>`:""}</div>`).join("")+
+  <p class="sub">${t&&n===t?"All packed. Ready to go.":n+" of "+t+" packed"}</p>${edit?`<p class="sub">Tap an item to rename it or change its icon.</p>`:""}`+
+  l.items.map(x=>`<div class="row ${x.d?"done":""}" data-a="${edit?"ei":"chk"}" data-id="${x.id}"><span class="ck">${x.d?"✓":""}</span><span class="ic">${x.i}</span><span class="nm">${esc(x.n)}${edit?" ✎":""}</span><span class="q"><button data-a="qm" data-id="${x.id}" aria-label="Less">−</button><b>${x.q}</b><button data-a="qp" data-id="${x.id}" aria-label="More">+</button></span>${edit?`<button class="x" data-a="del" data-id="${x.id}" aria-label="Remove">✕</button>`:""}</div>`).join("")+
   (t?"":`<p class="sub">This list is empty. Add your first item.</p>`)+
   (edit?`<button class="btn w" data-a="sdef">${flash?"Saved ✓":"Save as default "+S.tab+" list"}</button>`:"");
   d=`<div><button class="btn p" data-a="add">+ Add item</button><button class="btn" data-a="new">New list</button><button class="btn" data-a="sess">Sessions</button></div>`;
@@ -185,12 +185,12 @@ function Sh(){
  const s=$("sheet"),
  f=`<input type="date" id="fdt" class="in" value="${sd}"><div style="height:8px"></div><input id="fnote" class="in" placeholder="Name, e.g. opponent (optional)" maxlength="40" autocomplete="off" value="${esc(sn)}"><div style="height:12px"></div>`,
  ov=(c,x)=>`<div class="ov" data-a="close"><div class="sh" data-a="none">${c}<button class="btn w" data-a="close">${x||"Cancel"}</button></div></div>`;
- if(sheet==="add")s.innerHTML=ov(`<h2>Add item</h2>
- <input id="fn" class="in" placeholder="Item name" maxlength="40" autocomplete="off">
- <div class="qr"><span>Quantity</span><span class="q"><button data-a="sqm">−</button><b id="fq">1</b><button data-a="sqp">+</button></span></div>
+ if(sheet==="add")s.innerHTML=ov(`<h2>${eid?"Edit item":"Add item"}</h2>
+ <input id="fn" class="in" placeholder="Item name" maxlength="40" autocomplete="off" value="${eid?esc(cur().items.find(z=>z.id===eid).n):""}">
+ <div class="qr"><span>Quantity</span><span class="q"><button data-a="sqm">−</button><b id="fq">${fq}</b><button data-a="sqp">+</button></span></div>
  <div class="ig">${PICK.map(e=>`<button class="${e===ico?"on":""}" data-a="ico" data-id="${e}">${e}</button>`).join("")}</div>
- <label class="chk"><input type="checkbox" id="fd" checked> Also add to the default ${S.tab} list</label>
- <button class="btn p w" data-a="addok">Add to list</button>`);
+ <label class="chk"><input type="checkbox" id="fd" checked> ${eid?`Also change it in the default list and upcoming ${S.tab} sessions`:`Also add to the default ${S.tab} list`}</label>
+ <button class="btn p w" data-a="addok">${eid?"Save item":"Add to list"}</button>`);
  else if(sheet==="ses"){
   const T={edit:["Edit session",`<button class="btn p w" data-a="sv">Save</button>`],
    new:["New "+S.tab+" list",`<button class="btn p w" data-a="nfresh">Fresh from default list</button><button class="btn w" data-a="ncopy">Copy of current list, unticked</button>`],
@@ -205,7 +205,7 @@ function Sh(){
  else s.innerHTML="";
 }
 function act(a,id){
- const l=cur(),it=()=>l.items.find(x=>x.id===id),X=()=>S.lists.find(z=>z.id===id),
+ const l=cur(),it=()=>l.items.find(x=>x.id===id),it2=i=>l.items.find(x=>x.id===i),X=()=>S.lists.find(z=>z.id===id),
  rd=()=>({dt:$("fdt").value||today(),note:$("fnote").value.trim()}),
  go=n=>{S.lists.push(n);S.tab=n.type;S.act[n.type]=n.id;sheet=null;view="l";edit=false};
  switch(a){
@@ -216,7 +216,8 @@ function act(a,id){
  case"del":l.items=l.items.filter(x=>x.id!==id);break;
  case"edit":edit=!edit;break;
  case"sdef":S.tpl[S.tab]=l.items.map(x=>({n:x.n,i:x.i,q:x.q}));flash=true;setTimeout(()=>{flash=false;R()},1800);break;
- case"add":sheet="add";ico="🎒";fq=1;break;
+ case"add":sheet="add";eid=null;ico="🎒";fq=1;break;
+ case"ei":{const x=it();sheet="add";eid=x.id;ico=x.i;fq=x.q;break}
  case"ses":sheet="ses";sm="edit";sd=l.dt;sn=l.note;break;
  case"new":sheet="ses";sm="new";sd=today();sn="";break;
  case"pg":sheet="ses";sm="game";sd=today();sn="";break;
@@ -227,6 +228,9 @@ function act(a,id){
  case"sqp":case"sqm":fq=Math.max(1,Math.min(99,fq+(a==="sqp"?1:-1)));$("fq").textContent=fq;return;
  case"wd":{const n=+id;S.wd=S.wd.includes(n)?S.wd.filter(x=>x!==n):S.wd.concat(n);document.querySelectorAll(".wd button").forEach(b=>b.classList.toggle("on",S.wd.includes(+b.dataset.id)));save();return}
  case"addok":{const nm=$("fn").value.trim();if(!nm){$("fn").focus();return}
+  if(eid){const x=it2(eid),old=x.n.toLowerCase();
+   if($("fd").checked){const ap=L=>L.forEach(z=>{if(z.n.toLowerCase()===old){z.n=nm;z.i=ico}});ap(S.tpl[S.tab]);S.lists.forEach(q=>{if(q.type===S.tab&&q.dt>=today())ap(q.items)})}
+   x.n=nm;x.i=ico;x.q=fq;eid=null;sheet=null;break}
   l.items.push(mkI(nm,ico,fq));if($("fd").checked)S.tpl[S.tab].push({n:nm,i:ico,q:fq});sheet=null;break}
  case"ppok":{const w=+$("fw").value,have=new Set(S.lists.filter(z=>z.type==="practice").map(z=>z.dt));
   for(let i=0;i<w*7;i++){const d=new Date();d.setDate(d.getDate()+i);const k=iso(d);

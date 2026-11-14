@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gear Check</title><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#c2410c"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#e9edf1;--sf:#fff;--ink:#0f1b2d;--mut:#5d6b7c;--ln:#d3dae2;--ac:#c2410c;--acx:#fff;--ok:#1e8e5a;--okbg:#e1f3ea;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e151d;--sf:#17212c;--ink:#eef2f6;--mut:#98a6b5;--ln:#2a3745;--ac:#fb7c2f;--acx:#1a0d03;--ok:#3cc58a;--okbg:#14352a}}
+:root[data-theme="dark"]{--bg:#0e151d;--sf:#17212c;--ink:#eef2f6;--mut:#98a6b5;--ln:#2a3745;--ac:#fb7c2f;--acx:#1a0d03;--ok:#3cc58a;--okbg:#14352a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
+main{max-width:560px;margin:0 auto;padding:12px 14px 130px}
+h1{font-size:30px;font-weight:900;letter-spacing:-.02em;margin:6px 0}
+h2{margin:0 0 12px;font-size:20px}
+.top{display:flex;justify-content:space-between;align-items:center}
+.sub,.mut{color:var(--mut);font-size:14px;margin:8px 0}
+button{font-family:inherit;color:var(--ink)}
+.seg{display:flex;background:var(--ln);border-radius:14px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:none;color:var(--mut);font-weight:700;font-size:16px;padding:11px;border-radius:11px}
+.seg .on{background:var(--ac);color:var(--acx)}
+.bar{height:10px;background:var(--ln);border-radius:5px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ac);transition:width .2s}
+.bar i.ok{background:var(--ok)}
+.row{display:flex;align-items:center;gap:12px;background:var(--sf);border:1px solid var(--ln);border-radius:14px;padding:10px 12px;margin:8px 0}
+.row.done{background:var(--okbg);border-color:transparent}
+.row.done .nm{text-decoration:line-through;color:var(--mut)}
+.ck{width:26px;height:26px;flex:none;border-radius:50%;border:2px solid var(--ln);display:grid;place-items:center;color:#fff;font-weight:900}
+.done .ck{background:var(--ok);border-color:var(--ok)}
+.ic{font-size:26px;width:32px;text-align:center}
+.nm{flex:1;font-weight:600}
+.q{display:flex;align-items:center;gap:8px}
+.q b{min-width:20px;text-align:center}
+.q button,.x{width:34px;height:34px;border-radius:10px;border:1px solid var(--ln);background:var(--bg);font-size:18px}
+.x{color:#c0392b}
+.btn{flex:1;padding:12px;border-radius:12px;border:1px solid var(--ln);background:var(--bg);font-weight:700;font-size:15px}
+.btn.p{background:var(--ac);border-color:var(--ac);color:var(--acx)}
+.btn.sm{flex:none;padding:8px 16px}
+.w{display:block;width:100%;margin:8px 0}
+.dock{position:fixed;left:0;right:0;bottom:0;background:var(--sf);border-top:1px solid var(--ln);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px))}
+.dock div{display:flex;gap:8px;max-width:560px;margin:0 auto}
+.hc{background:var(--sf);border:1px solid var(--ln);border-radius:14px;padding:12px;margin:8px 0}
+.acts{display:flex;gap:8px;margin-top:10px}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;z-index:5}
+.sh{background:var(--sf);width:100%;max-width:560px;border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));max-height:92vh;overflow:auto}
+.in{width:100%;padding:12px;border-radius:12px;border:1px solid var(--ln);background:var(--bg);color:var(--ink);font-size:16px;font-family:inherit}
+.qr{display:flex;justify-content:space-between;align-items:center;margin:12px 0}
+.ig{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-bottom:12px}
+.ig button{aspect-ratio:1;font-size:22px;border-radius:10px;border:2px solid transparent;background:var(--bg);padding:0}
+.ig .on{border-color:var(--ac)}
+.chk{display:flex;gap:8px;align-items:center;margin:4px 0 12px;font-size:15px}
+.wd{display:flex;gap:6px;margin:8px 0 12px}.wd button{flex:1;padding:10px 0;border-radius:10px;border:1px solid var(--ln);background:var(--bg);font-weight:700;font-size:14px}.wd .on{background:var(--ac);border-color:var(--ac);color:var(--acx)}
+h3{margin:20px 0 2px;font-size:15px;color:var(--mut)}
+.tl{display:block;width:100%;text-align:left;background:none;border:0;padding:8px 0;color:var(--mut);font-size:15px}
+</style></head><body>
+<main id="app"></main>
+<div class="dock" id="dock"></div>
+<div id="sheet"></div>
+<script>
+const K="gearcheck.v1",$=id=>document.getElementById(id),uid=()=>Math.random().toString(36).slice(2,9);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const B=[["Basketball Shoes","👟"],["Jersey","🎽"],["Shorts","🩳"],["Boxer","🩲"],["Socks","🧦"],["Undershirt","👕"],["Undershorts","🩲"],["Shooting Shirt","👚"],["Track Top","🧥"],["Suspensorium","🛡️"],["Headband","🎀"],["Other Accessories","🎒"],["T-Shirt","👕"],["Warm Top","🧶"],["Pants","👖"],["Hat","🧢"],["Small Towel","🧻"],["Big Towel","🛁"],["Slippers","👡"],["Shower Gel","🧴"],["Magnesium","🧂"],["Drinks","🥤"]];
+const PICK=["👟","🎽","👕","👚","🩳","🩲","🧦","🧥","🧶","👖","🧢","🎀","🛡️","🎒","🧻","🛁","🩴","👡","🥿","🧴","🧂","🥤","🍌","🏀","🔑","🔋","🎧","💳","⌚","🩹","🧊","📱","🕶️","🧳"];
+const iso=t=>{const d=new Date(t);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")},today=()=>iso(Date.now()),byd=(a,b)=>a.dt<b.dt?-1:a.dt>b.dt?1:0;
+const mkI=(n,i,q)=>({id:uid(),n,i,q:q||1,d:false});
+const mkL=(type,items,note,dt)=>({id:uid(),type,note:note||"",dt:dt||today(),t:Date.now(),items:items.map(x=>mkI(x.n,x.i,x.q))});
+let S,sheet=null,sm="",sid="",sd="",sn="",ico="🎒",fq=1,view="l",edit=false,confirmId=null,flash=false;
+function seed(){
+ const p=B.map(([n,i])=>({n,i,q:1})),g=p.concat([{n:"Snacks",i:"🍌",q:1}]);
+ const a=mkL("game",g),b=mkL("practice",p);
+ return{tab:"game",wd:[2,4],tpl:{game:g,practice:p},lists:[a,b],act:{game:a.id,practice:b.id}};
+}
+function pick(t){
+ const L=S.lists.filter(l=>l.type===t).sort(byd),td=today(),r=L.find(l=>l.dt>=td)||L[L.length-1];
+ if(r)S.act[t]=r.id;else{const n=mkL(t,S.tpl[t]);S.lists.push(n);S.act[t]=n.id}
+}
+function fix(){
+ S.lists.forEach(l=>{if(!l.dt)l.dt=iso(l.t)});S.wd=S.wd||[2,4];S.act=S.act||{};
+ if(!S.v&&S.tpl){const sw=x=>{if(x.n==="Slippers"&&x.i==="🩴")x.i="👡"};S.tpl.game.forEach(sw);S.tpl.practice.forEach(sw);S.lists.forEach(l=>l.items.forEach(sw));S.v=2}
+ pick("game");pick("practice");
+ const u=S.lists.filter(l=>l.dt>=today()).sort(byd)[0];if(u)S.tab=u.type;
+}
+try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
+if(!S||!S.lists)S=seed();
+fix();
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
+const cur=()=>S.lists.find(l=>l.id===S.act[S.tab]);
+const ds=dt=>new Date(dt+"T12:00:00").toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short",year:"numeric"});
+const tl=k=>k==="game"?"🏀 Game":"🏃 Practice";
+const card=l=>{const n=l.items.filter(x=>x.d).length;
+ return`<div class="hc"><b>${ds(l.dt)}</b>${l.note?" – "+esc(l.note):""}<div class="mut">${tl(l.type)} – ${n} of ${l.items.length} packed</div><div class="acts"><button class="btn" data-a="open" data-id="${l.id}">Open</button><button class="btn" data-a="dup" data-id="${l.id}">Duplicate</button><button class="btn" data-a="rm" data-id="${l.id}">${confirmId===l.id?"Tap to confirm":"Delete"}</button></div></div>`};
+
+function R(){
+ let h="",d="";
+ if(view==="s"){
+  const td=today(),A=[...S.lists].sort(byd),up=A.filter(l=>l.dt>=td),past=A.filter(l=>l.dt<td).reverse();
+  h=`<h1>Sessions</h1><div class="acts"><button class="btn" data-a="pg">+ Game</button><button class="btn" data-a="pp">Plan practices</button></div>
+  <h3>Upcoming</h3>`+(up.map(card).join("")||`<p class="sub">Nothing planned yet.</p>`)+
+  `<h3>Past</h3>`+(past.map(card).join("")||`<p class="sub">No past sessions.</p>`)+
+  `<h3>Backup</h3><p class="sub">Data is stored in this browser only. Export a backup to move it to another device.</p>
+  <div class="acts"><button class="btn" data-a="exp">Export backup</button><button class="btn" data-a="imp">Import backup</button></div><input type="file" id="fi" accept="application/json" hidden>`;
+  d=`<div><button class="btn p" data-a="back">Back to list</button></div>`;
+ }else{
+  const l=cur(),n=l.items.filter(x=>x.d).length,t=l.items.length;
+  h=`<div class="top"><h1>Gear check</h1><button class="btn sm" data-a="edit">${edit?"Done":"Edit"}</button></div>
+  <div class="seg">${["game","practice"].map(k=>`<button class="${S.tab===k?"on":""}" data-a="tab" data-id="${k}">${tl(k)}</button>`).join("")}</div>
+  <button class="tl" data-a="ses">📅 ${ds(l.dt)}${l.note?" – "+esc(l.note):""} ✎</button>
+  <div class="bar"><i class="${t&&n===t?"ok":""}" style="width:${t?n/t*100:0}%"></i></div>
+  <p class="sub">${t&&n===t?"All packed. Ready to go.":n+" of "+t+" packed"}</p>`+
+  l.items.map(x=>`<div class="row ${x.d?"done":""}" data-a="chk" data-id="${x.id}"><span class="ck">${x.d?"✓":""}</span><span class="ic">${x.i}</span><span class="nm">${esc(x.n)}</span><span class="q"><button data-a="qm" data-id="${x.id}" aria-label="Less">−</button><b>${x.q}</b><button data-a="qp" data-id="${x.id}" aria-label="More">+</button></span>${edit?`<button class="x" data-a="del" data-id="${x.id}" aria-label="Remove">✕</button>`:""}</div>`).join("")+
+  (t?"":`<p class="sub">This list is empty. Add your first item.</p>`)+
+  (edit?`<button class="btn w" data-a="sdef">${flash?"Saved ✓":"Save as default "+S.tab+" list"}</button>`:"");
+  d=`<div><button class="btn p" data-a="add">+ Add item</button><button class="btn" data-a="new">New list</button><button class="btn" data-a="sess">Sessions</button></div>`;
+ }
+ $("app").innerHTML=h;$("dock").innerHTML=d;Sh();
+}
+function Sh(){
+ const s=$("sheet"),
+ f=`<input type="date" id="fdt" class="in" value="${sd}"><div style="height:8px"></div><input id="fnote" class="in" placeholder="Name, e.g. opponent (optional)" maxlength="40" autocomplete="off" value="${esc(sn)}"><div style="height:12px"></div>`,
+ ov=c=>`<div class="ov" data-a="close"><div class="sh" data-a="none">${c}<button class="btn w" data-a="close">Cancel</button></div></div>`;
+ if(sheet==="add")s.innerHTML=ov(`<h2>Add item</h2>
+ <input id="fn" class="in" placeholder="Item name" maxlength="40" autocomplete="off">
+ <div class="qr"><span>Quantity</span><span class="q"><button data-a="sqm">−</button><b id="fq">1</b><button data-a="sqp">+</button></span></div>
+ <div class="ig">${PICK.map(e=>`<button class="${e===ico?"on":""}" data-a="ico" data-id="${e}">${e}</button>`).join("")}</div>
+ <label class="chk"><input type="checkbox" id="fd" checked> Also add to the default ${S.tab} list</label>
+ <button class="btn p w" data-a="addok">Add to list</button>`);
+ else if(sheet==="ses"){
+  const T={edit:["Edit session",`<button class="btn p w" data-a="sv">Save</button>`],
+   new:["New "+S.tab+" list",`<button class="btn p w" data-a="nfresh">Fresh from default list</button><button class="btn w" data-a="ncopy">Copy of current list, unticked</button>`],
+   dup:["Duplicate session",`<button class="btn p w" data-a="dupok">Duplicate</button>`],
+   game:["Add game",`<button class="btn p w" data-a="gok">Add game</button>`]}[sm];
+  s.innerHTML=ov(`<h2>${T[0]}</h2>`+f+T[1]);
+ }else if(sheet==="pp")s.innerHTML=ov(`<h2>Plan practices</h2><p class="sub">Pick the weekdays. Sessions start today and use the default practice list. Days that already have a practice are skipped.</p>
+ <div class="wd">${[[1,"Mon"],[2,"Tue"],[3,"Wed"],[4,"Thu"],[5,"Fri"],[6,"Sat"],[0,"Sun"]].map(([n,t])=>`<button class="${S.wd.includes(n)?"on":""}" data-a="wd" data-id="${n}">${t}</button>`).join("")}</div>
+ <div class="qr"><span>For the next</span><select id="fw" class="in" style="width:auto"><option value="4">4 weeks</option><option value="8" selected>8 weeks</option><option value="12">12 weeks</option><option value="26">26 weeks</option></select></div>
+ <button class="btn p w" data-a="ppok">Create practices</button>`);
+ else s.innerHTML="";
+}
+function act(a,id){
+ const l=cur(),it=()=>l.items.find(x=>x.id===id),X=()=>S.lists.find(z=>z.id===id),
+ rd=()=>({dt:$("fdt").value||today(),note:$("fnote").value.trim()}),
+ go=n=>{S.lists.push(n);S.tab=n.type;S.act[n.type]=n.id;sheet=null;view="l";edit=false};
+ switch(a){
+ case"tab":S.tab=id;edit=false;break;
+ case"chk":it().d=!it().d;break;
+ case"qp":it().q=Math.min(99,it().q+1);break;
+ case"qm":it().q=Math.max(1,it().q-1);break;
+ case"del":l.items=l.items.filter(x=>x.id!==id);break;
+ case"edit":edit=!edit;break;
+ case"sdef":S.tpl[S.tab]=l.items.map(x=>({n:x.n,i:x.i,q:x.q}));flash=true;setTimeout(()=>{flash=false;R()},1800);break;
+ case"add":sheet="add";ico="🎒";fq=1;break;
+ case"ses":sheet="ses";sm="edit";sd=l.dt;sn=l.note;break;
+ case"new":sheet="ses";sm="new";sd=today();sn="";break;
+ case"pg":sheet="ses";sm="game";sd=today();sn="";break;
+ case"dup":sheet="ses";sm="dup";sid=id;sd=today();sn=X().note;break;
+ case"pp":sheet="pp";break;
+ case"close":sheet=null;break;
+ case"ico":ico=id;document.querySelectorAll(".ig button").forEach(b=>b.classList.toggle("on",b.dataset.id===id));return;
+ case"sqp":case"sqm":fq=Math.max(1,Math.min(99,fq+(a==="sqp"?1:-1)));$("fq").textContent=fq;return;
+ case"wd":{const n=+id;S.wd=S.wd.includes(n)?S.wd.filter(x=>x!==n):S.wd.concat(n);document.querySelectorAll(".wd button").forEach(b=>b.classList.toggle("on",S.wd.includes(+b.dataset.id)));save();return}
+ case"addok":{const nm=$("fn").value.trim();if(!nm){$("fn").focus();return}
+  l.items.push(mkI(nm,ico,fq));if($("fd").checked)S.tpl[S.tab].push({n:nm,i:ico,q:fq});sheet=null;break}
+ case"ppok":{const w=+$("fw").value,have=new Set(S.lists.filter(z=>z.type==="practice").map(z=>z.dt));
+  for(let i=0;i<w*7;i++){const d=new Date();d.setDate(d.getDate()+i);const k=iso(d);
+   if(S.wd.includes(d.getDay())&&!have.has(k))S.lists.push(mkL("practice",S.tpl.practice,"",k))}
+  sheet=null;view="s";break}
+ case"sv":{const v=rd();l.dt=v.dt;l.note=v.note;sheet=null;break}
+ case"nfresh":case"ncopy":{const v=rd();go(mkL(S.tab,a==="nfresh"?S.tpl[S.tab]:l.items,v.note,v.dt));break}
+ case"dupok":{const v=rd(),x=X();go(mkL(x.type,x.items,v.note,v.dt));break}
+ case"gok":{const v=rd();S.lists.push(mkL("game",S.tpl.game,v.note,v.dt));sheet=null;break}
+ case"sess":view="s";confirmId=null;break;
+ case"back":view="l";break;
+ case"open":{const x=X();S.tab=x.type;S.act[x.type]=id;view="l";edit=false;break}
+ case"rm":
+  if(confirmId!==id){confirmId=id;break}
+  S.lists=S.lists.filter(z=>z.id!==id);confirmId=null;
+  for(const t of["game","practice"])if(!S.lists.some(z=>z.id===S.act[t]))pick(t);
+  break;
+ case"exp":{const e=document.createElement("a");e.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:"application/json"}));e.download="gear-check-backup.json";e.click();return}
+ case"imp":$("fi").click();return;
+ default:return}
+ save();R();
+}
+document.addEventListener("click",e=>{const t=e.target.closest("[data-a]");if(t)act(t.dataset.a,t.dataset.id)});
+document.addEventListener("change",e=>{
+ if(e.target.id!=="fi"||!e.target.files[0])return;
+ const r=new FileReader();
+ r.onload=()=>{try{const x=JSON.parse(r.result);if(x.lists&&x.tpl){S=x;fix();save();view="l";R()}}catch(err){}};
+ r.readAsText(e.target.files[0]);
+});
+window.hwBack=()=>{if(sheet){sheet=null;R();return true}if(view==="s"){view="l";R();return true}return false};
+R();
+if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script></body></html>

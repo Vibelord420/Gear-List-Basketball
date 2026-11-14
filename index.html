@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Gear Check</title><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#c2410c"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
+<title>Gear Check</title><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#c2410c"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><script src="config.js"></script>
 <style>
 :root{--bg:#e9edf1;--sf:#fff;--ink:#0f1b2d;--mut:#5d6b7c;--ln:#d3dae2;--ac:#c2410c;--acx:#fff;--ok:#1e8e5a;--okbg:#e1f3ea;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -14,6 +14,7 @@ main{max-width:560px;margin:0 auto;padding:12px 14px 130px}
 h1{font-size:30px;font-weight:900;letter-spacing:-.02em;margin:6px 0}
 h2{margin:0 0 12px;font-size:20px}
 .top{display:flex;justify-content:space-between;align-items:center}
+.top div{display:flex;gap:6px}
 .sub,.mut{color:var(--mut);font-size:14px;margin:8px 0}
 button{font-family:inherit;color:var(--ink)}
 .seg{display:flex;background:var(--ln);border-radius:14px;padding:3px;gap:3px}
@@ -83,7 +84,59 @@ function fix(){
 try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
 if(!S||!S.lists)S=seed();
 fix();
-const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
+const lsave=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
+const save=()=>{S.ts=Date.now();lsave();cpush()};
+let cl={ok:false,user:null,uid:null,t:0,err:"",fb:null},pt;
+const cpush=()=>{if(!cl.uid)return;clearTimeout(pt);pt=setTimeout(push,1500)};
+async function push(){
+ if(!cl.uid||!cl.fb)return;
+ try{const{F,db}=cl.fb;S.ts=S.ts||Date.now();S.cloudUid=cl.uid;
+  await F.setDoc(F.doc(db,"users",cl.uid),{data:JSON.stringify(S),ts:S.ts});cl.t=Date.now();cl.err=""}
+ catch(e){cl.err="Sync failed. It will retry on your next change."}
+}
+async function pull(){
+ if(!cl.uid||!cl.fb)return;
+ try{
+  const{F,db}=cl.fb,s=await F.getDoc(F.doc(db,"users",cl.uid));
+  if(s.exists()){
+   const r=JSON.parse(s.data().data);
+   if(S.cloudUid!==cl.uid||(r.ts||0)>(S.ts||0)){S=r;S.cloudUid=cl.uid;fix()}
+   else if((S.ts||0)>(r.ts||0))await push();
+  }else await push();
+  lsave();cl.t=Date.now();cl.err="";
+ }catch(e){cl.err="Sync failed. Check your connection."}
+ R();
+}
+async function cauth(reg){
+ const u=$("cu").value.trim(),p=$("cp").value,m=$("cmsg");
+ if(!/^[A-Za-z0-9][A-Za-z0-9_-]{2,19}$/.test(u)){m.textContent="Username: 3–20 characters, letters, digits, - or _.";return}
+ if(p.length<6){m.textContent="The password needs at least 6 characters.";return}
+ m.textContent="Please wait…";
+ try{const{U,auth}=cl.fb;await(reg?U.createUserWithEmailAndPassword:U.signInWithEmailAndPassword)(auth,u.toLowerCase()+"@gearcheck.app",p);sheet=null;R()}
+ catch(e){const c=e.code||"";
+  m.textContent=c.includes("email-already")?"That username is taken.":/credential|password|user-not-found/.test(c)?"Wrong username or password.":c.includes("network")?"No connection.":"Something went wrong ("+c.replace("auth/","")+").";}
+}
+async function clogout(){
+ try{await push();await cl.fb.U.signOut(cl.fb.auth)}catch(e){}
+ cl.user=null;cl.uid=null;S=seed();fix();lsave();sheet=null;view="l";R();
+}
+async function cinit(){
+ const c=window.FIREBASE_CONFIG;
+ if(!c||!c.apiKey||/PASTE/.test(c.apiKey)||!location.protocol.startsWith("http"))return;
+ try{
+  const V="https://www.gstatic.com/firebasejs/10.12.2/";
+  const[A,U,F]=await Promise.all([import(V+"firebase-app.js"),import(V+"firebase-auth.js"),import(V+"firebase-firestore.js")]);
+  const app=A.initializeApp(c),auth=U.getAuth(app),db=F.getFirestore(app);
+  cl.fb={U,F,auth,db};cl.ok=true;
+  U.onAuthStateChanged(auth,u=>{cl.user=u?u.email.split("@")[0]:null;cl.uid=u?u.uid:null;if(u)pull();else R()});
+ }catch(e){}
+ R();
+}
+function accHTML(){
+ if(!cl.ok)return`<h2>Account</h2><p class="sub">Online sync is not available. Add your Firebase settings to config.js (see the README) and check your connection.</p>`;
+ if(cl.user)return`<h2>Account</h2><p>Signed in as <b>${esc(cl.user)}</b></p><p class="sub">${cl.err||(cl.t?"Last synced "+new Date(cl.t).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"Syncing…")}</p><button class="btn w" data-a="sync">Sync now</button><button class="btn w" data-a="lo">Log out</button><p class="sub">Logging out clears the data on this device. It stays safe in your account.</p>`;
+ return`<h2>Log in or register</h2><input id="cu" class="in" placeholder="Username" autocomplete="username" autocapitalize="none" maxlength="20"><div style="height:8px"></div><input id="cp" type="password" class="in" placeholder="Password (min. 6 characters)" autocomplete="current-password"><p class="sub" id="cmsg">Logging in to an existing account replaces the data on this device. Creating an account uploads this device’s data.</p><button class="btn p w" data-a="li">Log in</button><button class="btn w" data-a="rg">Create account</button>`;
+}
 const cur=()=>S.lists.find(l=>l.id===S.act[S.tab]);
 const ds=dt=>new Date(dt+"T12:00:00").toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short",year:"numeric"});
 const tl=k=>k==="game"?"🏀 Game":"🏃 Practice";
@@ -102,7 +155,7 @@ function R(){
   d=`<div><button class="btn p" data-a="back">Back to list</button></div>`;
  }else{
   const l=cur(),n=l.items.filter(x=>x.d).length,t=l.items.length;
-  h=`<div class="top"><h1>Gear check</h1><button class="btn sm" data-a="edit">${edit?"Done":"Edit"}</button></div>
+  h=`<div class="top"><h1>Gear check</h1><div>${window.FIREBASE_CONFIG?`<button class="btn sm" data-a="acc">👤${cl.user?" "+esc(cl.user):""}</button>`:""}<button class="btn sm" data-a="edit">${edit?"Done":"Edit"}</button></div></div>
   <div class="seg">${["game","practice"].map(k=>`<button class="${S.tab===k?"on":""}" data-a="tab" data-id="${k}">${tl(k)}</button>`).join("")}</div>
   <button class="tl" data-a="ses">📅 ${ds(l.dt)}${l.note?" – "+esc(l.note):""} ✎</button>
   <div class="bar"><i class="${t&&n===t?"ok":""}" style="width:${t?n/t*100:0}%"></i></div>
@@ -117,7 +170,7 @@ function R(){
 function Sh(){
  const s=$("sheet"),
  f=`<input type="date" id="fdt" class="in" value="${sd}"><div style="height:8px"></div><input id="fnote" class="in" placeholder="Name, e.g. opponent (optional)" maxlength="40" autocomplete="off" value="${esc(sn)}"><div style="height:12px"></div>`,
- ov=c=>`<div class="ov" data-a="close"><div class="sh" data-a="none">${c}<button class="btn w" data-a="close">Cancel</button></div></div>`;
+ ov=(c,x)=>`<div class="ov" data-a="close"><div class="sh" data-a="none">${c}<button class="btn w" data-a="close">${x||"Cancel"}</button></div></div>`;
  if(sheet==="add")s.innerHTML=ov(`<h2>Add item</h2>
  <input id="fn" class="in" placeholder="Item name" maxlength="40" autocomplete="off">
  <div class="qr"><span>Quantity</span><span class="q"><button data-a="sqm">−</button><b id="fq">1</b><button data-a="sqp">+</button></span></div>
@@ -134,6 +187,7 @@ function Sh(){
  <div class="wd">${[[1,"Mon"],[2,"Tue"],[3,"Wed"],[4,"Thu"],[5,"Fri"],[6,"Sat"],[0,"Sun"]].map(([n,t])=>`<button class="${S.wd.includes(n)?"on":""}" data-a="wd" data-id="${n}">${t}</button>`).join("")}</div>
  <div class="qr"><span>For the next</span><select id="fw" class="in" style="width:auto"><option value="4">4 weeks</option><option value="8" selected>8 weeks</option><option value="12">12 weeks</option><option value="26">26 weeks</option></select></div>
  <button class="btn p w" data-a="ppok">Create practices</button>`);
+ else if(sheet==="acc")s.innerHTML=ov(accHTML(),"Close");
  else s.innerHTML="";
 }
 function act(a,id){
@@ -178,6 +232,11 @@ function act(a,id){
   break;
  case"exp":{const e=document.createElement("a");e.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:"application/json"}));e.download="gear-check-backup.json";e.click();return}
  case"imp":$("fi").click();return;
+ case"acc":sheet="acc";break;
+ case"li":cauth(false);return;
+ case"rg":cauth(true);return;
+ case"sync":pull();return;
+ case"lo":clogout();return;
  default:return}
  save();R();
 }
@@ -189,6 +248,8 @@ document.addEventListener("change",e=>{
  r.readAsText(e.target.files[0]);
 });
 window.hwBack=()=>{if(sheet){sheet=null;R();return true}if(view==="s"){view="l";R();return true}return false};
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&cl.uid&&!sheet)pull()});
 R();
+cinit();
 if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script></body></html>

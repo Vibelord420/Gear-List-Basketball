@@ -1552,13 +1552,21 @@ function sFerien(b){
 /* --- Import der Spiele aus einer HTML-Liste (basketball-bund.net) --- */
 function parseSpielplan(src){
   var toks=[];
-  if(!/<[a-z!]/i.test(src)){src.split(/\n|\t/).forEach(function(l){l=l.replace(/\s+/g,' ').trim();if(l)toks.push({s:l})})}
+  var TAG=/^(spiel)?tag$/i,NUM=/^\d{1,2}$/;
+  if(!/<[a-z!]/i.test(src)){var ti=-1;src.split(/\n/).forEach(function(ln){
+    var cs=ln.split(/\t/).map(function(c){return c.replace(/\s+/g,' ').trim()}),h=cs.findIndex(function(c){return TAG.test(c)});
+    if(h>=0&&cs.length>1){ti=h}else if(ti>=0&&cs.length>ti)toks.push({md:NUM.test(cs[ti])?+cs[ti]:0});
+    cs.forEach(function(c){if(c)toks.push({s:c})})})}
   else{
     var doc;try{doc=new DOMParser().parseFromString(src,'text/html')}catch(e){return []}
     doc.querySelectorAll('script,style,noscript,template').forEach(function(n){n.remove()});
     (function walk(n){
       if(n.nodeType===3){var t=n.nodeValue.replace(/\s+/g,' ').trim();if(t)toks.push({s:t});return}
       if(n.nodeType!==1)return;
+      if(n.nodeName==='TR'){var tb=n.closest('table');if(tb){
+        if(tb._ti===undefined){tb._ti=-1;for(var r=0;r<tb.rows.length&&tb._ti<0;r++)for(var q=0;q<tb.rows[r].cells.length;q++)if(TAG.test(tb.rows[r].cells[q].textContent.replace(/\s+/g,' ').trim())){tb._ti=q;tb._hr=tb.rows[r];break}}
+        var cc=tb._ti>=0&&n!==tb._hr?n.cells[tb._ti]:null,cv=cc?cc.textContent.replace(/\s+/g,' ').trim():'';
+        if(cc)toks.push({md:NUM.test(cv)?+cv:0})}}
       if(n.nodeName==='A'){var m=/spiel\/(\d+)/.exec(n.getAttribute('href')||'');if(m)toks.push({id:m[1]})}
       for(var c=n.firstChild;c;c=c.nextSibling)walk(c);
     })(doc.body||doc);
@@ -1568,6 +1576,7 @@ function parseSpielplan(src){
   var recs=[],cur2=null,md=null;
   function start(){cur2={date:'',time:'',teams:[],mid:'',md:md};recs.push(cur2)}
   function handle(tk){
+    if(tk.md!==undefined){md=tk.md||null;cur2=null;return}
     if(tk.id){if(!cur2||cur2.mid)start();cur2.mid=tk.id;return}
     var s=tk.s,m;
     if(!tk.sub&&/[|•;]/.test(s)){s.split(/\s*[|•;]\s*/).forEach(function(p){if(p)handle({s:p,sub:1})});return}

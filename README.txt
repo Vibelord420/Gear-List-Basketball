@@ -74,3 +74,15 @@ H) BEKANNTE GRENZEN
 - Die Regeln wurden von Hand geprüft, aber nicht im Firebase-Emulator getestet. Teste nach dem Veröffentlichen
   mit einem Spieler- und einem Trainerkonto (Firebase-Konsole > Regeln > Regel-Playground hilft dabei).
 - Bilder in Statistik-Einträgen werden verkleinert und im Dokument gespeichert; Firestore erlaubt ca. 1 MB pro Dokument.
+
+I) GEAR-LISTE: VORSCHLÄGE, KATEGORIEN, REIHENFOLGE
+- Beim ersten Start dieser Version werden die entfernten Einträge (Unterhemd, Unterhose, Shooting-Shirt,
+  Trainingsjacke, Suspensorium, Stirnband, Sonstiges Zubehör, Mütze, Magnesium, Schlüssel, Geldbeutel, Kamera,
+  Kameraausrüstung, Gelatine + Vitamin C) aus der Standardliste und aus allen kommenden Terminen gelöscht.
+  Vergangene Listen bleiben unverändert. Das passiert automatisch und nur einmal pro Konto.
+- Unter "+ Eintrag" stehen sie als Vorschläge zur Auswahl (mehrere gleichzeitig), dazu Sport-Tights,
+  Privatschlüssel und Hallenschlüssel. Bereits vorhandene Einträge werden nicht noch einmal angeboten.
+- Kategorien: Vorbereitung, Kleidung, Wertsachen, Nachbereitung, Accessoires, Nahrung. Eine Kategorie
+  erscheint nur, wenn sie Einträge enthält. Eigene Kategorien: im Eintrag "Neue Kategorie …" wählen.
+- Reihenfolge: "Bearbeiten" tippen, dann mit ▲ ▼ verschieben (innerhalb der Kategorie).
+  "Als Standardliste speichern" übernimmt Reihenfolge und Kategorien für neue Listen.

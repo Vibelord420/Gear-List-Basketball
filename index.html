@@ -131,6 +131,10 @@ h3.cat .mv button{color:var(--ink)}
 .A .fbn{font-weight:700;margin-bottom:4px}
 .A .ftxt{white-space:pre-wrap;overflow-wrap:anywhere;margin:2px 0 6px}
 .A #pMine textarea{background:var(--card)}
+.A .who2{font-weight:700;font-size:13px;letter-spacing:.04em;text-transform:uppercase;margin:12px 0 0;color:var(--blue)}
+.A .who2.tm{color:var(--muted)}
+.A #pMine select{background:var(--card)}
+.A #mMsg{min-height:24px;font-weight:600;color:var(--blue);margin:8px 0 0}
 .A input[type=number]{width:100%;margin-top:6px;padding:10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit}
 .A .top{display:flex;gap:8px;align-items:center;margin-bottom:12px}
 .A .who{margin-right:auto;font-size:14px;opacity:.95}
@@ -533,7 +537,7 @@ function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cl
 function renderList(){
   var box=Q('#list');box.textContent='';
   var t=today(),rows=items.filter(function(i){return T[i.type]&&(flt==='alle'||i.type===flt)});
-  if(!rows.length){box.appendChild(el('p','empty','Noch keine Einträge. Lege oben ein Spiel oder Training an.'));return}
+  if(!rows.length){box.appendChild(el('p','empty',trainer?'Noch keine Einträge. Lege oben ein Spiel oder Training an.':'Noch keine Termine. Die Trainer legen Spiele und Trainings an.'));return}
   var up=rows.filter(function(i){return i.date>=t}).sort(function(a,b){return a.date<b.date?-1:1});
   var past=rows.filter(function(i){return i.date<t}).sort(function(a,b){return a.date<b.date?1:-1});
   [['Kommende Termine',up],['Vergangene Termine',past]].forEach(function(g){
@@ -547,6 +551,7 @@ function renderList(){
       var has=i.focus||i.happened||i.why||i.fix||(i.entries&&i.entries.length);
       if(has&&trainer){mid.appendChild(el('div','done','AAR ausgefüllt'))}
       if(i.pub){mid.appendChild(el('div','done','Team-Review freigegeben'))}
+      var md=myDr[i.id];if(md&&(md.subKind||md.updated)){mid.appendChild(el('div','done',md.subKind?'Mein Review abgeschickt':'Mein Entwurf gespeichert'))}
       b.appendChild(mid);
       b.onclick=function(){openEditor(i)};
       box.appendChild(b);
@@ -561,7 +566,7 @@ function setupTabs(item){
   var tb=Q('#tabs');tb.textContent='';
   var multi=!!(online()&&item.id);tb.hidden=!multi;
   if(multi){
-    var defs=[['mine','Meine Punkte'],['team','Team-Review']];if(trainer)defs.push(['fb','Rückmeldungen']);
+    var defs=[['mine','Mein Review'],['team','Team-Review']];if(trainer)defs.push(['fb','Rückmeldungen']);
     defs.forEach(function(d){var b=el('button',null,d[1]);b.dataset.t=d[0];b.onclick=function(){showTab(d[0])};tb.appendChild(b)});
     showTab(trainer?'team':'mine');
   }else showTab('team');
@@ -575,64 +580,220 @@ function showTab(t){
   Q('#pView').hidden=!(t==='team'&&!trainer&&multi);
   if(t==='mine')renderMine();if(t==='fb')renderFb();if(t==='team'&&!trainer&&multi)renderView();
 }
+var pents=[],mineDirty=false,myDr={},ME='Für mich',TM='Für die Mannschaft';
 function mref(){var x=cl.fb;return x.F.doc(x.db,'users',cl.uid,'drafts',acur.id)}
-async function renderMine(){
-  var box=Q('#pMine');box.textContent='Lade ...';rec={};
-  try{var d=await cl.fb.F.getDoc(mref());rec=d.exists()?d.data():{}}catch(e){rec={}}
-  box.textContent='';
-  box.appendChild(el('p','note','Deine Punkte sind privat in deinem Konto gespeichert. Erst mit „An Trainer senden“ sehen die Trainer sie.'));
-  F.forEach(function(f){box.appendChild(el('label','lbl',f[1]));var t=document.createElement('textarea');t.dataset.m=f[0];t.maxLength=2000;t.value=rec[f[0]]||'';t.setAttribute('aria-label',f[1]);box.appendChild(t)});
-  box.appendChild(el('label','lbl','Wie sollen die Trainer deine Punkte sehen?'));
-  var sel=document.createElement('select');sel.id='mAnon';
-  [['n','Mit meinem Namen'],['a','Anonym']].forEach(function(o){var op=el('option',null,o[1]);op.value=o[0];sel.appendChild(op)});
-  sel.value=rec.anon?'a':'n';box.appendChild(sel);
-  box.appendChild(el('p','note','Anonym: Dein Name wird mit der Abgabe nicht gespeichert, die Trainer sehen nur den Text.'));
-  var r=el('div','row'),b1=el('button','btn ghost','Privat speichern'),b2=el('button','btn',rec.subKind?'Erneut senden':'An Trainer senden');
+function ne(e){return e.stat||e.img||e.time||e.link||e.desc}
+function evLabel(t){return (t.type==='spiel'?'Spiel: ':'Training: ')+(t.title||'ohne Titel')}
+function mta(k,ph,small){return '<textarea data-m="'+k+'" aria-label="'+ph+'" placeholder="'+ph+'" maxlength="2000"'+(small?' style="min-height:44px"':'')+'></textarea>'}
+function who(t,cls){return '<div class="who2 '+cls+'">'+t+'</div>'}
+function pform(c){
+  var g=!!c.vid,q2=g?'Verlinke das Spiel-Video. Halte pro Situation einen Eintrag fest: eine Stelle im Video, eine Statistik oder nur eine Beschreibung.':'Was ist dir aufgefallen? Nur beschreiben, nicht bewerten.';
+  return '<p class="note">Deine Einträge sind privat in deinem Konto gespeichert. Die Trainer sehen sie erst, wenn du sie abschickst. Bis dahin kannst du sie zwischenspeichern und weiter bearbeiten.</p>'+
+  '<div id="pPrev"></div>'+
+  sec('--p1','1. Gesetzter Fokus',1,'<p class="ask">Was wollte ich erreichen?</p>'+mta('focusMe',c.p1)+'<p class="ask">Was wollte das Team erreichen?</p>'+mta('focusTeam',c.p1))+
+  sec('--p2','2. Was ist passiert',c.t2,'<p class="ask">'+q2+'</p>'+(g?'<label class="f">Link zum YouTube-Video<input type="text" data-m="video" placeholder="https://www.youtube.com/watch?v=..." maxlength="300"></label><div id="pEnt"></div><button type="button" class="btn ghost" id="pAddE">+ Eintrag hinzufügen</button>':mta('happened',c.p2)))+
+  sec('--p3','3. Warum ist es passiert',c.t3,
+    '<p class="ask">Was hat funktioniert und sollten wir behalten?</p>'+who(ME,'me')+mta('workedMe',c.pk)+who(TM,'tm')+mta('workedTeam',c.pk)+
+    '<p class="ask">Was kann ich bzw. das Team verbessern? Keine Schuldzuweisung.</p>'+who(ME,'me')+mta('improveMe',c.pw)+who(TM,'tm')+mta('improveTeam',c.pw))+
+  sec('--p4',c.h4,c.t4,'<p class="ask">Ein Vorschlag, eine verantwortliche Person, ein Stichwort.</p>'+
+    who(ME,'me')+mta('fixMe','Verbesserung:')+mta('ownerMe','Verantwortlich (Trainer oder Spieler):',1)+mta('cueMe',c.cue,1)+
+    '<label class="chk" style="margin-top:8px"><input type="checkbox" data-m="nxMe"> Diese Verbesserung ins nächste Training oder Spiel übernehmen</label>'+
+    who(TM,'tm')+mta('fixTeam','Verbesserung:')+mta('ownerTeam','Verantwortlich (Trainer oder Spieler):',1)+mta('cueTeam',c.cue,1))+
+  '<section style="--c:var(--muted)"><h2>Abschicken</h2>'+
+  '<label class="lbl">Was soll an die Trainer gehen?</label><select data-m="scope"><option value="team">Nur die Teameinträge</option><option value="all">Teameinträge und meine persönlichen Einträge</option></select>'+
+  '<label class="lbl">Wie sollen die Trainer es sehen?</label><select data-m="anon"><option value="n">Mit meinem Namen</option><option value="a">Anonym</option></select>'+
+  '<p class="note" style="margin:10px 0 12px">Zwischenspeichern: Nur du siehst deinen Entwurf. Abschicken: Die Trainer sehen, was du oben ausgewählt hast. Danach kannst du weiter ändern und erneut senden oder zurückziehen. Anonym: Dein Name wird nicht gespeichert.</p>'+
+  '<div class="row" id="mBtns"></div><div id="mMsg" role="status"></div></section>';
+}
+function mdef(r){
+  r=r||{};
+  if(!r.ver&&(r.happened||r.why||r.worked||r.fix)){
+    r=Object.assign({},r);
+    if(acur.type==='spiel'&&r.happened&&!(r.entries&&r.entries.length)){r.entries=[{kind:'note',desc:r.happened}];r.happened=''}
+    r.workedMe=r.workedMe||r.worked||'';r.improveMe=r.improveMe||r.why||'';r.fixMe=r.fixMe||r.fix||'';
+  }
+  return r;
+}
+function stamp(ts){return new Date(ts).toLocaleString(lang==='de'?'de-DE':'en-GB',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}
+function mStat(prefix){
+  var m=Q('#mMsg');if(!m)return;
+  var t='';
+  if(mineDirty)t='Ungespeicherte Änderungen.';
+  else if(rec.subKind)t='Abgeschickt am '+stamp(rec.sentAt)+' ('+(rec.subKind==='anon'?'anonym':'mit Namen')+', '+(rec.sentScope==='all'?'mit persönlichen Einträgen':'nur Teameinträge')+').';
+  else if(rec.updated)t='Zwischengespeichert am '+stamp(rec.updated)+'.';
+  m.textContent=(prefix?prefix+' ':'')+t;
+}
+function mBtns(){
+  var r=Q('#mBtns');if(!r)return;r.textContent='';
+  var b1=el('button','btn ghost','Zwischenspeichern'),b2=el('button','btn',rec.subKind?'Erneut senden':'Abschicken');
   b1.onclick=function(){mAct('save')};b2.onclick=function(){mAct('send')};r.appendChild(b1);r.appendChild(b2);
   if(rec.subKind){var b3=el('button','btn ghost','Zurückziehen');b3.onclick=function(){mAct('del')};r.appendChild(b3)}
-  box.appendChild(r);var m=el('div',null,rec.subKind?'Bereits an die Trainer gesendet ('+(rec.subKind==='anon'?'anonym':'mit Namen')+').':'');m.id='mMsg';m.setAttribute('role','status');m.style.fontWeight='600';box.appendChild(m);
 }
+function setDirty(){if(mineDirty)return;mineDirty=true;mStat()}
+async function renderMine(){
+  var box=Q('#pMine');box.textContent='Lade ...';rec={};mineDirty=false;
+  try{var d=await cl.fb.F.getDoc(mref());rec=d.exists()?d.data():{}}catch(e){rec={}}
+  var r=mdef(rec);
+  box.innerHTML=pform(T[acur.type]);
+  box.querySelectorAll('[data-m]').forEach(function(f){
+    var k=f.dataset.m;
+    if(f.type==='checkbox')f.checked=!!r[k];
+    else if(k==='anon')f.value=r.anon?'a':'n';
+    else if(k==='scope')f.value=r.scope==='all'?'all':'team';
+    else f.value=r[k]||'';
+  });
+  if(T[acur.type].vid){
+    pents=(r.entries||[]).map(function(e){return Object.assign(newE(),e)});
+    if(!pents.length)pents=[newE()];
+    var vf=function(){var v=Q('#pMine [data-m=video]');return v?v.value:''},draw=function(){entEd(Q('#pEnt'),pents,vf,setDirty)};
+    draw();Q('#pAddE').onclick=function(){pents.push(newE());draw();setDirty()};
+    Q('#pMine [data-m=video]').onchange=function(){(Q('#pEnt')._u||[]).forEach(function(f){f()})};
+  }
+  rec=Object.assign({},rec);
+  renderPrev(r);mBtns();mStat();
+}
+function prevCands(){
+  var cur=acur,out=[];
+  termine.forEach(function(t){
+    if(t.id===cur.id||!t.date||!cur.date||!(t.date<cur.date))return;
+    var d=myDr[t.id],mine=!!(d&&d.nxMe&&d.fixMe),team=t.pub==='ja';
+    if(mine||team)out.push({t:t,mine:mine,team:team});
+  });
+  out.sort(function(a,b){return a.t.date<b.t.date?1:-1});return out;
+}
+function renderPrev(r){
+  var box=Q('#pPrev');if(!box)return;box.textContent='';
+  var cs=prevCands();if(!cs.length)return;
+  var s=document.createElement('section');s.style.setProperty('--c','var(--p4)');
+  s.appendChild(el('h2',null,'Aus früheren Terminen prüfen'));
+  s.appendChild(el('p','ask','Aus welchem früheren Termin möchtest du Verbesserungen übernehmen und prüfen?'));
+  var sel=document.createElement('select');sel.dataset.m='pvFrom';sel.setAttribute('aria-label','Früherer Termin');
+  var o0=el('option',null,'Keinen');o0.value='';sel.appendChild(o0);
+  cs.forEach(function(c){var op=el('option',null,fmt(c.t.date)+' · '+evLabel(c.t)+(c.mine&&c.team?' · meine Verbesserung + Team-Review':c.mine?' · meine Verbesserung':' · Team-Review'));op.value=c.t.id;sel.appendChild(op)});
+  sel.value=r.pvFrom||'';if(sel.value!==(r.pvFrom||''))sel.value='';
+  var det=el('div');det.id='pvBox';
+  sel.onchange=function(){setDirty();fillPrev(det,sel.value,null)};
+  s.appendChild(sel);s.appendChild(det);box.appendChild(s);
+  fillPrev(det,sel.value,r);
+}
+async function fillPrev(det,id,r){
+  det.textContent='';det.dataset.id=id;if(!id)return;
+  var t=termine.find(function(x){return x.id===id}),d=myDr[id]||{};
+  var c1=el('div','fb');c1.appendChild(el('div','fbn','Meine Verbesserung'));
+  if(d.nxMe&&d.fixMe){c1.appendChild(el('div','ftxt',d.fixMe));if(d.ownerMe)c1.appendChild(el('div','ftxt','Verantwortlich: '+d.ownerMe));if(d.cueMe)c1.appendChild(el('div','ftxt','Stichwort: '+d.cueMe))}
+  else c1.appendChild(el('div','ftxt','Dazu hast du keine Verbesserung zum Übernehmen markiert.'));
+  var c2=el('div','fb');c2.appendChild(el('div','fbn','Verbesserung des Teams (vom Trainerteam festgelegt)'));
+  var c2b=el('div','ftxt','Lade ...');c2.appendChild(c2b);
+  det.appendChild(c1);det.appendChild(c2);
+  var f1=el('label','chk'),cb=document.createElement('input');cb.type='checkbox';cb.dataset.m='pvDone';f1.appendChild(cb);f1.appendChild(document.createTextNode(' Ich habe meine Verbesserung umgesetzt'));
+  det.appendChild(f1);
+  det.appendChild(el('label','lbl','Wie lief es?'));
+  var ta=document.createElement('textarea');ta.dataset.m='pvNote';ta.maxLength=2000;ta.setAttribute('aria-label','Wie lief es?');ta.placeholder='Was hat geklappt, was nicht?';det.appendChild(ta);
+  if(r&&r.pvFrom===id){cb.checked=!!r.pvDone;ta.value=r.pvNote||''}
+  var ad=aarDocs[id];
+  if(!ad&&t&&t.pub==='ja'){try{var sn=await cl.fb.F.getDoc(cl.fb.F.doc(cl.fb.db,'aar',id));ad=sn.exists()?sn.data():null}catch(e){ad=null}}
+  if(det.dataset.id!==id)return;
+  c2b.textContent='';
+  if(!t||t.pub!=='ja'||!ad)c2b.textContent='Noch nicht freigegeben.';
+  else if(!ad.fix&&!ad.owner&&!ad.cue)c2b.textContent='Das Trainerteam hat keine Teamverbesserung eingetragen.';
+  else{c2b.appendChild(document.createTextNode(ad.fix||''));if(ad.owner)c2b.appendChild(el('div',null,'Verantwortlich: '+ad.owner));if(ad.cue)c2b.appendChild(el('div',null,'Stichwort: '+ad.cue))}
+}
+function collectMine(){
+  var v={};
+  document.querySelectorAll('#pMine [data-m]').forEach(function(f){var k=f.dataset.m;v[k]=f.type==='checkbox'?f.checked:f.value.trim()});
+  v.anon=v.anon==='a';v.scope=v.scope==='all'?'all':'team';
+  if(acur.type==='spiel')v.entries=pents.filter(ne);
+  if(!v.pvFrom){delete v.pvFrom;delete v.pvDone;delete v.pvNote}
+  return v;
+}
+function subOf(v){
+  var all=v.scope==='all',s={termin:acur.id,ts:Date.now(),ver:2,scope:v.scope,type:acur.type},tm={},me={},ks=['focus','worked','improve','fix','owner','cue'];
+  ks.forEach(function(k){if(v[k+'Team'])tm[k]=v[k+'Team'];if(all&&v[k+'Me'])me[k]=v[k+'Me']});
+  s.team=tm;if(v.video)s.video=v.video;if(v.entries&&v.entries.length)s.entries=v.entries;if(v.happened)s.happened=v.happened;
+  if(all){if(v.nxMe)me.next=true;if(v.pvFrom)me.prev={from:v.pvFrom,done:!!v.pvDone,note:v.pvNote||''};s.me=me}
+  return s;
+}
+function hasContent(s){return !!(Object.keys(s.team).length||s.video||s.entries||s.happened||(s.me&&Object.keys(s.me).filter(function(k){return k!=='next'}).length))}
 async function mAct(a){
-  var o=Object.assign({},rec),vals={},msg=Q('#mMsg'),x=cl.fb,Fz=x.F,D=x.db;
-  document.querySelectorAll('#pMine [data-m]').forEach(function(f){vals[f.dataset.m]=f.value.trim()});
-  Object.assign(o,vals);o.anon=Q('#mAnon').value==='a';o.updated=Date.now();
+  var msg=Q('#mMsg'),x=cl.fb,Fz=x.F,D=x.db,v=collectMine();
+  if(v.video&&!ytUrl(v.video)){msg.textContent='Bitte einen gültigen YouTube-Link eintragen.';return false}
+  var ee=v.entries||[];
+  for(var q=0;q<ee.length;q++){
+    if(ee[q].kind==='clip'&&ee[q].time&&secs(ee[q].time)==null){msg.textContent='Eintrag '+(q+1)+': Zeitangabe bitte als hh:mm:ss.';return false}
+    if(ee[q].link&&!ytUrl(ee[q].link)){msg.textContent='Eintrag '+(q+1)+': Bitte einen gültigen YouTube-Link eintragen.';return false}
+  }
+  if(JSON.stringify(v).length>230000){msg.textContent='Zu viele oder zu große Bilder. Bitte einzelne Bilder entfernen.';return false}
+  var o={ver:2,updated:Date.now()};['subKind','subId','sentAt','sentScope'].forEach(function(k){if(rec[k]!==undefined)o[k]=rec[k]});
+  Object.assign(o,v);
   try{
     var nid=acur.id+'_'+cl.uid;
     var removeOld=async function(){
       if(o.subKind==='anon'&&o.subId)await Fz.deleteDoc(Fz.doc(D,'anon',o.subId));
       if(o.subKind==='named')await Fz.deleteDoc(Fz.doc(D,'submissions',nid));
-      delete o.subKind;delete o.subId;
+      delete o.subKind;delete o.subId;delete o.sentAt;delete o.sentScope;
     };
+    var tx='';
     if(a==='send'){
-      if(!F.some(function(f){return vals[f[0]]})){msg.textContent='Bitte zuerst etwas eintragen.';return}
+      var sub=subOf(v);
+      if(!hasContent(sub)){msg.textContent='Bitte zuerst etwas eintragen.';return false}
       if(o.subKind&&(o.subKind==='anon')!==o.anon)await removeOld();
-      var sub={termin:acur.id,ts:Date.now()};F.forEach(function(f){sub[f[0]]=vals[f[0]]});
       if(o.anon){var id=o.subId||('s'+Date.now().toString(36)+Math.random().toString(36).slice(2,10));await Fz.setDoc(Fz.doc(D,'anon',id),sub);o.subKind='anon';o.subId=id}
       else{sub.uid=cl.uid;sub.name=cl.user;await Fz.setDoc(Fz.doc(D,'submissions',nid),sub);o.subKind='named';delete o.subId}
-      o.sentAt=Date.now();
+      o.sentAt=Date.now();o.sentScope=v.scope;
     }
-    if(a==='del')await removeOld();
-    await Fz.setDoc(mref(),o);rec=o;
-    var tx=a==='send'?'Gesendet '+(o.anon?'(anonym).':'(mit Namen).'):a==='del'?'Zurückgezogen.':'Privat gespeichert.';
-    await renderMine();var m2=Q('#mMsg');if(m2)m2.textContent=tx;
-  }catch(e){msg.textContent='Das hat nicht geklappt. Bitte erneut versuchen.'}
+    if(a==='del'){await removeOld();tx='Zurückgezogen.'}
+    await Fz.setDoc(mref(),o);rec=o;mineDirty=false;
+    mBtns();mStat(tx);
+    return true;
+  }catch(e){msg.textContent='Das hat nicht geklappt. Bitte erneut versuchen.';return false}
 }
+function flushMine(then){
+  if(mineDirty&&online()&&acur&&acur.id&&!Q('#aarApp').hidden&&tab==='mine'){mAct('save').then(function(ok){if(ok!==false)then()})}
+  else then();
+}
+var FK=[['focus','Gesetzter Fokus','focus'],['worked','Was hat funktioniert','worked'],['improve','Was kann verbessert werden','why'],['fix','Verbesserungsvorschlag','fix'],['owner','Verantwortlich','owner'],['cue','Stichwort','cue']];
 async function renderFb(){
   var box=Q('#fbl');box.textContent='';Q('#fbm').textContent='';
   var mine=subs.filter(function(x){return x.termin===acur.id}).sort(function(a,b){return a.ts-b.ts});
   Q('#fbm').textContent=mine.length?mine.length+' Rückmeldung(en). Mit „Übernehmen“ fügst du einen Punkt in das Team-Review ein. Danach unter „Team-Review“ speichern.':'Noch keine Rückmeldungen von Spielern.';
   mine.forEach(function(x){
     var c=el('div','fb');c.appendChild(el('div','fbn',x.uid?(x.name||'Spieler'):'Anonym'));
-    F.forEach(function(f){
-      if(!x[f[0]])return;c.appendChild(el('div','lbl',f[1]));c.appendChild(el('div','ftxt',x[f[0]]));
-      var b=el('button','btn ghost sm','Übernehmen');b.onclick=function(){adopt(f[0],x[f[0]])};c.appendChild(b);
-    });
+    if(x.ver===2){
+      c.appendChild(el('div','done',x.me?'Teameinträge und persönliche Einträge':'Nur Teameinträge'));
+      var line=function(label,txt,fn){if(!txt)return;c.appendChild(el('div','lbl',label));c.appendChild(el('div','ftxt',txt));if(fn){var b=el('button','btn ghost sm','Übernehmen');b.onclick=fn;c.appendChild(b)}};
+      var tm=x.team||{};
+      if(x.video){var vu=ytUrl(x.video);if(vu){var a=el('a','yl','Video öffnen');a.href=vu;a.target='_blank';a.rel='noopener noreferrer';c.appendChild(a)}}
+      (x.entries||[]).forEach(function(e,i){
+        var d=el('div','ent');d.appendChild(el('strong',null,'Eintrag '+(i+1)+(e.kind==='stat'?' · Statistik':e.kind==='note'?' · Beschreibung':' · Stelle im Video')));
+        if(e.stat)d.appendChild(el('div','ftxt',e.stat));
+        if(/^data:image\/jpeg;base64,/.test(e.img||'')){var im=el('img','pv');im.src=e.img;im.alt='Statistik';d.appendChild(im)}
+        if(e.time)d.appendChild(el('div','ftxt','Zeitpunkt: '+e.time));
+        var u=(e.kind==='clip'||!e.kind)?(ytUrl(e.link)||(secs(e.time)!=null&&x.video?ytUrl(x.video,secs(e.time)):null)):null;
+        if(u){var l=el('a','yl','Zur Stelle im Video öffnen');l.href=u;l.target='_blank';l.rel='noopener noreferrer';d.appendChild(l)}
+        if(e.desc)d.appendChild(el('div','ftxt',e.desc));
+        var b=el('button','btn ghost sm','Eintrag übernehmen');b.onclick=function(){adoptEntry(e)};d.appendChild(b);c.appendChild(d);
+      });
+      line('Was ist passiert',x.happened,function(){adopt('happened',x.happened)});
+      FK.forEach(function(f){line(f[1]+' (Team)',tm[f[0]],function(){adopt(f[2],tm[f[0]])})});
+      if(x.me){
+        c.appendChild(el('div','fbn','Persönliche Einträge'));c.lastChild.style.marginTop='10px';
+        FK.forEach(function(f){line(f[1]+' (persönlich)',x.me[f[0]],function(){adopt(f[2],x.me[f[0]])})});
+        if(x.me.next)c.appendChild(el('div','done','Verbesserung fürs nächste Training oder Spiel vorgemerkt.'));
+        if(x.me.prev){var pt=termine.find(function(t){return t.id===x.me.prev.from});line('Frühere Verbesserung geprüft'+(pt?' ('+fmt(pt.date)+')':''),(x.me.prev.done?'Umgesetzt. ':'Noch nicht umgesetzt. ')+(x.me.prev.note||''))}
+      }
+    }else{
+      F.forEach(function(f){
+        if(!x[f[0]])return;c.appendChild(el('div','lbl',f[1]));c.appendChild(el('div','ftxt',x[f[0]]));
+        var b=el('button','btn ghost sm','Übernehmen');b.onclick=function(){adopt(f[0],x[f[0]])};c.appendChild(b);
+      });
+    }
     box.appendChild(c);
   });
 }
+function adoptEntry(e){ents.push(Object.assign(newE(),e));renderEnts();Q('#fbm').textContent='Übernommen. Zum Speichern unter „Team-Review“ auf Speichern tippen.'}
 function adopt(k,txt){
-  if(k==='happened'&&T[acur.type].vid){ents.push(Object.assign(newE(),{kind:'stat',desc:txt}));renderEnts()}
-  else{var t=Q('[data-f='+k+']');if(!t)return;t.value=(t.value?t.value+'\n':'')+txt}
+  if(k==='happened'&&T[acur.type].vid){ents.push(Object.assign(newE(),{kind:'note',desc:txt}));renderEnts()}
+  else{var t=Q('#form [data-f='+k+']');if(!t)return;t.value=(t.value?t.value+'\n':'')+txt}
   Q('#fbm').textContent='Übernommen. Zum Speichern unter „Team-Review“ auf Speichern tippen.';
 }
 async function renderView(){
@@ -640,21 +801,21 @@ async function renderView(){
   if(!it.pub){box.appendChild(el('p','empty','Das Team-Review ist noch nicht freigegeben.'));return}
   if(online()&&!it.focus&&!it.why&&!it.entries&&!it.fix){try{var sn=await cl.fb.F.getDoc(cl.fb.F.doc(cl.fb.db,'aar',it.id));if(sn.exists())it=Object.assign({},it,sn.data())}catch(e){}}
   var add=function(h,t){if(!t)return;box.appendChild(el('div','lbl',h));box.appendChild(el('div','ftxt',t))};
-  add('Fokus',it.focus);add('Was ist passiert',it.happened);
+  add('Gesetzter Fokus',it.focus);add('Was ist passiert',it.happened);
   var vu=it.video?ytUrl(it.video):null;
   if(vu){var a=el('a','yl','Video öffnen');a.href=vu;a.target='_blank';a.rel='noopener noreferrer';box.appendChild(a)}
   (it.entries||[]).forEach(function(e,i){
-    var c=el('div','fb');c.appendChild(el('div','fbn','Eintrag '+(i+1)+(e.kind==='stat'?' · Statistik':' · Stelle im Video')));
+    var c=el('div','fb');c.appendChild(el('div','fbn','Eintrag '+(i+1)+(e.kind==='stat'?' · Statistik':e.kind==='note'?' · Beschreibung':' · Stelle im Video')));
     if(e.stat)c.appendChild(el('div','ftxt',e.stat));
     if(/^data:image\/jpeg;base64,/.test(e.img||'')){var im=el('img','pv');im.src=e.img;im.alt='Statistik';c.appendChild(im)}
-    if(e.kind!=='stat'){
+    if(e.kind!=='stat'&&e.kind!=='note'){
       var u=ytUrl(e.link)||(secs(e.time)!=null&&vu?ytUrl(vu,secs(e.time)):null);
       if(e.time)c.appendChild(el('div','ftxt','Zeitpunkt: '+e.time));
       if(u){var l=el('a','yl','Zur Stelle im Video öffnen');l.href=u;l.target='_blank';l.rel='noopener noreferrer';c.appendChild(l)}
     }
     if(e.desc)c.appendChild(el('div','ftxt',e.desc));box.appendChild(c);
   });
-  add('Warum ist es passiert',it.why);add('Was hat funktioniert',it.worked);add('Verbesserung',it.fix);add('Verantwortlich',it.owner);add('Stichwort',it.cue);
+  add('Was hat funktioniert',it.worked);add('Was kann das Team verbessern',it.why);add('Verbesserung',it.fix);add('Verantwortlich',it.owner);add('Stichwort',it.cue);
 }
 var ents=[];
 function newE(){return {kind:'clip',stat:'',img:'',time:'',link:'',desc:''}}
@@ -662,35 +823,36 @@ function ytUrl(u,sec){try{var x=new URL(String(u).trim());if(x.protocol!=='https
 function secs(t){var m=/^(?:(\d{1,2}):)?([0-5]?\d):([0-5]?\d)$/.exec(String(t||'').trim());return m?(+(m[1]||0))*3600+(+m[2])*60+(+m[3]):null}
 function fld(tag,e,k,ph,cb){var f=document.createElement(tag);if(tag==='input')f.type='text';f.value=e[k]||'';f.placeholder=ph;f.setAttribute('aria-label',ph);f.maxLength=tag==='input'?300:2000;f.oninput=function(){e[k]=f.value;if(cb)cb()};return f}
 function shrink(file,cb){var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var w=Math.min(480,im.width),h=Math.round(im.height*w/im.width),c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(im,0,0,w,h);cb(c.toDataURL('image/jpeg',0.6))};im.src=r.result};r.readAsDataURL(file)}
-function renderEnts(){
-  var box=Q('#ent');if(!box)return;box.textContent='';
-  var vf=Q('[data-f=video]');
-  ents.forEach(function(e,i){
+function entEd(box,arr,vfn,onchg){
+  if(!box)return;box.textContent='';box._u=[];
+  var again=function(){if(onchg)onchg();entEd(box,arr,vfn,onchg)};
+  arr.forEach(function(e,i){
     var c=el('div','ent'),hd=el('div','enth');
     hd.appendChild(el('strong',null,'Eintrag '+(i+1)));
-    var rm=el('button','btn ghost sm','Entfernen');rm.type='button';rm.onclick=function(){ents.splice(i,1);renderEnts()};hd.appendChild(rm);c.appendChild(hd);
+    var rm=el('button','btn ghost sm','Entfernen');rm.type='button';rm.onclick=function(){arr.splice(i,1);again()};hd.appendChild(rm);c.appendChild(hd);
     var sel=document.createElement('select');sel.setAttribute('aria-label','Art des Eintrags');
-    [['clip','Stelle im Video'],['stat','Statistik']].forEach(function(o){var op=el('option',null,o[1]);op.value=o[0];sel.appendChild(op)});
-    sel.value=e.kind;sel.onchange=function(){e.kind=sel.value;renderEnts()};c.appendChild(sel);
+    [['clip','Stelle im Video'],['stat','Statistik'],['note','Nur Beschreibung']].forEach(function(o){var op=el('option',null,o[1]);op.value=o[0];sel.appendChild(op)});
+    sel.value=e.kind||'clip';sel.onchange=function(){e.kind=sel.value;again()};c.appendChild(sel);
     if(e.kind==='stat'){
-      c.appendChild(fld('textarea',e,'stat','Statistik als Text, z. B. Rebounds 28:41'));
+      c.appendChild(fld('textarea',e,'stat','Statistik als Text, z. B. Rebounds 28:41',onchg));
       c.appendChild(el('label','lbl','Oder als Bild (optional)'));
       var fi=document.createElement('input');fi.type='file';fi.accept='image/*';fi.setAttribute('aria-label','Bild zur Statistik');
-      fi.onchange=function(){if(fi.files[0]&&/^image\//.test(fi.files[0].type))shrink(fi.files[0],function(d){e.img=d;renderEnts()})};c.appendChild(fi);
+      fi.onchange=function(){if(fi.files[0]&&/^image\//.test(fi.files[0].type))shrink(fi.files[0],function(d){e.img=d;again()})};c.appendChild(fi);
       if(/^data:image\/jpeg;base64,/.test(e.img||'')){var pv=el('img','pv');pv.src=e.img;pv.alt='Statistik';c.appendChild(pv);
-        var rb=el('button','btn ghost sm','Bild entfernen');rb.type='button';rb.onclick=function(){e.img='';renderEnts()};c.appendChild(rb)}
-    }else{
-      var a=el('a','yl','Zur Stelle im Video öffnen');a.target='_blank';a.rel='noopener noreferrer';
-      var upd=function(){var u=ytUrl(e.link)||(secs(e.time)!=null&&vf?ytUrl(vf.value,secs(e.time)):null);a.hidden=!u;if(u)a.href=u};
+        var rb=el('button','btn ghost sm','Bild entfernen');rb.type='button';rb.onclick=function(){e.img='';again()};c.appendChild(rb)}
+    }else if(e.kind!=='note'){
+      var a=el('a','yl','Zur Stelle im Video öffnen'),built=false;a.target='_blank';a.rel='noopener noreferrer';
+      var upd=function(){var vv=vfn(),u=ytUrl(e.link)||(secs(e.time)!=null&&vv?ytUrl(vv,secs(e.time)):null);a.hidden=!u;if(u)a.href=u;if(built&&onchg)onchg()};
       c.appendChild(fld('input',e,'time','Zeitpunkt im Video als hh:mm:ss, z. B. 00:12:45',upd));
       c.appendChild(fld('input',e,'link','Oder Link zur genauen Stelle (YouTube)',upd));
-      upd();c.appendChild(a);
+      upd();built=true;box._u.push(upd);c.appendChild(a);
     }
-    c.appendChild(el('label','lbl','Was genau ist passiert?'));
-    c.appendChild(fld('textarea',e,'desc','Beschreibe die Situation'));
+    c.appendChild(el('label','lbl',e.kind==='note'?'Beschreibung':'Was genau ist passiert?'));
+    c.appendChild(fld('textarea',e,'desc','Beschreibe die Situation',onchg));
     box.appendChild(c);
   });
 }
+function renderEnts(){entEd(Q('#ent'),ents,function(){var v=Q('#form [data-f=video]');return v?v.value:''})}
 function sec(col,h,t,body){return '<section style="--c:var('+col+')"><h2>'+h+' <span>'+t+' Min</span></h2>'+body+'</section>'}
 function ta(f,ph,cls){return '<textarea data-f="'+f+'" aria-label="'+ph+'" placeholder="'+ph+'"'+(cls?' style="min-height:44px"':'')+'></textarea>'}
 function buildForm(c){
@@ -702,10 +864,10 @@ function buildForm(c){
   '<section style="--c:var(--muted)"><label class="f">Datum<input type="date" data-f="date"></label><label class="f" style="margin:0">'+c.ttl+'<input type="text" data-f="title" placeholder="'+c.ttlPh+'" maxlength="80"></label><label class="f" style="margin:10px 0 0">Sichtbarkeit<select data-f="pub"><option value="">Entwurf (nur Trainer)</option><option value="ja">Für alle freigeben</option></select></label></section>'+
   '<div class="strip">'+strip+'</div><p class="note">Fokus setzen, was ist passiert, warum, nächster Schritt. Kurz halten und beim Team bleiben.</p>'+
   sec('--muted','Vorher: Vorbereitung',c.pt.replace(' Min',''),'<p class="ask">'+c.pa+'</p>'+prep)+
-  (c.rf?rs:'')+sec('--p1','1. Fokus setzen',1,'<p class="ask">'+c.q1+'</p>'+ta('focus',c.p1))+
+  (c.rf?rs:'')+sec('--p1','1. Gesetzter Fokus',1,'<p class="ask">'+c.q1+'</p>'+ta('focus',c.p1))+
   sec('--p2','2. Was ist passiert',c.t2,'<p class="ask">'+c.q2+'</p>'+(c.vid?'<label class="f">Link zum YouTube-Video<input type="text" data-f="video" placeholder="https://www.youtube.com/watch?v=..." maxlength="300"></label><div id="ent"></div><button type="button" class="btn ghost" id="addE">+ Eintrag hinzufügen</button>':ta('happened',c.p2)))+
-  sec('--p3','3. Warum ist es passiert',c.t3,'<p class="ask">Was war die Ursache für das Team? Keine Schuldzuweisung.</p>'+ta('why',c.pw)+'<p class="ask">Was hat funktioniert und sollten wir behalten?</p>'+ta('worked',c.pk))+
-  '<div class="s">'+sec('--p4',c.h4,c.t4,'<p class="ask">Eine Verbesserung fürs Team, eine verantwortliche Person, ein Stichwort.</p>'+ta('fix','Verbesserung:')+ta('owner','Verantwortlich (Trainer oder Spieler):',1)+ta('cue',c.cue,1)+'<label class="chk" style="margin-top:8px"><input type="checkbox" data-f="next"> '+c.nx+'</label>')+'</div>'+
+  sec('--p3','3. Warum ist es passiert',c.t3,'<p class="ask">Was hat funktioniert und sollten wir behalten?</p>'+ta('worked',c.pk)+'<p class="ask">Was kann das Team verbessern? Keine Schuldzuweisung.</p>'+ta('why',c.pw))+
+  '<div class="s">'+sec('--p4',c.h4,c.t4,'<p class="ask">Ein Vorschlag fürs Team, eine verantwortliche Person, ein Stichwort.</p>'+ta('fix','Verbesserung:')+ta('owner','Verantwortlich (Trainer oder Spieler):',1)+ta('cue',c.cue,1)+'<label class="chk" style="margin-top:8px"><input type="checkbox" data-f="next"> '+c.nx+'</label>')+'</div>'+
   (c.rf?'':rs);
 }
 
@@ -722,14 +884,14 @@ function openEditor(item){
     if(!ents.length)ents=[newE()];
     renderEnts();
     Q('#addE').onclick=function(){ents.push(newE());renderEnts()};
-    Q('[data-f=video]').onchange=renderEnts;
+    Q('#form [data-f=video]').onchange=function(){(Q('#ent')._u||[]).forEach(function(f){f()})};
   }
   Q('#msg').textContent='';
   Q('#del').hidden=!item.id;Q('#del').textContent='Löschen';Q('#del').className='btn ghost';
   setupTabs(item);
   Q('#listView').hidden=true;Q('#editView').hidden=false;window.scrollTo(0,0);
 }
-function showList(){Q('#editView').hidden=true;Q('#listView').hidden=false;acur=null;renderList();window.scrollTo(0,0)}
+function showList(){mineDirty=false;Q('#editView').hidden=true;Q('#listView').hidden=false;acur=null;renderList();window.scrollTo(0,0)}
 function collect(){
   var o={type:acur.type,updated:Date.now()};
   Q('#form').querySelectorAll('[data-f]').forEach(function(f){o[f.dataset.f]=f.type==='checkbox'?f.checked:f.value.trim()});
@@ -769,8 +931,10 @@ async function aremove(){
 function nw(type){openEditor({type:type,date:today(),title:''})}
 Q('#newG').onclick=function(){nw('spiel')};
 Q('#newT').onclick=function(){nw('training')};
-Q('#back').onclick=showList;
+Q('#back').onclick=function(){flushMine(showList)};
 Q('#save').onclick=asave;
+Q('#pMine').addEventListener('input',function(){setDirty()});
+Q('#pMine').addEventListener('change',function(){setDirty()});
 Q('#del').onclick=aremove;
 Q('#chips').onclick=function(e){var b=e.target.closest('button');if(!b)return;flt=b.dataset.f;
   document.querySelectorAll('#chips button').forEach(function(x){x.setAttribute('aria-pressed',x===b)});renderList()};
@@ -779,6 +943,63 @@ Q('#chips').onclick=function(e){var b=e.target.closest('button');if(!b)return;fl
 
 /* ===== i18n (Quelltexte sind Deutsch, Englisch wird per Wörterbuch eingesetzt) ===== */
 var EN={
+"1. Gesetzter Fokus":"1. Focus set",
+"Gesetzter Fokus":"Focus set",
+"Was kann das Team verbessern? Keine Schuldzuweisung.":"What can the team improve? No blame.",
+"Was kann das Team verbessern":"What can the team improve",
+"Ein Vorschlag fürs Team, eine verantwortliche Person, ein Stichwort.":"One suggestion for the team, one person responsible, one keyword.",
+"Nur Beschreibung":"Description only",
+"Beschreibung":"Description",
+"Mein Review":"My review",
+"Mein Review abgeschickt":"My review sent",
+"Mein Entwurf gespeichert":"My draft saved",
+"Noch keine Termine. Die Trainer legen Spiele und Trainings an.":"No dates yet. The coaches create the games and trainings.",
+"Wähle einen Termin aus der Liste und schreibe dein Review. Zwischenspeichern, abschicken, wenn du zufrieden bist.":"Pick a date from the list and write your review. Save a draft, and send it when you are happy with it.",
+"Wähle einen Termin und schreibe dein Review für die Trainer.":"Pick a date and write your review for the coaches.",
+"Deine Einträge sind privat in deinem Konto gespeichert. Die Trainer sehen sie erst, wenn du sie abschickst. Bis dahin kannst du sie zwischenspeichern und weiter bearbeiten.":"Your entries are stored privately in your account. The coaches only see them once you send them. Until then you can save a draft and keep editing.",
+"Was wollte ich erreichen?":"What did I want to achieve?",
+"Was wollte das Team erreichen?":"What did the team want to achieve?",
+"Verlinke das Spiel-Video. Halte pro Situation einen Eintrag fest: eine Stelle im Video, eine Statistik oder nur eine Beschreibung.":"Link the game video. Record one entry per situation: a point in the video, a statistic or just a description.",
+"Was ist dir aufgefallen? Nur beschreiben, nicht bewerten.":"What did you notice? Describe only, do not judge.",
+"Was hat funktioniert und sollten wir behalten?":"What worked and should we keep?",
+"Was kann ich bzw. das Team verbessern? Keine Schuldzuweisung.":"What can I or the team improve? No blame.",
+"Ein Vorschlag, eine verantwortliche Person, ein Stichwort.":"One suggestion, one person responsible, one keyword.",
+"Für mich":"For me",
+"Für die Mannschaft":"For the team",
+"Diese Verbesserung ins nächste Training oder Spiel übernehmen":"Carry this improvement over to the next training or game",
+"Abschicken":"Send",
+"Zwischenspeichern":"Save draft",
+"Was soll an die Trainer gehen?":"What should go to the coaches?",
+"Nur die Teameinträge":"Team entries only",
+"Teameinträge und meine persönlichen Einträge":"Team entries and my personal entries",
+"Wie sollen die Trainer es sehen?":"How should the coaches see it?",
+"Zwischenspeichern: Nur du siehst deinen Entwurf. Abschicken: Die Trainer sehen, was du oben ausgewählt hast. Danach kannst du weiter ändern und erneut senden oder zurückziehen. Anonym: Dein Name wird nicht gespeichert.":"Save draft: only you see your draft. Send: the coaches see what you selected above. Afterwards you can keep editing and send again or withdraw. Anonymous: your name is not stored.",
+"Aus früheren Terminen prüfen":"Check from earlier dates",
+"Aus welchem früheren Termin möchtest du Verbesserungen übernehmen und prüfen?":"From which earlier date do you want to carry over and check improvements?",
+"Früherer Termin":"Earlier date",
+"Keinen":"None",
+"Meine Verbesserung":"My improvement",
+"Dazu hast du keine Verbesserung zum Übernehmen markiert.":"You did not mark an improvement to carry over for this date.",
+"Verbesserung des Teams (vom Trainerteam festgelegt)":"Team improvement (set by the coaching team)",
+"Noch nicht freigegeben.":"Not published yet.",
+"Das Trainerteam hat keine Teamverbesserung eingetragen.":"The coaching team did not enter a team improvement.",
+"Ich habe meine Verbesserung umgesetzt":"I have put my improvement into practice",
+"Wie lief es?":"How did it go?",
+"Was hat geklappt, was nicht?":"What worked, what did not?",
+"Bitte einen gültigen YouTube-Link eintragen.":"Please enter a valid YouTube link.",
+"Zu viele oder zu große Bilder. Bitte einzelne Bilder entfernen.":"Too many or too large images. Please remove some images.",
+"Bitte zuerst etwas eintragen.":"Please enter something first.",
+"Das hat nicht geklappt. Bitte erneut versuchen.":"That did not work. Please try again.",
+"Zurückgezogen.":"Withdrawn.",
+"Teameinträge und persönliche Einträge":"Team entries and personal entries",
+"Nur Teameinträge":"Team entries only",
+"Persönliche Einträge":"Personal entries",
+"Eintrag übernehmen":"Adopt entry",
+"Verbesserung fürs nächste Training oder Spiel vorgemerkt.":"Improvement marked for the next training or game.",
+"Was ist passiert":"What happened",
+"Was kann verbessert werden":"What can be improved",
+"Verbesserungsvorschlag":"Suggested improvement",
+"Training":"Training",
 "Termine":"Schedule","Trainings und Spiele des Vereins.":"Trainings and games of the club.",
 "Trainings und Spiele des Vereins, mit deinen persönlichen Anpassungen.":"Club trainings and games, with your personal adjustments.",
 "+ Termin":"+ Date","Trainings planen":"Plan trainings","Spiele importieren":"Import games","Ferien":"Holidays","Ausgeblendete zeigen":"Show hidden","Ausgeblendet":"Hidden","Abgesagt":"Cancelled",
@@ -907,6 +1128,14 @@ var EN={
 "Beobachtungen und Zahlen statt Meinungen.":"Observations and numbers instead of opinions.","Nach 6 Minuten ist Schluss. Eine Verbesserung schlägt fünf.":"Stop after 6 minutes. One improvement beats five."
 };
 var RX=[
+[/^(Zurückgezogen\. )?(Ungespeicherte Änderungen\.|Zwischengespeichert am (.+)\.|Abgeschickt am (.+) \((anonym|mit Namen), (mit persönlichen Einträgen|nur Teameinträge)\)\.)?$/,function(m){var o=m[1]?'Withdrawn. ':'';if(m[2]==='Ungespeicherte Änderungen.')return o+'Unsaved changes.';if(m[3])return o+'Saved as draft on '+m[3]+'.';if(m[4])return o+'Sent on '+m[4]+' ('+(m[5]==='anonym'?'anonymous':'with name')+', '+(m[6]==='nur Teameinträge'?'team entries only':'including personal entries')+').';return o.trim()}],
+[/^(.+) · (Spiel|Training): (.*) · (meine Verbesserung \+ Team-Review|meine Verbesserung|Team-Review)$/,function(m){return m[1]+' · '+(m[2]==='Spiel'?'Game':'Training')+': '+m[3]+' · '+({'meine Verbesserung + Team-Review':'my improvement + team review','meine Verbesserung':'my improvement','Team-Review':'team review'}[m[4]])}],
+[/^(Spiel|Training): (.+)$/,function(m){return (m[1]==='Spiel'?'Game':'Training')+': '+m[2]}],
+[/^Verantwortlich: (.+)$/,function(m){return 'Responsible: '+m[1]}],
+[/^Stichwort: (.+)$/,function(m){return 'Keyword: '+m[1]}],
+[/^(Gesetzter Fokus|Was hat funktioniert|Was kann verbessert werden|Verbesserungsvorschlag|Verantwortlich|Stichwort) \((Team|persönlich)\)$/,function(m){return tr(m[1])+' ('+(m[2]==='Team'?'team':'personal')+')'}],
+[/^Frühere Verbesserung geprüft(?: \((.+)\))?$/,function(m){return 'Earlier improvement checked'+(m[1]?' ('+m[1]+')':'')}],
+[/^(Umgesetzt|Noch nicht umgesetzt)\.( .*)?$/,function(m){return (m[1]==='Umgesetzt'?'Done.':'Not done yet.')+(m[2]||'')}],
 [/^(\d+) Min$/,function(m){return m[1]+' min'}],
 [/^Eintrag (\d+)$/,function(m){return 'Entry '+m[1]}],
 [/^Eintrag (\d+) · (.+)$/,function(m){return 'Entry '+m[1]+' · '+tr(m[2])}],
@@ -976,7 +1205,7 @@ Q('#who').onclick=function(){accountRender();show('account')};
 function buildHub(){
   var h=Q('#hub');h.textContent='';
   function card(t,d,fn){var b=el('button','hubc');b.appendChild(el('h2',null,t));b.appendChild(el('p',null,d));b.onclick=fn;h.appendChild(b)}
-  if(online())card('After-Action Review','Spiele und Trainings auswerten, Reviews sammeln und freigeben.',function(){showList();show('aar')});
+  if(online())card('After-Action Review',trainer?'Spiele und Trainings auswerten, Reviews sammeln und freigeben.':'Wähle einen Termin und schreibe dein Review für die Trainer.',function(){showList();show('aar')});
   if(online())card('Termine','Trainings und Spiele des Vereins, mit deinen persönlichen Anpassungen.',function(){sMode='list';sSel=null;sRender();show('sched')});
   card('Gear-Checkliste','Ausrüstung für Spiele und Training vorbereiten.',function(){R();show('gear')});
   if(admin)card('Benutzerverwaltung','Konten ansehen und Rollen festlegen.',function(){adminRender();show('admin')});
@@ -990,7 +1219,7 @@ function buildHub(){
   updWho();
 }
 function showHub(){buildHub();show('hub')}
-Q('#menuBtn').onclick=showHub;
+Q('#menuBtn').onclick=function(){flushMine(showHub)};
 Q('#outBtn').onclick=function(){clogout()};
 
 /* Login / Registrierung (Firebase: E-Mail oder Benutzername + Passwort) */
@@ -1099,6 +1328,7 @@ async function enter(){
   try{var ud=await Fz.getDoc(Fz.doc(D,'usernames',String(cl.user).toLowerCase()));if(!ud.exists())await Fz.setDoc(Fz.doc(D,'usernames',String(cl.user).toLowerCase()),{uid:u})}catch(e){}
   try{
     Fz.onSnapshot(Fz.doc(D,'profiles',u),function(sn){prof=sn.exists()?sn.data():{role:'player'};applyRole()},function(){});
+    Fz.onSnapshot(Fz.collection(D,'users',u,'drafts'),function(sn){myDr={};sn.docs.forEach(function(d){myDr[d.id]=d.data()});if(!Q('#aarApp').hidden&&!Q('#listView').hidden)renderList()},function(){});
     Fz.onSnapshot(Fz.collection(D,'users',u,'prefs'),function(sn){prefs={};sn.docs.forEach(function(d){prefs[d.id]=d.data()});if(!Q('#schedApp').hidden&&sMode==='list')sRender()},function(){});
     Fz.onSnapshot(Fz.doc(D,'config','schedule'),function(sn){cfg=sn.exists()?sn.data():{}},function(){});
     Fz.onSnapshot(Fz.collection(D,'termine'),function(sn){termine=sn.docs.map(function(d){return Object.assign({id:d.id},d.data())});rebuild()},function(){});
@@ -1107,6 +1337,7 @@ async function enter(){
 }
 function applyRole(){
   trainer=admin||prof.role==='trainer';
+  SCR.aar[1]=trainer?'Spiele und Trainings in einer Liste: Termin eintragen, kurz auswerten, später nachschlagen.':'Wähle einen Termin aus der Liste und schreibe dein Review. Zwischenspeichern, abschicken, wenn du zufrieden bist.';
   Q('#newRow').hidden=!trainer;updWho();
   if(trainer)trainerListen();
   if(!Q('#hub').hidden)buildHub();

@@ -23,6 +23,7 @@ box-sizing:border-box;padding-bottom:env(safe-area-inset-bottom,0px)}
 .A .brand{margin:0 0 12px}
 #app .top h1{display:none}
 #gate h2{margin-bottom:12px}
+.A .top{flex-wrap:wrap}
 #app .top{justify-content:flex-end}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
@@ -155,6 +156,7 @@ h3{margin:20px 0 2px;font-size:15px;color:var(--mut)}
 <div id="hub" hidden></div>
 <div id="adminApp" hidden></div>
 <div id="accountApp" hidden></div>
+<div id="schedApp" hidden></div>
 <div id="aarApp" hidden>
 <div id="listView">
   <div class="row" id="newRow"><button class="btn" id="newG">+ Spiel</button><button class="btn" id="newT">+ Training</button></div>
@@ -667,7 +669,7 @@ async function asave(){
   if(JSON.stringify(o).length>230000){Q('#msg').textContent='Zu viele oder zu große Bilder. Bitte einzelne Bilder entfernen.';return}
   var id=acur.id||('t'+Date.now().toString(36)+Math.random().toString(36).slice(2,6));
   if(online()){
-    try{var x=cl.fb,Fz=x.F,meta={type:o.type,date:o.date,title:o.title||'',pub:o.pub||''},con=Object.assign({},o);delete con.type;delete con.date;delete con.title;delete con.id;con.pub=o.pub||'';await Fz.setDoc(Fz.doc(x.db,'termine',id),meta);await Fz.setDoc(Fz.doc(x.db,'aar',id),con)}
+    try{var x=cl.fb,Fz=x.F,meta={type:o.type,date:o.date,title:o.title||'',pub:o.pub||''},con=Object.assign({},o);delete con.type;delete con.date;delete con.title;delete con.id;con.pub=o.pub||'';await Fz.setDoc(Fz.doc(x.db,'termine',id),meta,{merge:true});await Fz.setDoc(Fz.doc(x.db,'aar',id),con)}
     catch(e){Q('#msg').textContent=e&&e.code==='permission-denied'?'Kein Schreibrecht: Nur Trainer dürfen Termine bearbeiten.':'Speichern fehlgeschlagen. Bitte erneut versuchen.';return}
   }else{
     o.id=id;var k=items.findIndex(function(i){return i.id===id});
@@ -696,6 +698,24 @@ Q('#chips').onclick=function(e){var b=e.target.closest('button');if(!b)return;fl
 
 /* ===== i18n (Quelltexte sind Deutsch, Englisch wird per Wörterbuch eingesetzt) ===== */
 var EN={
+"Termine":"Schedule","Trainings und Spiele des Vereins.":"Trainings and games of the club.",
+"Trainings und Spiele des Vereins, mit deinen persönlichen Anpassungen.":"Club trainings and games, with your personal adjustments.",
+"+ Termin":"+ Date","Trainings planen":"Plan trainings","Spiele importieren":"Import games","Ferien":"Holidays","Ausgeblendete zeigen":"Show hidden","Ausgeblendet":"Hidden","Abgesagt":"Cancelled",
+"Keine Termine vorhanden.":"No dates yet.","Heimspiel":"Home game","Auswärtsspiel":"Away game","← Zur Terminliste":"← Back to schedule",
+"Datum:":"Date:","Uhrzeit:":"Time:","Heim:":"Home:","Gast:":"Away:","Art:":"Type:","Spieltag:":"Matchday:","Spiel auf basketball-bund.net öffnen":"Open game on basketball-bund.net",
+"Meine Anpassungen":"My adjustments","Nur für dich sichtbar. Der Vereinstermin bleibt unverändert.":"Only visible to you. The club date stays unchanged.",
+"Für mich ausblenden":"Hide for me","Meine Uhrzeit":"My time","Meine Notiz":"My note","Zurücksetzen":"Reset",
+"Termin bearbeiten":"Edit date","Neuer Termin":"New date","Art":"Type","Uhrzeit":"Time","Heim/Auswärts":"Home/away","Nicht angegeben":"Not specified","Spieltag":"Matchday","Link zum Spiel":"Link to the game","Termin ist abgesagt":"Date is cancelled",
+"Bitte eine Uhrzeit als hh:mm eintragen.":"Please enter a time as hh:mm.",
+"Regel: Dienstag und Donnerstag, nur an Schultagen in Baden-Württemberg (keine Ferien, keine Feiertage).":"Rule: Tuesday and Thursday, school days in Baden-Württemberg only (no holidays, no public holidays).",
+"Von":"From","Bis":"To","Mo":"Mon","Di":"Tue","Mi":"Wed","Do":"Thu","Fr":"Fri","Trainings erstellen":"Create trainings",
+"Ferien und freie Tage":"Holidays and days off",
+"Ein Eintrag pro Zeile: „2026-12-23 bis 2027-01-09 Weihnachtsferien“ oder ein einzelner Tag „2027-03-25 Name“. Gesetzliche Feiertage in Baden-Württemberg werden automatisch berücksichtigt. Bewegliche Ferientage und Brückentage der einzelnen Schule sind nicht enthalten.":"One entry per line: “2026-12-23 bis 2027-01-09 Christmas holidays” or a single day “2027-03-25 Name”. Public holidays in Baden-Württemberg are included automatically. Flexible holiday days and bridge days of individual schools are not included.",
+"Die Standardwerte stammen aus den Ferienterminen des Kultusministeriums Baden-Württemberg (Stand November 2026). Bitte vor der Saison prüfen.":"The defaults come from the school holiday dates of the Baden-Württemberg ministry of education (as of November 2026). Please check them before the season.",
+"Standard wiederherstellen":"Restore default",
+"Öffne den Spielplan auf basketball-bund.net, markiere die Tabelle, kopiere sie und füge sie hier ein (Strg+V). Alternativ kannst du den HTML-Quelltext oder eine .html-Datei verwenden.":"Open the schedule on basketball-bund.net, select the table, copy it and paste it here (Ctrl+V). Alternatively you can use the HTML source or an .html file.",
+"Hier einfügen (Strg+V)":"Paste here (Ctrl+V)","Spielplan einfügen":"Paste the schedule","Oder HTML-Quelltext einfügen":"Or paste the HTML source","Oder HTML-Datei wählen":"Or choose an HTML file","HTML-Datei wählen":"Choose HTML file","HTML-Quelltext einfügen":"Paste HTML source","Auslesen":"Read",
+"Keine Spiele gefunden. Prüfe, ob du die Tabelle mit dem Spielplan kopiert hast.":"No games found. Check that you copied the table with the schedule.","Verein":"Club","Nicht beteiligt":"Not involved",
 "Konto":"Account","Dein Konto und deine E-Mail-Adresse.":"Your account and your email address.",
 "Anmelden oder registrieren":"Log in or register","E-Mail oder Benutzername":"Email or username","Passwort":"Password","Passwort (mind. 6 Zeichen)":"Password (min. 6 characters)",
 "Konto erstellen":"Create account","Passwort vergessen?":"Forgot password?","Zurück zur Anmeldung":"Back to login","Benutzername":"Username","E-Mail-Adresse":"Email address",
@@ -816,7 +836,17 @@ var RX=[
 [/^Bereits an die Trainer gesendet \((anonym|mit Namen)\)\.$/,function(m){return 'Already sent to the coaches ('+(m[1]==='anonym'?'anonymous':'with name')+').'}],
 [/^Gesendet \((anonym|mit Namen)\)\.$/,function(m){return 'Sent ('+(m[1]==='anonym'?'anonymous':'with name')+').'}],
 [/^Zeitpunkt: (.+)$/,function(m){return 'Time: '+m[1]}],
-[/^(\d+) von (\d+) gepackt$/,function(m){return m[1]+' of '+m[2]+' packed'}]
+[/^(Heimspiel|Auswärtsspiel)( · (\d+)\. Spieltag)?$/,function(m){return (m[1]==='Heimspiel'?'Home game':'Away game')+(m[3]?' · matchday '+m[3]:'')}],
+[/^(\d+)\. Spieltag$/,function(m){return 'Matchday '+m[1]}],
+[/^(\d{1,2}:\d{2}) Uhr$/,function(m){return m[1]}],
+[/^(\d+) Trainings? (?:werden|wird) erstellt, (\d+) Tage? übersprungen\.$/,function(m){return m[1]+(m[1]==='1'?' training will be created, ':' trainings will be created, ')+m[2]+(m[2]==='1'?' day skipped.':' days skipped.')}],
+[/^(\d+) Trainings? erstellt\.$/,function(m){return m[1]+(m[1]==='1'?' training':' trainings')+' created.'}],
+[/^Eingefügt: (\d+) Zeichen$/,function(m){return 'Pasted: '+m[1]+' characters'}],
+[/^(\d+) Spiele? gefunden\.$/,function(m){return m[1]+(m[1]==='1'?' game':' games')+' found.'}],
+[/^(\d+) Spiele? importieren$/,function(m){return 'Import '+m[1]+(m[1]==='1'?' game':' games')}],
+[/^(\d+) Spiele? importiert \((\d+) aktualisiert\)\.$/,function(m){return m[1]+(m[1]==='1'?' game':' games')+' imported ('+m[2]+' updated).'}],
+[/^(.+): (Neujahr|Heilige Drei Könige|Karfreitag|Ostermontag|Tag der Arbeit|Christi Himmelfahrt|Pfingstmontag|Fronleichnam|Tag der Deutschen Einheit|Allerheiligen|1\. Weihnachtsfeiertag|2\. Weihnachtsfeiertag|schon vorhanden)$/,function(m){return m[1]+': '+({'Neujahr':'New Year','Heilige Drei Könige':'Epiphany','Karfreitag':'Good Friday','Ostermontag':'Easter Monday','Tag der Arbeit':'Labour Day','Christi Himmelfahrt':'Ascension Day','Pfingstmontag':'Whit Monday','Fronleichnam':'Corpus Christi','Tag der Deutschen Einheit':'German Unity Day','Allerheiligen':'All Saints','1. Weihnachtsfeiertag':'Christmas Day','2. Weihnachtsfeiertag':'Boxing Day','schon vorhanden':'already exists'}[m[2]])}],
+[/^(\\d+) von (\\d+) gepackt$/,function(m){return m[1]+' of '+m[2]+' packed'}]
 ];
 function tr(s){
   var k=s.trim();if(!k)return s;var v=EN[k];
@@ -848,10 +878,11 @@ var SCR={
   aar:['After-Action Review','Spiele und Trainings in einer Liste: Termin eintragen, kurz auswerten, später nachschlagen.'],
   gear:['Gear-Checkliste','Ausrüstung für Spiele und Training vorbereiten.'],
   admin:['Benutzerverwaltung','Neue Konten sind Spieler. Trainer legt ein Admin fest.'],
-  account:['Konto','Dein Konto und deine E-Mail-Adresse.']
+  account:['Konto','Dein Konto und deine E-Mail-Adresse.'],
+  sched:['Termine','Trainings und Spiele des Vereins.']
 };
 function show(n){
-  var m={gate:'gate',hub:'hub',admin:'adminApp',aar:'aarApp',gear:'gearApp',account:'accountApp'};
+  var m={gate:'gate',hub:'hub',admin:'adminApp',aar:'aarApp',gear:'gearApp',account:'accountApp',sched:'schedApp'};
   if(n!=='hub')hubNote='';
   Object.keys(m).forEach(function(k){Q('#'+m[k]).hidden=k!==n});
   Q('#shell').hidden=(n==='gear');
@@ -865,6 +896,7 @@ function buildHub(){
   var h=Q('#hub');h.textContent='';
   function card(t,d,fn){var b=el('button','hubc');b.appendChild(el('h2',null,t));b.appendChild(el('p',null,d));b.onclick=fn;h.appendChild(b)}
   if(online())card('After-Action Review','Spiele und Trainings auswerten, Reviews sammeln und freigeben.',function(){showList();show('aar')});
+  if(online())card('Termine','Trainings und Spiele des Vereins, mit deinen persönlichen Anpassungen.',function(){sMode='list';sSel=null;sRender();show('sched')});
   card('Gear-Checkliste','Ausrüstung für Spiele und Training vorbereiten.',function(){R();show('gear')});
   if(admin)card('Benutzerverwaltung','Konten ansehen und Rollen festlegen.',function(){adminRender();show('admin')});
   if(!online())h.appendChild(el('p','note','Offline-Modus: Nur die Gear-Checkliste ist auf diesem Gerät verfügbar.'));
@@ -986,6 +1018,8 @@ async function enter(){
   try{var ud=await Fz.getDoc(Fz.doc(D,'usernames',String(cl.user).toLowerCase()));if(!ud.exists())await Fz.setDoc(Fz.doc(D,'usernames',String(cl.user).toLowerCase()),{uid:u})}catch(e){}
   try{
     Fz.onSnapshot(Fz.doc(D,'profiles',u),function(sn){prof=sn.exists()?sn.data():{role:'player'};applyRole()},function(){});
+    Fz.onSnapshot(Fz.collection(D,'users',u,'prefs'),function(sn){prefs={};sn.docs.forEach(function(d){prefs[d.id]=d.data()});if(!Q('#schedApp').hidden&&sMode==='list')sRender()},function(){});
+    Fz.onSnapshot(Fz.doc(D,'config','schedule'),function(sn){cfg=sn.exists()?sn.data():{}},function(){});
     Fz.onSnapshot(Fz.collection(D,'termine'),function(sn){termine=sn.docs.map(function(d){return Object.assign({id:d.id},d.data())});rebuild()},function(){});
   }catch(e){}
   applyRole();showHub();
@@ -999,6 +1033,7 @@ function applyRole(){
 function rebuild(){
   items=termine.map(function(t){return Object.assign({},t,aarDocs[t.id]||{},{id:t.id})});
   if(!Q('#aarApp').hidden&&!Q('#listView').hidden)renderList();
+  if(!Q('#schedApp').hidden)sRender();
 }
 function trainerListen(){
   if(trSubs||!online())return;trSubs=true;
@@ -1033,6 +1068,281 @@ function adminRender(){
   b.appendChild(msg);
 }
 
+/* ===== Termine (zentrale Datenbank: Sammlung "termine") ===== */
+var prefs={},cfg={},sFilter='alle',sShowHidden=false,sMode='list',sSel=null,impRows=[],impTeams=[],impTeam='',impHtml='',sArm=false;
+var FERIEN_DEF='2026-10-26 bis 2026-10-31 Herbstferien\n2026-12-23 bis 2027-01-09 Weihnachtsferien\n2027-03-25 bis 2027-04-03 Osterferien (mit Gründonnerstag)\n2027-05-18 bis 2027-05-29 Pfingstferien\n2027-07-29 bis 2027-09-11 Sommerferien\n2027-11-02 bis 2027-11-06 Herbstferien\n2027-12-23 bis 2028-01-08 Weihnachtsferien\n2028-04-13 bis 2028-04-22 Osterferien\n2028-06-06 bis 2028-06-17 Pfingstferien';
+function easterD(y){var a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=(h+l-7*m+114)%31+1;return new Date(Date.UTC(y,mo-1,da))}
+function isoD(d){return d.toISOString().slice(0,10)}
+function addD(d,n){return new Date(d.getTime()+n*864e5)}
+function feiertage(y){var e=easterD(y),m={};
+  m[y+'-01-01']='Neujahr';m[y+'-01-06']='Heilige Drei Könige';m[isoD(addD(e,-2))]='Karfreitag';m[isoD(addD(e,1))]='Ostermontag';m[y+'-05-01']='Tag der Arbeit';
+  m[isoD(addD(e,39))]='Christi Himmelfahrt';m[isoD(addD(e,50))]='Pfingstmontag';m[isoD(addD(e,60))]='Fronleichnam';m[y+'-10-03']='Tag der Deutschen Einheit';
+  m[y+'-11-01']='Allerheiligen';m[y+'-12-25']='1. Weihnachtsfeiertag';m[y+'-12-26']='2. Weihnachtsfeiertag';return m}
+function parseFerien(t){
+  var out=[];String(t||'').split('\n').forEach(function(l){
+    var m=/^\s*(\d{4}-\d{2}-\d{2})(?:\s*(?:bis|–|-|—)\s*(\d{4}-\d{2}-\d{2}))?\s*(.*)$/.exec(l);
+    if(m)out.push({from:m[1],to:m[2]||m[1],name:(m[3]||'Frei').trim()||'Frei'});
+  });return out}
+function freeReason(iso,fer){
+  var f=feiertage(+iso.slice(0,4))[iso];if(f)return f;
+  for(var i=0;i<fer.length;i++)if(iso>=fer[i].from&&iso<=fer[i].to)return fer[i].name;
+  return '';
+}
+function planTrainings(from,to,days){
+  var out=[],skip=[],have={},fer=parseFerien(cfg.ferien||FERIEN_DEF);
+  termine.forEach(function(t){if(t.type==='training')have[t.date]=1});
+  for(var d=new Date(from+'T12:00:00Z');isoD(d)<=to;d=addD(d,1)){
+    var iso=isoD(d);if(days.indexOf(d.getUTCDay())<0)continue;
+    var r=freeReason(iso,fer);
+    if(r)skip.push([iso,r]);else if(have[iso])skip.push([iso,'schon vorhanden']);else out.push(iso);
+  }
+  return {out:out,skip:skip};
+}
+var TIMERX=/^([01]\d|2[0-3]):[0-5]\d$/;
+function safeLink(u){return /^https:\/\/(www\.)?basketball-bund\.(net|de)\//i.test(u||'')?u:''}
+function myEv(e){var p=prefs[e.id]||{};return {hide:!!p.hide,time:p.time||e.time||'',note:p.note||''}}
+function evTitle(e){return e.type==='spiel'?((e.home===false?'@ ':'vs. ')+(e.title||'')):'Training'}
+function sSetMsg(t){var m=Q('#sMsg');if(m)m.textContent=t}
+
+function sRender(){
+  var b=Q('#schedApp');b.textContent='';
+  if(sMode==='detail'&&sSel)return sDetail(b);
+  if(sMode==='plan')return sPlan(b);
+  if(sMode==='ferien')return sFerien(b);
+  if(sMode==='imp')return sImport(b);
+  if(sMode==='edit')return sEdit(b);
+  if(trainer){
+    var r=el('div','row');
+    [['+ Termin',function(){sSel={id:'',type:'training',date:today(),time:'20:00',title:''};sMode='edit';sRender()}],['Trainings planen',function(){sMode='plan';sRender()}],['Spiele importieren',function(){sMode='imp';sRender()}],['Ferien',function(){sMode='ferien';sRender()}]].forEach(function(x){var bt=el('button','btn',x[0]);bt.onclick=x[1];r.appendChild(bt)});
+    b.appendChild(r);
+  }
+  var ch=el('div','row chips');
+  [['alle','Alle'],['spiel','Spiele'],['training','Trainings']].forEach(function(x){var bt=el('button',null,x[1]);bt.setAttribute('aria-pressed',sFilter===x[0]);bt.onclick=function(){sFilter=x[0];sRender()};ch.appendChild(bt)});
+  var hb=el('button',null,'Ausgeblendete zeigen');hb.setAttribute('aria-pressed',sShowHidden);hb.onclick=function(){sShowHidden=!sShowHidden;sRender()};ch.appendChild(hb);b.appendChild(ch);
+  var t=today(),rows=termine.filter(function(e){return (sFilter==='alle'||e.type===sFilter)&&(sShowHidden||!myEv(e).hide)});
+  rows.sort(function(a,c){return (a.date+(myEv(a).time))<(c.date+(myEv(c).time))?-1:1});
+  var up=rows.filter(function(e){return e.date>=t}),past=rows.filter(function(e){return e.date<t}).reverse().slice(0,15);
+  if(!up.length&&!past.length)b.appendChild(el('p','empty','Keine Termine vorhanden.'));
+  [['Kommende Termine',up],['Vergangene Termine',past]].forEach(function(g){
+    if(!g[1].length)return;b.appendChild(el('div','grp',g[0]));
+    g[1].forEach(function(e){
+      var m=myEv(e),col=e.type==='spiel'?'--p1':'--p3',bt=el('button','item');bt.style.setProperty('--c','var('+col+')');if(m.hide)bt.style.opacity='.55';
+      var d=el('span','d',fmt(e.date));d.appendChild(el('div','done',m.time?m.time+' Uhr':'–'));bt.appendChild(d);
+      var bd=el('span','badge',e.type==='spiel'?'Spiel':'Training');bd.style.setProperty('--c','var('+col+')');bt.appendChild(bd);
+      var mid=el('span','t',e.type==='spiel'?evTitle(e):'');
+      var sub=[];if(e.type==='spiel'&&e.home!=null)sub.push(e.home?'Heimspiel':'Auswärtsspiel');if(e.matchday)sub.push(e.matchday+'. Spieltag');
+      if(sub.length)mid.appendChild(el('div','done',sub.join(' · ')));
+      if(e.cancelled)mid.appendChild(el('div','done','Abgesagt'));
+      if(m.hide)mid.appendChild(el('div','done','Ausgeblendet'));
+      if(m.note)mid.appendChild(el('div','done','📝 '+m.note));
+      bt.appendChild(mid);bt.onclick=function(){sSel=e;sArm=false;sMode='detail';sRender()};b.appendChild(bt);
+    });
+  });
+  var mm=el('div','pm');mm.id='sMsg';mm.setAttribute('role','status');b.appendChild(mm);
+}
+function backBtn(b){var r=el('div','row'),bk=el('button','btn ghost','← Zur Terminliste');bk.onclick=function(){sMode='list';sSel=null;sRender()};r.appendChild(bk);b.appendChild(r)}
+function lbl(txt,node){var l=el('label','f',txt);l.appendChild(node);return l}
+function mkIn(type,val,ph,w){var i=document.createElement('input');i.type=type;i.value=val||'';if(ph){i.placeholder=ph;i.setAttribute('aria-label',ph)}if(w)i.style.width=w;return i}
+
+function sDetail(b){
+  var e=sSel,m=myEv(e);backBtn(b);
+  var s=el('section');s.style.setProperty('--c',e.type==='spiel'?'var(--p1)':'var(--p3)');
+  s.appendChild(el('h2',null,e.type==='spiel'?evTitle(e):'Training'));
+  function ln(l,v){if(!v)return;var d=el('div','sumr');d.appendChild(el('strong',null,l));d.appendChild(document.createTextNode(' '+v));s.appendChild(d)}
+  ln('Datum:',fmt(e.date));ln('Uhrzeit:',(e.time||'–')+(e.time?' Uhr':''));
+  if(e.type==='spiel'){ln('Heim:',e.homeTeam||'');ln('Gast:',e.awayTeam||'');if(e.home!=null)ln('Art:',e.home?'Heimspiel':'Auswärtsspiel');if(e.matchday)ln('Spieltag:',String(e.matchday))}
+  if(e.cancelled)s.appendChild(el('p','pm','Abgesagt'));
+  var lk=safeLink(e.link);if(lk){var a=el('a','yl','Spiel auf basketball-bund.net öffnen');a.href=lk;a.target='_blank';a.rel='noopener noreferrer';s.appendChild(a)}
+  b.appendChild(s);
+  var p=el('section');p.style.setProperty('--c','var(--muted)');p.appendChild(el('h2',null,'Meine Anpassungen'));p.appendChild(el('p','note','Nur für dich sichtbar. Der Vereinstermin bleibt unverändert.'));
+  var hide=document.createElement('input');hide.type='checkbox';hide.checked=m.hide;var hl=el('label','chk');hl.appendChild(hide);hl.appendChild(document.createTextNode(' '));hl.appendChild(el('span',null,'Für mich ausblenden'));p.appendChild(hl);
+  var ti=mkIn('time',(prefs[e.id]||{}).time||'','Meine Uhrzeit');p.appendChild(lbl('Meine Uhrzeit',ti));
+  var no=document.createElement('textarea');no.value=(prefs[e.id]||{}).note||'';no.maxLength=300;p.appendChild(lbl('Meine Notiz',no));
+  var r=el('div','row'),sv=el('button','btn','Speichern'),rs=el('button','btn ghost','Zurücksetzen');
+  sv.onclick=async function(){
+    var x=cl.fb,o={hide:hide.checked,time:ti.value||'',note:no.value.trim()};
+    try{if(!o.hide&&!o.time&&!o.note)await x.F.deleteDoc(x.F.doc(x.db,'users',cl.uid,'prefs',e.id));else await x.F.setDoc(x.F.doc(x.db,'users',cl.uid,'prefs',e.id),o);sSetMsg('Gespeichert.')}catch(er){sSetMsg('Speichern fehlgeschlagen. Bitte erneut versuchen.')}
+  };
+  rs.onclick=async function(){var x=cl.fb;try{await x.F.deleteDoc(x.F.doc(x.db,'users',cl.uid,'prefs',e.id));hide.checked=false;ti.value='';no.value='';sSetMsg('Zurückgesetzt.')}catch(er){sSetMsg('Speichern fehlgeschlagen. Bitte erneut versuchen.')}};
+  r.appendChild(sv);r.appendChild(rs);p.appendChild(r);var mm=el('div','pm');mm.id='sMsg';mm.setAttribute('role','status');p.appendChild(mm);b.appendChild(p);
+  if(trainer){var tr2=el('div','row'),ed=el('button','btn ghost','Termin bearbeiten');ed.onclick=function(){sMode='edit';sRender()};tr2.appendChild(ed);b.appendChild(tr2)}
+}
+
+function sEdit(b){
+  var e=sSel;backBtn(b);var s=el('section');s.style.setProperty('--c','var(--blue)');
+  s.appendChild(el('h2',null,e.id?'Termin bearbeiten':'Neuer Termin'));
+  var ty=document.createElement('select');[['training','Training'],['spiel','Spiel']].forEach(function(o){var op=el('option',null,o[1]);op.value=o[0];ty.appendChild(op)});ty.value=e.type||'training';
+  var di=mkIn('date',e.date),tm=mkIn('time',e.time||''),ti=mkIn('text',e.title||'','',null),ho=document.createElement('select');
+  [['','Nicht angegeben'],['h','Heimspiel'],['a','Auswärtsspiel']].forEach(function(o){var op=el('option',null,o[1]);op.value=o[0];ho.appendChild(op)});ho.value=e.home==null?'':(e.home?'h':'a');
+  var md=mkIn('number',e.matchday||''),lk=mkIn('text',e.link||''),ca=document.createElement('input');ca.type='checkbox';ca.checked=!!e.cancelled;
+  s.appendChild(lbl('Art',ty));s.appendChild(lbl('Datum',di));s.appendChild(lbl('Uhrzeit',tm));
+  var gb=el('div');gb.appendChild(lbl('Gegner',ti));gb.appendChild(lbl('Heim/Auswärts',ho));gb.appendChild(lbl('Spieltag',md));gb.appendChild(lbl('Link zum Spiel',lk));s.appendChild(gb);
+  var cl2=el('label','chk');cl2.appendChild(ca);cl2.appendChild(document.createTextNode(' '));cl2.appendChild(el('span',null,'Termin ist abgesagt'));s.appendChild(cl2);
+  var upd=function(){gb.hidden=ty.value!=='spiel'};ty.onchange=upd;upd();
+  var r=el('div','row');r.style.marginTop='12px';var sv=el('button','btn','Speichern');r.appendChild(sv);
+  var mm=el('div','pm');mm.id='sMsg';mm.setAttribute('role','status');
+  sv.onclick=async function(){
+    if(!di.value){sSetMsg('Bitte ein Datum eintragen.');return}
+    if(tm.value&&!TIMERX.test(tm.value)){sSetMsg('Bitte eine Uhrzeit als hh:mm eintragen.');return}
+    var id=e.id||('e'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),x=cl.fb;
+    var o={type:ty.value,date:di.value,time:tm.value||'',cancelled:ca.checked,title:ty.value==='spiel'?ti.value.trim():(e.title||'')};
+    if(ty.value==='spiel'){o.home=ho.value===''?null:ho.value==='h';o.matchday=md.value?+md.value:null;o.link=safeLink(lk.value.trim())}
+    if(!e.id)o.pub='';
+    try{await x.F.setDoc(x.F.doc(x.db,'termine',id),o,{merge:true});sMode='list';sSel=null;sRender();sSetMsg('Gespeichert.')}
+    catch(er){sSetMsg(er&&er.code==='permission-denied'?'Kein Schreibrecht: Nur Trainer dürfen Termine bearbeiten.':'Speichern fehlgeschlagen. Bitte erneut versuchen.')}
+  };
+  if(e.id){var dl=el('button','btn ghost',sArm?'Wirklich löschen?':'Löschen');if(sArm)dl.className='btn warn';
+    dl.onclick=async function(){if(!sArm){sArm=true;sRender();return}var x=cl.fb;
+      try{await x.F.deleteDoc(x.F.doc(x.db,'termine',e.id));await x.F.deleteDoc(x.F.doc(x.db,'aar',e.id)).catch(function(){});sArm=false;sMode='list';sSel=null;sRender()}catch(er){sSetMsg('Löschen fehlgeschlagen.')}};r.appendChild(dl)}
+  s.appendChild(r);s.appendChild(mm);b.appendChild(s);
+}
+
+function sPlan(b){
+  backBtn(b);var s=el('section');s.style.setProperty('--c','var(--blue)');s.appendChild(el('h2',null,'Trainings planen'));
+  s.appendChild(el('p','note','Regel: Dienstag und Donnerstag, nur an Schultagen in Baden-Württemberg (keine Ferien, keine Feiertage).'));
+  var fr=mkIn('date',today()),to=mkIn('date','2027-07-28'),tm=mkIn('time',cfg.time||'20:00');
+  s.appendChild(lbl('Von',fr));s.appendChild(lbl('Bis',to));s.appendChild(lbl('Uhrzeit',tm));
+  var dr=el('div','row chips'),sel={2:1,4:1};
+  [[1,'Mo'],[2,'Di'],[3,'Mi'],[4,'Do'],[5,'Fr']].forEach(function(x){var bt=el('button',null,x[1]);bt.setAttribute('aria-pressed',!!sel[x[0]]);bt.onclick=function(){if(sel[x[0]])delete sel[x[0]];else sel[x[0]]=1;bt.setAttribute('aria-pressed',!!sel[x[0]]);prev()};dr.appendChild(bt)});
+  s.appendChild(dr);
+  var pv=el('div','sumr'),mm=el('div','pm');mm.id='sMsg';mm.setAttribute('role','status');
+  var go=el('button','btn','Trainings erstellen'),plan=null;
+  function prev(){
+    pv.textContent='';if(!fr.value||!to.value||fr.value>to.value){go.disabled=true;return}
+    plan=planTrainings(fr.value,to.value,Object.keys(sel).map(Number));go.disabled=!plan.out.length;
+    pv.appendChild(el('p',null,(plan.out.length===1?'1 Training wird erstellt':plan.out.length+' Trainings werden erstellt')+', '+(plan.skip.length===1?'1 Tag übersprungen.':plan.skip.length+' Tage übersprungen.')));
+    plan.skip.forEach(function(k){pv.appendChild(el('div','note',fmt(k[0])+': '+k[1]))});
+  }
+  [fr,to,tm].forEach(function(i){i.onchange=prev});prev();
+  go.onclick=async function(){
+    if(!plan||!plan.out.length)return;if(!TIMERX.test(tm.value)){sSetMsg('Bitte eine Uhrzeit als hh:mm eintragen.');return}
+    var x=cl.fb;go.disabled=true;
+    try{await Promise.all(plan.out.map(function(iso){return x.F.setDoc(x.F.doc(x.db,'termine','t_'+iso),{type:'training',date:iso,time:tm.value,title:'',pub:'',source:'rule'},{merge:true})}));
+      await x.F.setDoc(x.F.doc(x.db,'config','schedule'),{time:tm.value},{merge:true});
+      sSetMsg((plan.out.length===1?'1 Training':plan.out.length+' Trainings')+' erstellt.');prev()}
+    catch(er){sSetMsg(er&&er.code==='permission-denied'?'Kein Schreibrecht: Nur Trainer dürfen Termine bearbeiten.':'Speichern fehlgeschlagen. Bitte erneut versuchen.');go.disabled=false}
+  };
+  s.appendChild(pv);s.appendChild(go);s.appendChild(mm);b.appendChild(s);
+}
+
+function sFerien(b){
+  backBtn(b);var s=el('section');s.style.setProperty('--c','var(--blue)');s.appendChild(el('h2',null,'Ferien und freie Tage'));
+  s.appendChild(el('p','note','Ein Eintrag pro Zeile: „2026-12-23 bis 2027-01-09 Weihnachtsferien“ oder ein einzelner Tag „2027-03-25 Name“. Gesetzliche Feiertage in Baden-Württemberg werden automatisch berücksichtigt. Bewegliche Ferientage und Brückentage der einzelnen Schule sind nicht enthalten.'));
+  s.appendChild(el('p','note','Die Standardwerte stammen aus den Ferienterminen des Kultusministeriums Baden-Württemberg (Stand November 2026). Bitte vor der Saison prüfen.'));
+  var ta2=document.createElement('textarea');ta2.value=cfg.ferien||FERIEN_DEF;ta2.style.minHeight='200px';ta2.setAttribute('aria-label','Ferien und freie Tage');s.appendChild(ta2);
+  var r=el('div','row');r.style.marginTop='10px';var sv=el('button','btn','Speichern'),df=el('button','btn ghost','Standard wiederherstellen');
+  var mm=el('div','pm');mm.id='sMsg';mm.setAttribute('role','status');
+  sv.onclick=async function(){var x=cl.fb;try{await x.F.setDoc(x.F.doc(x.db,'config','schedule'),{ferien:ta2.value},{merge:true});sSetMsg('Gespeichert.')}catch(er){sSetMsg('Speichern fehlgeschlagen. Bitte erneut versuchen.')}};
+  df.onclick=function(){ta2.value=FERIEN_DEF};
+  r.appendChild(sv);r.appendChild(df);s.appendChild(r);s.appendChild(mm);b.appendChild(s);
+}
+
+/* --- Import der Spiele aus einer HTML-Liste (basketball-bund.net) --- */
+function parseSpielplan(src){
+  var toks=[];
+  if(!/<[a-z!]/i.test(src)){src.split(/\n|\t/).forEach(function(l){l=l.replace(/\s+/g,' ').trim();if(l)toks.push({s:l})})}
+  else{
+    var doc;try{doc=new DOMParser().parseFromString(src,'text/html')}catch(e){return []}
+    doc.querySelectorAll('script,style,noscript,template').forEach(function(n){n.remove()});
+    (function walk(n){
+      if(n.nodeType===3){var t=n.nodeValue.replace(/\s+/g,' ').trim();if(t)toks.push({s:t});return}
+      if(n.nodeType!==1)return;
+      if(n.nodeName==='A'){var m=/spiel\/(\d+)/.exec(n.getAttribute('href')||'');if(m)toks.push({id:m[1]})}
+      for(var c=n.firstChild;c;c=c.nextSibling)walk(c);
+    })(doc.body||doc);
+  }
+  var DRX=/(\d{1,2})\.(\d{1,2})\.(\d{4}|\d{2})(?!\d)/,TRX=/(?:^|[^\d:])((?:[01]?\d|2[0-3]):[0-5]\d)(?!\d|:)/;
+  var STOP=/^(heim|gast|ergebnis|datum|zeit|uhr|spieltag|halle|ort|nr\.?|details?|spielbericht|live|vorschau|tabelle|spielplan|ergebnisse|abgesagt|verlegt|vs\.?|mo|di|mi|do|fr|sa|so|montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)[.,]?$/i;
+  var recs=[],cur2=null,md=null;
+  function start(){cur2={date:'',time:'',teams:[],mid:'',md:md};recs.push(cur2)}
+  function handle(tk){
+    if(tk.id){if(!cur2||cur2.mid)start();cur2.mid=tk.id;return}
+    var s=tk.s,m;
+    if(!tk.sub&&/[|•;]/.test(s)){s.split(/\s*[|•;]\s*/).forEach(function(p){if(p)handle({s:p,sub:1})});return}
+    var ms=/(\d{1,2})\s*\.\s*Spieltag|Spieltag\s*(\d{1,2})/i.exec(s);
+    if(ms&&!DRX.test(s)){md=+(ms[1]||ms[2]);if(cur2&&!cur2.date&&!cur2.teams.length&&!cur2.mid)cur2.md=md;else cur2=null;return}
+    if((m=DRX.exec(s))){
+      if(!cur2||cur2.date)start();
+      var y=m[3].length===2?'20'+m[3]:m[3];cur2.date=y+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[1]).slice(-2);
+      var rs=' '+s.replace(DRX,' '),tm=TRX.exec(rs);if(tm&&!cur2.time)cur2.time=('0'+tm[1]).slice(-5);
+      var rest=rs.replace(/(?:^|[^\d:])(?:[01]?\d|2[0-3]):[0-5]\d/g,' ').replace(/\bUhr\b/gi,' ').replace(/\b(mo|di|mi|do|fr|sa|so|montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\b[.,]?/gi,' ').replace(/[,;]/g,' ').replace(/\s+/g,' ').trim();
+      if(rest.length>=5&&!tk.sub)handle({s:rest,sub:1});
+      return;
+    }
+    if(!cur2)return;
+    if(!cur2.time&&s.length<=12&&(m=TRX.exec(' '+s))){cur2.time=('0'+m[1]).slice(-5);return}
+    if(cur2.teams.length>=2||STOP.test(s)||/^[\d\s:.\-–]+$/.test(s)||s.length<3||/spieltag/i.test(s))return;
+    var parts=s.split(/\s+[-–—]\s+/);
+    if(!cur2.teams.length&&parts.length===2){cur2.teams=[parts[0].trim(),parts[1].trim()]}else cur2.teams.push(s);
+  }
+  toks.forEach(handle);
+  var seen={};
+  return recs.filter(function(r){var k=r.mid||(r.date+r.teams.join('|'));if(!r.date||r.teams.length<2||seen[k])return false;seen[k]=1;return true});
+}
+function impCompute(){
+  impRows.forEach(function(r){
+    var t=impTeam.toLowerCase(),h=r.teams[0].toLowerCase(),a=r.teams[1].toLowerCase();
+    r.home=h===t?true:a===t?false:null;r.opp=r.home===true?r.teams[1]:r.home===false?r.teams[0]:'';
+    if(r.home===null)r.inc=false;else if(r.inc===undefined||r.inc===false&&!r.touched)r.inc=true;
+  });
+}
+function sImport(b){
+  backBtn(b);var s=el('section');s.style.setProperty('--c','var(--blue)');s.appendChild(el('h2',null,'Spiele importieren'));
+  s.appendChild(el('p','note','Öffne den Spielplan auf basketball-bund.net, markiere die Tabelle, kopiere sie und füge sie hier ein (Strg+V). Alternativ kannst du den HTML-Quelltext oder eine .html-Datei verwenden.'));
+  var box=document.createElement('div');box.className='in';box.contentEditable='true';box.style.minHeight='56px';box.setAttribute('aria-label','Hier einfügen (Strg+V)');
+  var st=el('p','note','');
+  box.addEventListener('paste',function(e){e.preventDefault();var cd=e.clipboardData||{getData:function(){return ''}};impHtml=cd.getData('text/html')||cd.getData('text/plain')||'';st.textContent='Eingefügt: '+impHtml.length+' Zeichen';box.textContent=''});
+  s.appendChild(el('label','lbl','Spielplan einfügen'));s.appendChild(box);s.appendChild(st);
+  var ta2=document.createElement('textarea');ta2.placeholder='<table>…';ta2.setAttribute('aria-label','HTML-Quelltext einfügen');s.appendChild(lbl('Oder HTML-Quelltext einfügen',ta2));
+  var fi=document.createElement('input');fi.type='file';fi.accept='.html,.htm,.txt,text/html';fi.setAttribute('aria-label','HTML-Datei wählen');
+  fi.onchange=function(){var f=fi.files[0];if(!f)return;var r=new FileReader();r.onload=function(){impHtml=String(r.result||'');st.textContent='Eingefügt: '+impHtml.length+' Zeichen'};r.readAsText(f)};
+  s.appendChild(lbl('Oder HTML-Datei wählen',fi));
+  var rd=el('button','btn','Auslesen');rd.style.marginTop='10px';s.appendChild(rd);
+  var out=el('div');out.style.marginTop='14px';s.appendChild(out);
+  var mm=el('div','pm');mm.id='sMsg';mm.setAttribute('role','status');s.appendChild(mm);b.appendChild(s);
+  function showRows(){
+    out.textContent='';impCompute();
+    var sel=document.createElement('select');sel.setAttribute('aria-label','Verein');impTeams.forEach(function(t){var op=el('option',null,t);op.value=t;sel.appendChild(op)});sel.value=impTeam;
+    sel.onchange=function(){impTeam=sel.value;impRows.forEach(function(r){r.inc=undefined;r.touched=false});showRows()};out.appendChild(lbl('Verein',sel));
+    var n=impRows.filter(function(r){return r.inc}).length;
+    out.appendChild(el('p',null,impRows.length===1?'1 Spiel gefunden.':impRows.length+' Spiele gefunden.'));
+    impRows.forEach(function(r){
+      var row=el('div','gi');row.style.flexWrap='wrap';
+      var cb=document.createElement('input');cb.type='checkbox';cb.checked=!!r.inc;cb.disabled=r.home===null;cb.setAttribute('aria-label',r.teams.join(' – '));cb.onchange=function(){r.inc=cb.checked;r.touched=true;btn.textContent=cnt()};row.appendChild(cb);
+      var dt=mkIn('date',r.date,'',null);dt.style.width='auto';dt.onchange=function(){r.date=dt.value};row.appendChild(dt);
+      var tt=mkIn('time',r.time,'',null);tt.style.width='auto';tt.onchange=function(){r.time=tt.value};row.appendChild(tt);
+      var mdI=mkIn('number',r.md||'','Spieltag','80px');mdI.onchange=function(){r.md=mdI.value?+mdI.value:null};row.appendChild(mdI);
+      var tx=el('div','nm',r.teams[0]+' – '+r.teams[1]);tx.style.flexBasis='100%';row.appendChild(tx);
+      row.appendChild(el('div','done',r.home===null?'Nicht beteiligt':(r.home?'Heimspiel':'Auswärtsspiel')));
+      out.appendChild(row);
+    });
+    var btn=el('button','btn');function cnt(){var k=impRows.filter(function(r){return r.inc}).length;return k===1?'1 Spiel importieren':k+' Spiele importieren'}
+    btn.textContent=cnt();btn.style.marginTop='10px';
+    btn.onclick=async function(){
+      var x=cl.fb,list=impRows.filter(function(r){return r.inc&&r.date}),upd=0,have={};termine.forEach(function(t){have[t.id]=1});
+      btn.disabled=true;
+      try{
+        await Promise.all(list.map(function(r){
+          var id=r.mid?'g_'+r.mid:'g_'+r.date.replace(/-/g,'')+'_'+(r.teams.join('').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,24));
+          if(have[id])upd++;
+          var o={type:'spiel',date:r.date,time:TIMERX.test(r.time||'')?r.time:'',title:r.opp,home:r.home,homeTeam:r.teams[0],awayTeam:r.teams[1],matchday:r.md||null,club:impTeam,source:'import'};
+          if(r.mid)o.link='https://www.basketball-bund.net/static/#/spiel/'+r.mid;
+          return x.F.setDoc(x.F.doc(x.db,'termine',id),o,{merge:true});
+        }));
+        await x.F.setDoc(x.F.doc(x.db,'config','schedule'),{club:impTeam},{merge:true});
+        sSetMsg((list.length===1?'1 Spiel':list.length+' Spiele')+' importiert ('+upd+' aktualisiert).');
+      }catch(er){sSetMsg(er&&er.code==='permission-denied'?'Kein Schreibrecht: Nur Trainer dürfen Termine bearbeiten.':'Speichern fehlgeschlagen. Bitte erneut versuchen.');btn.disabled=false}
+    };
+    out.appendChild(btn);
+  }
+  rd.onclick=function(){
+    var src=(ta2.value.trim()||impHtml||'').trim();impRows=parseSpielplan(src);
+    if(!impRows.length){out.textContent='';sSetMsg('Keine Spiele gefunden. Prüfe, ob du die Tabelle mit dem Spielplan kopiert hast.');return}
+    sSetMsg('');var seen={};impRows.forEach(function(r){r.teams.forEach(function(t){seen[t]=1})});impTeams=Object.keys(seen).sort();
+    var pref=cfg.club&&seen[cfg.club]?cfg.club:impTeams.filter(function(t){return /cannstatt/i.test(t)})[0]||impTeams[0];impTeam=pref;showRows();
+  };
+}
+
 /* Sprache */
 function setLang(l){
   lang=l;try{localStorage.setItem('gearcheck.lang',l)}catch(e){}
@@ -1042,6 +1352,7 @@ function setLang(l){
   if(!Q('#hub').hidden)buildHub();
   if(!Q('#adminApp').hidden)adminRender();
   if(!Q('#accountApp').hidden)accountRender();
+  if(!Q('#schedApp').hidden)sRender();
   if(!Q('#aarApp').hidden&&!Q('#listView').hidden)renderList();
   R();
   xw(Q('#hdr'));xw(Q('#shell'));obs.takeRecords();

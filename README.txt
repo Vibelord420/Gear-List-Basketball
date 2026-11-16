@@ -4,7 +4,7 @@ A) PUT THE APP ONLINE
 1. github.com > New repository (e.g. gear-check), set it to Public, create it.
 2. Add file > Upload files: upload ALL files from this folder, then Commit changes.
 3. Settings > Pages > Source: Deploy from a branch > main, folder / (root) > Save.
-   Your app is live after about a minute at https://YOUR-USERNAME.github.io/gear-check/
+   Your app is live after about a minute at https://vibelord420.github.io/Gear-List-Basketball/
 
 B) CREATE THE ONLINE DATABASE (Firebase, free Spark plan, no credit card)
 1. Go to console.firebase.google.com > Add project (name it e.g. gear-check, analytics off).

@@ -82,7 +82,13 @@ I) GEAR-LISTE: VORSCHLÄGE, KATEGORIEN, REIHENFOLGE
   Vergangene Listen bleiben unverändert. Das passiert automatisch und nur einmal pro Konto.
 - Unter "+ Eintrag" stehen sie als Vorschläge zur Auswahl (mehrere gleichzeitig), dazu Sport-Tights,
   Privatschlüssel und Hallenschlüssel. Bereits vorhandene Einträge werden nicht noch einmal angeboten.
-- Kategorien: Vorbereitung, Kleidung, Wertsachen, Nachbereitung, Accessoires, Nahrung. Eine Kategorie
-  erscheint nur, wenn sie Einträge enthält. Eigene Kategorien: im Eintrag "Neue Kategorie …" wählen.
+- Kategorien: Vorbereitung, Sportbekleidung, Freizeitbekleidung, Wertsachen, Nachbereitung, Accessoires, Nahrung.
+  Eine Kategorie erscheint in der Liste nur, wenn sie Einträge enthält.
+  Beim Hinzufügen gilt das Feld "Kategorie" für alle gewählten Vorschläge und den eigenen Eintrag.
+  Steht es auf "Standard", bekommt jeder Vorschlag seine eigene Standardkategorie.
+- Kategorien verwalten: "Bearbeiten" > "Kategorien verwalten". Dort umbenennen (Namen ändern, Enter),
+  verschieben (▲ ▼), neue Kategorien hinzufügen und löschen (Einträge bleiben, ohne Kategorie).
+  Im Bearbeiten-Modus verschieben ▲ ▼ an der Überschrift eine Kategorie samt allen Einträgen.
+  Kategorien gelten für alle Listen (Spiel und Training) und werden mit dem Konto synchronisiert.
 - Reihenfolge: "Bearbeiten" tippen, dann mit ▲ ▼ verschieben (innerhalb der Kategorie).
   "Als Standardliste speichern" übernimmt Reihenfolge und Kategorien für neue Listen.

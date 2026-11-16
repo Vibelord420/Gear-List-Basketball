@@ -76,6 +76,8 @@ h3.cat{display:flex;justify-content:space-between;align-items:baseline}
 .nm{min-width:0;overflow-wrap:anywhere}
 .row.ed{gap:8px}
 .mv{display:flex;gap:4px}.mv button{width:34px;height:34px;border-radius:10px;border:1px solid var(--ln);background:var(--bg);font-size:14px}.mv .off{opacity:.3}
+.cr{display:flex;gap:6px;align-items:center;margin:6px 0}.cr .in{flex:1;min-width:0}.cr button:not(.btn){width:34px;height:34px;flex:none;border-radius:10px;border:1px solid var(--ln);background:var(--bg);font-size:14px}.cr .del{width:auto!important;padding:0 10px;color:#c0392b}.cr .off{opacity:.3}
+h3.cat .mv button{color:var(--ink)}
 .sgs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}.sgs button{padding:8px 12px;border-radius:999px;border:2px solid var(--ln);background:var(--bg);font-size:15px;font-weight:600}.sgs .on{border-color:var(--ac);background:var(--ac);color:var(--acx)}
 .tl{display:block;width:100%;text-align:left;background:none;border:0;padding:8px 0;color:var(--mut);font-size:15px}
 
@@ -196,13 +198,15 @@ const PICK=["👟","🎽","👕","👚","🩳","🩲","🧦","🧥","🧶","👖
 const DE={"Sessions":"Termine","+ Game":"+ Spiel","Plan practices":"Trainings planen","Upcoming":"Anstehend","Nothing planned yet.":"Noch nichts geplant.","Past":"Vergangen","No past sessions.":"Keine vergangenen Termine.","Backup":"Sicherung","Data is stored in this browser only. Export a backup to move it to another device.":"Die Daten werden nur in diesem Browser gespeichert. Exportiere eine Sicherung, um sie auf ein anderes Gerät zu übertragen.","Export backup":"Sicherung exportieren","Import backup":"Sicherung importieren","Back to list":"Zurück zur Liste","Game":"Spiel","Practice":"Training","game":"Spiel","practice":"Training","{n} of {t} packed":"{n} von {t} gepackt","Open":"Öffnen","Duplicate":"Duplizieren","Delete":"Löschen","Tap to confirm":"Zum Bestätigen tippen","Gear check":"Ausrüstungs-Check","Edit":"Bearbeiten","Done":"Fertig","All packed. Ready to go.":"Alles gepackt. Es kann losgehen.","Tap an item to rename it or change its icon.":"Tippe auf einen Eintrag, um ihn umzubenennen oder das Symbol zu ändern.","Less":"Weniger","More":"Mehr","Remove":"Entfernen","This list is empty. Add your first item.":"Diese Liste ist leer. Füge deinen ersten Eintrag hinzu.","Saved ✓":"Gespeichert ✓","Save as default {tab} list":"Als Standardliste speichern ({tab})","+ Add item":"+ Eintrag","New list":"Neue Liste","Edit item":"Eintrag bearbeiten","Add item":"Eintrag hinzufügen","Item name":"Name des Eintrags","Quantity":"Menge","Upload your own icon":"Eigenes Symbol hochladen","Also change it in the default list and upcoming {tab} sessions":"Auch in der Standardliste und in allen kommenden Terminen dieser Art ändern","Also add to the default {tab} list":"Auch zur Standardliste hinzufügen ({tab})","Save item":"Eintrag speichern","Add to list":"Zur Liste hinzufügen","Cancel":"Abbrechen","Close":"Schließen","Edit session":"Termin bearbeiten","New {tab} list":"Neue Liste ({tab})","Duplicate session":"Termin duplizieren","Add game":"Spiel hinzufügen","Name, e.g. opponent (optional)":"Name, z. B. Gegner (optional)","Save":"Speichern","Fresh from default list":"Neu aus der Standardliste","Copy of current list, unticked":"Kopie der aktuellen Liste, ohne Haken","Pick the weekdays. Sessions start today and use the default practice list. Days that already have a practice are skipped.":"Wähle die Wochentage. Die Termine beginnen heute und nutzen die Standardliste für Training. Tage mit bereits geplantem Training werden übersprungen.","Mon":"Mo","Tue":"Di","Wed":"Mi","Thu":"Do","Fri":"Fr","Sat":"Sa","Sun":"So","For the next":"Für die nächsten","{n} weeks":"{n} Wochen","Create practices":"Trainings erstellen","Account":"Konto","Online sync is not available. Add your Firebase settings to config.js (see the README) and check your connection.":"Die Online-Synchronisierung ist nicht verfügbar. Trage deine Firebase-Einstellungen in config.js ein (siehe README) und prüfe deine Verbindung.","Signed in as":"Angemeldet als","Syncing…":"Synchronisiere…","Last synced {time}":"Zuletzt synchronisiert: {time}","Sync failed. It will retry on your next change.":"Synchronisierung fehlgeschlagen. Beim nächsten Ändern wird es erneut versucht.","Sync failed. Check your connection.":"Synchronisierung fehlgeschlagen. Prüfe deine Verbindung.","Sync now":"Jetzt synchronisieren","Log out":"Abmelden","Logging out clears the data on this device. It stays safe in your account.":"Beim Abmelden werden die Daten auf diesem Gerät gelöscht. Sie bleiben in deinem Konto gespeichert.","Log in or register":"Anmelden oder registrieren","Username":"Benutzername","Password (min. 6 characters)":"Passwort (mind. 6 Zeichen)","Logging in to an existing account replaces the data on this device. Creating an account uploads this device’s data.":"Beim Anmelden bei einem bestehenden Konto werden die Daten auf diesem Gerät ersetzt. Beim Erstellen eines Kontos werden die Daten dieses Geräts hochgeladen.","Log in":"Anmelden","Create account":"Konto erstellen","Username: 3–20 characters, letters, digits, - or _.":"Benutzername: 3–20 Zeichen, Buchstaben, Ziffern, - oder _.","The password needs at least 6 characters.":"Das Passwort braucht mindestens 6 Zeichen.","Please wait…":"Einen Moment…","That username is taken.":"Dieser Benutzername ist bereits vergeben.","Wrong username or password.":"Benutzername oder Passwort falsch.","No connection.":"Keine Verbindung.","Something went wrong ({c}).":"Etwas ist schiefgelaufen ({c})."};
 const DEN={"basketball shoes":"Basketballschuhe","jersey":"Trikot","shorts":"Shorts","boxer":"Unterwäsche","socks":"Socken","undershirt":"Unterhemd","undershorts":"Unterhose","shooting shirt":"Shooting-Shirt","track top":"Trainingsjacke","suspensorium":"Suspensorium","headband":"Stirnband","other accessories":"Sonstiges Zubehör","t-shirt":"T-Shirt","warm top":"Warmes Oberteil","pants":"Hose","hat":"Mütze","small towel":"Kleines Handtuch","big towel":"Großes Handtuch","slippers":"Badeschlappen","shower gel":"Duschgel","magnesium":"Magnesium","drinks":"Getränke","snacks":"Snacks","id card":"Ausweis","keys":"Schlüssel","wallet":"Geldbeutel","phone":"Handy","camera":"Kamera","camera equipment":"Kameraausrüstung","basketball":"Basketball","sport tights":"Sport-Tights","private keys":"Privatschlüssel","gym keys":"Hallenschlüssel","gelatin + vitamin c":"Gelatine + Vitamin C"};
 Object.assign(DE,{"Preparation":"Vorbereitung","Clothing":"Kleidung","Valuables":"Wertsachen","Afterwards":"Nachbereitung","Accessories":"Accessoires","Food":"Nahrung","Suggestions":"Vorschläge","or add your own":"oder eigener Eintrag","Category":"Kategorie","No category":"Ohne Kategorie","New category…":"Neue Kategorie …","Category name":"Name der Kategorie","Move up":"Nach oben","Move down":"Nach unten","Add selected ({n})":"Auswahl hinzufügen ({n})"});
-const CATS=["Preparation","Clothing","Valuables","Afterwards","Accessories","Food"];
-const SUG=[["Undershirt","👕","Clothing"],["Sport Tights","🩳","Clothing"],["Shooting Shirt","👚","Clothing"],["Track Top","🧥","Clothing"],["Suspensorium","🛡️","Clothing"],["Headband","🎀","Accessories"],["Other Accessories","🎒","Accessories"],["Hat","🧢","Accessories"],["Magnesium","🧂","Food"],["Gelatin + Vitamin C","💊","Food"],["Private Keys","🔑","Valuables"],["Gym Keys","🗝️","Valuables"],["Wallet","👛","Valuables"],["Camera","📷","Preparation"],["Camera Equipment","📸","Preparation"]];
+const CATS=["Preparation","Sportswear","Casual wear","Valuables","Afterwards","Accessories","Food"];
+Object.assign(DE,{"Sportswear":"Sportbekleidung","Casual wear":"Freizeitbekleidung","Categories":"Kategorien","Manage categories":"Kategorien verwalten","New category":"Neue Kategorie","Add category":"Kategorie hinzufügen","Change a name to rename. Empty categories are hidden in the list. Deleting keeps the items (without category).":"Name ändern zum Umbenennen. Leere Kategorien werden in der Liste ausgeblendet. Beim Löschen bleiben die Einträge erhalten (ohne Kategorie).","That name already exists.":"Diesen Namen gibt es schon.","Delete?":"Löschen?","Default":"Standard"});
+const syncCats=()=>{if(!S.cats)S.cats=CATS.slice();if(!S.cmap)S.cmap={};[S.tpl.game,S.tpl.practice].concat(S.lists.map(l=>l.items)).forEach(L=>L.forEach(x=>{if(x.c&&!S.cats.includes(x.c))S.cats.push(x.c)}))};
+const SUG=[["Undershirt","👕","Sportswear"],["Sport Tights","🩳","Sportswear"],["Shooting Shirt","👚","Sportswear"],["Track Top","🧥","Sportswear"],["Suspensorium","🛡️","Sportswear"],["Headband","🎀","Accessories"],["Other Accessories","🎒","Accessories"],["Hat","🧢","Accessories"],["Magnesium","🧂","Food"],["Gelatin + Vitamin C","💊","Food"],["Private Keys","🔑","Valuables"],["Gym Keys","🗝️","Valuables"],["Wallet","👛","Valuables"],["Camera","📷","Preparation"],["Camera Equipment","📸","Preparation"]];
 const DEN_R={};for(const k in DEN)DEN_R[DEN[k].toLowerCase()]=k;
 const LEG={"boxershorts":"boxer","wärmendes oberteil":"warm top"};
 const canon=n=>{n=String(n||"").trim().toLowerCase();if(/^gelatin/.test(n))return"gelatin + vitamin c";return LEG[n]||DEN_R[n]||n};
 const RMV=new Set(["undershirt","undershorts","shooting shirt","track top","suspensorium","headband","other accessories","hat","magnesium","keys","wallet","camera","camera equipment","gelatin + vitamin c"]);
-const CATDEF={"basketball shoes":"Clothing","jersey":"Clothing","shorts":"Clothing","boxer":"Clothing","socks":"Clothing","t-shirt":"Clothing","warm top":"Clothing","pants":"Clothing","small towel":"Afterwards","big towel":"Afterwards","slippers":"Afterwards","shower gel":"Afterwards","drinks":"Food","snacks":"Food","id card":"Valuables","phone":"Valuables","basketball":"Accessories"};
+const CATDEF={"basketball shoes":"Sportswear","jersey":"Sportswear","shorts":"Sportswear","boxer":"Sportswear","socks":"Sportswear","t-shirt":"Casual wear","warm top":"Casual wear","pants":"Casual wear","small towel":"Afterwards","big towel":"Afterwards","slippers":"Afterwards","shower gel":"Afterwards","drinks":"Food","snacks":"Food","id card":"Valuables","phone":"Valuables","basketball":"Accessories"};
 SUG.forEach(x=>{CATDEF[canon(x[0])]=x[2]});
 let lang=(()=>{try{const v=localStorage.getItem("gearcheck.lang");if(v)return v}catch(e){}return(typeof navigator!=="undefined"&&navigator.language||"").toLowerCase().startsWith("de")?"de":"en"})();
 try{document.documentElement.lang=lang}catch(e){}
@@ -211,7 +215,7 @@ const tn=n=>(lang==="de"&&DEN[n.toLowerCase()])||n;
 const iso=t=>{const d=new Date(t);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")},today=()=>iso(Date.now()),byd=(a,b)=>a.dt<b.dt?-1:a.dt>b.dt?1:0;
 const mkI=(n,i,q,c)=>({id:uid(),n,i,q:q||1,d:false,c:c||""});
 const mkL=(type,items,note,dt)=>({id:uid(),type,note:note||"",dt:dt||today(),t:Date.now(),items:items.map(x=>mkI(x.n,x.i,x.q,x.c))});
-let S,sg=new Set(),fc="",sheet=null,eid=null,sm="",sid="",sd="",sn="",ico="🎒",fq=1,view="l",edit=false,confirmId=null,flash=false;
+let S,sg=new Set(),fc="",cdl="",cmsg="",sheet=null,eid=null,sm="",sid="",sd="",sn="",ico="🎒",fq=1,view="l",edit=false,confirmId=null,flash=false;
 function seed(){
  const p=B.map(([n,i])=>({n,i,q:1})),g=p.map(x=>({...x})).concat([{n:"Snacks",i:"🍌",q:1}]);
  const a=mkL("game",g),b=mkL("practice",p);
@@ -244,6 +248,11 @@ function fix(){
   ["game","practice"].forEach(t=>{S.tpl[t].forEach(ren);S.tpl[t]=S.tpl[t].filter(keep);S.tpl[t].forEach(cat)});
   S.lists.forEach(l=>{l.items.forEach(ren);if(l.dt>=td||on.has(l.id))l.items=l.items.filter(keep);l.items.forEach(cat)});
   S.v=5}
+ if((S.v||0)<6&&S.tpl){
+  const mp=x=>{if(x.c==="Clothing")x.c=CATDEF[canon(x.n)]||"Sportswear"};
+  S.tpl.game.forEach(mp);S.tpl.practice.forEach(mp);S.lists.forEach(l=>l.items.forEach(mp));
+  S.cats=CATS.slice();S.cmap={};S.v=6}
+ syncCats();
  pick("game");pick("practice");
  const u=S.lists.filter(l=>l.dt>=today()).sort(byd)[0];if(u)S.tab=u.type;
 }
@@ -330,13 +339,22 @@ const card=l=>{const n=l.items.filter(x=>x.d).length;
  return`<div class="hc"><b>${ds(l.dt)}</b>${l.note?" – "+esc(l.note):""}<div class="mut">${tl(l.type)} – ${_("{n} of {t} packed",{n,t:l.items.length})}</div><div class="acts"><button class="btn" data-a="open" data-id="${l.id}">${_("Open")}</button><button class="btn" data-a="dup" data-id="${l.id}">${_("Duplicate")}</button><button class="btn" data-a="rm" data-id="${l.id}">${confirmId===l.id?_("Tap to confirm"):_("Delete")}</button></div></div>`};
 
 const grp=items=>{
- const m=new Map();items.forEach(x=>{const c=x.c||"";if(!m.has(c))m.set(c,[]);m.get(c).push(x)});
- const o=[...m.keys()].filter(Boolean).sort((a,b)=>{const p=CATS.indexOf(a),q=CATS.indexOf(b);return(p<0?99:p)-(q<0?99:q)}).map(c=>[c,m.get(c)]);
+ syncCats();const m=new Map();items.forEach(x=>{const c=x.c||"";if(!m.has(c))m.set(c,[]);m.get(c).push(x)});
+ const o=S.cats.filter(c=>m.has(c)).map(c=>[c,m.get(c)]);
  if(m.has(""))o.push(["",m.get("")]);return o.length?o:[["",[]]]};
 const itRow=(x,k,n)=>`<div class="row ${x.d?"done":""}${edit?" ed":""}" data-a="${edit?"ei":"chk"}" data-id="${x.id}">${edit?"":`<span class="ck">${x.d?"✓":""}</span>`}<span class="ic">${icn(x.i)}</span><span class="nm">${esc(tn(x.n))}${edit?" ✎":""}</span>${edit?`<span class="mv"><button class="${k?"":"off"}" data-a="up" data-id="${x.id}" aria-label="${_("Move up")}">▲</button><button class="${k<n-1?"":"off"}" data-a="dn" data-id="${x.id}" aria-label="${_("Move down")}">▼</button></span><button class="x" data-a="del" data-id="${x.id}" aria-label="${_("Remove")}">✕</button>`:`<span class="q"><button data-a="qm" data-id="${x.id}" aria-label="${_("Less")}">−</button><b>${x.q}</b><button data-a="qp" data-id="${x.id}" aria-label="${_("More")}">+</button></span>`}</div>`;
-const itemsHTML=l=>{const G=grp(l.items);return G.map(([c,xs])=>(G.length>1||c?`<h3 class="cat"><span>${esc(c?_(c):_("No category"))}</span><span>${xs.filter(x=>x.d).length}/${xs.length}</span></h3>`:"")+xs.map((x,k)=>itRow(x,k,xs.length)).join("")).join("")};
-const allCats=()=>{const u=[];[S.tpl.game,S.tpl.practice].concat(S.lists.map(l=>l.items)).forEach(L=>L.forEach(x=>{if(x.c&&!CATS.includes(x.c)&&!u.includes(x.c))u.push(x.c)}));return CATS.concat(u)};
-const rdCat=()=>{const v=$("fcs").value;return v==="__new"?$("fcn").value.trim().slice(0,24):v};
+const itemsHTML=l=>{const G=grp(l.items),nn=G.filter(g=>g[0]).length;return G.map(([c,xs],gi)=>(G.length>1||c?`<h3 class="cat"><span>${esc(c?_(c):_("No category"))}</span>${edit&&c?`<span class="mv"><button class="${gi?"":"off"}" data-a="cup" data-id="${esc(c)}" aria-label="${_("Move up")}">▲</button><button class="${gi<nn-1?"":"off"}" data-a="cdn" data-id="${esc(c)}" aria-label="${_("Move down")}">▼</button></span>`:`<span>${xs.filter(x=>x.d).length}/${xs.length}</span>`}</h3>`:"")+xs.map((x,k)=>itRow(x,k,xs.length)).join("")).join("")};
+const allCats=()=>{syncCats();return S.cats};
+const rc=c=>(S.cmap&&c in S.cmap)?S.cmap[c]:c;
+const addCat=n=>{n=String(n||"").trim().slice(0,24);if(!n)return"";syncCats();const e=S.cats.find(z=>z===n||_(z).toLowerCase()===n.toLowerCase());if(e)return e;S.cats.push(n);delete S.cmap[n];return n};
+const catOf=()=>{const v=$("fcs").value;return v==="__auto"?null:v==="__new"?addCat($("fcn").value):v};
+const renameCat=(k,v)=>{v=v.trim().slice(0,24);cmsg="";
+ if(v&&v!==_(k)){
+  if(S.cats.some(z=>z!==k&&(z===v||_(z).toLowerCase()===v.toLowerCase())))cmsg=_("That name already exists.");
+  else{S.cats=S.cats.map(z=>z===k?v:z);const re=L=>L.forEach(x=>{if(x.c===k)x.c=v});re(S.tpl.game);re(S.tpl.practice);S.lists.forEach(q=>re(q.items));
+   for(const z in S.cmap)if(S.cmap[z]===k)S.cmap[z]=v;S.cmap[k]=v;delete S.cmap[v];save()}}
+ R()};
+
 const updAdd=()=>{const b=$("addbtn");if(!b||eid)return;const n=sg.size+($("fn").value.trim()?1:0);b.textContent=sg.size?_("Add selected ({n})",{n}):_("Add to list")};
 
 function R(){
@@ -359,10 +377,12 @@ function R(){
   <p class="sub">${t&&n===t?_("All packed. Ready to go."):_("{n} of {t} packed",{n,t})}</p>${edit?`<p class="sub">${_("Tap an item to rename it or change its icon.")}</p>`:""}`+
   itemsHTML(l)+
   (t?"":`<p class="sub">${_("This list is empty. Add your first item.")}</p>`)+
-  (edit?`<button class="btn w" data-a="sdef">${flash?_("Saved ✓"):_("Save as default {tab} list",{tab:_(S.tab)})}</button>`:"");
+  (edit?`<button class="btn w" data-a="sdef">${flash?_("Saved ✓"):_("Save as default {tab} list",{tab:_(S.tab)})}</button><button class="btn w" data-a="cats">${_("Manage categories")}</button>`:"");
   d=`<div><button class="btn p" data-a="add">${_("+ Add item")}</button><button class="btn" data-a="new">${_("New list")}</button><button class="btn" data-a="sess">${_("Sessions")}</button></div>`;
  }
+ const _sc=document.querySelector("#sheet .sh"),_st=_sc?_sc.scrollTop:0;
  $("app").innerHTML=h;$("dock").innerHTML=d;Sh();
+ if(_st){const n=document.querySelector("#sheet .sh");if(n)n.scrollTop=_st}
 }
 function Sh(){
  const s=$("sheet"),
@@ -374,7 +394,7 @@ function Sh(){
  (av.length?`<p class="sub" style="margin:0 0 6px">${_("Suggestions")}</p><div class="sgs">${av.map(x=>`<button class="${sg.has(x[0])?"on":""}" data-a="sg" data-id="${esc(x[0])}">${x[1]} ${esc(tn(x[0]))}</button>`).join("")}</div><p class="sub" style="margin:0 0 8px">${_("or add your own")}</p>`:"")+
  `<input id="fn" class="in" placeholder="${_("Item name")}" maxlength="40" autocomplete="off" value="${eid?esc(tn(cur().items.find(z=>z.id===eid).n)):""}">
  <div class="qr"><span>${_("Quantity")}</span><span class="q"><button data-a="sqm">−</button><b id="fq">${fq}</b><button data-a="sqp">+</button></span></div>
- <div class="qr"><span>${_("Category")}</span><select id="fcs" class="in" style="width:auto;max-width:60%"><option value="">${_("No category")}</option>${allCats().map(c=>`<option value="${esc(c)}"${c===fc?" selected":""}>${esc(_(c))}</option>`).join("")}<option value="__new">${_("New category…")}</option></select></div>
+ <div class="qr"><span>${_("Category")}</span><select id="fcs" class="in" style="width:auto;max-width:60%">${eid?"":`<option value="__auto" selected>${_("Default")}</option>`}<option value="">${_("No category")}</option>${allCats().map(c=>`<option value="${esc(c)}"${eid&&c===fc?" selected":""}>${esc(_(c))}</option>`).join("")}<option value="__new">${_("New category…")}</option></select></div>
  <input id="fcn" class="in" placeholder="${_("Category name")}" maxlength="24" autocomplete="off" hidden style="margin-bottom:12px">
  <div class="ig">${igHTML()}</div>
  <button class="btn w" data-a="upl">${_("Upload your own icon")}</button><input type="file" id="fup" accept="image/*" hidden>
@@ -391,6 +411,12 @@ function Sh(){
  <div class="wd">${[[1,"Mon"],[2,"Tue"],[3,"Wed"],[4,"Thu"],[5,"Fri"],[6,"Sat"],[0,"Sun"]].map(([n,d])=>`<button class="${S.wd.includes(n)?"on":""}" data-a="wd" data-id="${n}">${_(d)}</button>`).join("")}</div>
  <div class="qr"><span>${_("For the next")}</span><select id="fw" class="in" style="width:auto">${[4,8,12,26].map(w=>`<option value="${w}"${w===8?" selected":""}>${_("{n} weeks",{n:w})}</option>`).join("")}</select></div>
  <button class="btn p w" data-a="ppok">${_("Create practices")}</button>`);
+ else if(sheet==="cats"){
+  const C=allCats();
+  s.innerHTML=ov(`<h2>${_("Categories")}</h2><p class="sub" style="margin:0 0 8px">${_("Change a name to rename. Empty categories are hidden in the list. Deleting keeps the items (without category).")}</p>`+(cmsg?`<p class="sub" role="status" style="color:#c0392b">${esc(cmsg)}</p>`:"")+
+  C.map((k,i)=>`<div class="cr"><input class="in" data-cat="${esc(k)}" value="${esc(_(k))}" maxlength="24" autocomplete="off" aria-label="${_("Category name")}"><button class="${i?"":"off"}" data-a="cmu" data-id="${esc(k)}" aria-label="${_("Move up")}">▲</button><button class="${i<C.length-1?"":"off"}" data-a="cmd" data-id="${esc(k)}" aria-label="${_("Move down")}">▼</button><button class="del" data-a="cdel" data-id="${esc(k)}" aria-label="${_("Remove")}">${cdl===k?_("Delete?"):"✕"}</button></div>`).join("")+
+  `<div class="cr" style="margin-top:12px"><input id="ncat" class="in" placeholder="${_("New category")}" maxlength="24" autocomplete="off"><button class="btn p sm" data-a="cadd">${_("Add category")}</button></div>`,_("Close"));
+ }
  else if(sheet==="acc")s.innerHTML=ov(accHTML(),_("Close"));
  else s.innerHTML="";
 }
@@ -409,6 +435,13 @@ function act(a,id){
  case"add":sheet="add";eid=null;ico="🎒";fq=1;fc="";sg=new Set();break;
  case"ei":{const x=it();sheet="add";eid=x.id;ico=x.i;fq=x.q;fc=x.c||"";break}
  case"up":case"dn":{const x=it(),c=x.c||"",pe=l.items.filter(z=>(z.c||"")===c),o=pe[pe.indexOf(x)+(a==="up"?-1:1)];if(o){const i=l.items.indexOf(x),j=l.items.indexOf(o);l.items[i]=o;l.items[j]=x}break}
+ case"cats":sheet="cats";cdl="";cmsg="";break;
+ case"cup":case"cdn":{const vs=grp(l.items).map(g=>g[0]).filter(Boolean),o=vs[vs.indexOf(id)+(a==="cup"?-1:1)];if(o){S.cats=S.cats.filter(z=>z!==id);S.cats.splice(S.cats.indexOf(o)+(a==="cdn"?1:0),0,id)}break}
+ case"cmu":case"cmd":{const i=S.cats.indexOf(id),j=i+(a==="cmu"?-1:1);if(i>=0&&j>=0&&j<S.cats.length)[S.cats[i],S.cats[j]]=[S.cats[j],S.cats[i]];cdl="";cmsg="";break}
+ case"cdel":{if(cdl!==id){cdl=id;break}
+  const kill=L=>L.forEach(x=>{if(x.c===id)x.c=""});kill(S.tpl.game);kill(S.tpl.practice);S.lists.forEach(q=>kill(q.items));
+  S.cats=S.cats.filter(z=>z!==id);for(const k in S.cmap)if(S.cmap[k]===id)S.cmap[k]="";S.cmap[id]="";cdl="";break}
+ case"cadd":{const v=$("ncat").value.trim();if(!v){$("ncat").focus();return}const n=S.cats.length;addCat(v);cmsg=S.cats.length===n?_("That name already exists."):"";break}
  case"sg":{sg.has(id)?sg.delete(id):sg.add(id);document.querySelectorAll(".sgs button").forEach(b=>b.classList.toggle("on",sg.has(b.dataset.id)));updAdd();return}
  case"ses":sheet="ses";sm="edit";sd=l.dt;sn=l.note;break;
  case"new":sheet="ses";sm="new";sd=today();sn="";break;
@@ -419,15 +452,16 @@ function act(a,id){
  case"ico":ico=id;document.querySelectorAll(".ig button").forEach(b=>b.classList.toggle("on",b.dataset.id===id));return;
  case"sqp":case"sqm":fq=Math.max(1,Math.min(99,fq+(a==="sqp"?1:-1)));$("fq").textContent=fq;return;
  case"wd":{const n=+id;S.wd=S.wd.includes(n)?S.wd.filter(x=>x!==n):S.wd.concat(n);document.querySelectorAll(".wd button").forEach(b=>b.classList.toggle("on",S.wd.includes(+b.dataset.id)));save();return}
- case"addok":{let nm=$("fn").value.trim();const cat=rdCat();
+ case"addok":{let nm=$("fn").value.trim();
   if(!eid){
    const pk=SUG.filter(x=>sg.has(x[0])),df=$("fd").checked,has=(L,n)=>L.some(z=>canon(z.n)===canon(n));
    if(!nm&&!pk.length){$("fn").focus();return}
-   pk.forEach(([n,i,c])=>{if(!has(l.items,n))l.items.push(mkI(n,i,1,c));if(df&&!has(S.tpl[S.tab],n))S.tpl[S.tab].push({n,i,q:1,c})});
-   if(nm){l.items.push(mkI(nm,ico,fq,cat));if(df)S.tpl[S.tab].push({n:nm,i:ico,q:fq,c:cat})}
+   const cat=catOf();
+   pk.forEach(([n,i,c])=>{const k=cat===null?addCat(rc(c)):cat;if(!has(l.items,n))l.items.push(mkI(n,i,1,k));if(df&&!has(S.tpl[S.tab],n))S.tpl[S.tab].push({n,i,q:1,c:k})});
+   if(nm){const k=cat===null?"":cat;l.items.push(mkI(nm,ico,fq,k));if(df)S.tpl[S.tab].push({n:nm,i:ico,q:fq,c:k})}
    sheet=null;break}
   if(!nm){$("fn").focus();return}
-  {const y=it2(eid);if(tn(y.n)===nm)nm=y.n;const old=y.n.toLowerCase();
+  {const cat=catOf()||"",y=it2(eid);if(tn(y.n)===nm)nm=y.n;const old=y.n.toLowerCase();
    if($("fd").checked){const ap=L=>L.forEach(z=>{if(z.n.toLowerCase()===old){z.n=nm;z.i=ico;z.c=cat}});ap(S.tpl[S.tab]);S.lists.forEach(q=>{if(q.type===S.tab&&q.dt>=today())ap(q.items)})}
    y.n=nm;y.i=ico;y.q=fq;y.c=cat;eid=null;sheet=null;break}}
  case"ppok":{const w=+$("fw").value,have=new Set(S.lists.filter(z=>z.type==="practice").map(z=>z.dt));
@@ -459,8 +493,10 @@ function act(a,id){
  save();R();
 }
 document.addEventListener("click",e=>{const t=e.target.closest("[data-a]");if(t)act(t.dataset.a,t.dataset.id)});
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.id==="ncat"){e.preventDefault();act("cadd")}});
 document.addEventListener("input",e=>{if(e.target.id==="fn")updAdd()});
 document.addEventListener("change",e=>{
+ if(e.target.dataset&&e.target.dataset.cat!==undefined){renameCat(e.target.dataset.cat,e.target.value);return}
  if(e.target.id==="fcs"){fc=e.target.value;$("fcn").hidden=fc!=="__new";if(fc==="__new")$("fcn").focus();return}
  if(e.target.id==="fup"&&e.target.files[0]){upIcon(e.target.files[0]);e.target.value="";return}
  if(e.target.id!=="fi"||!e.target.files[0])return;

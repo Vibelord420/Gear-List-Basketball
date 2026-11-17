@@ -1,3 +1,5 @@
+TVC Blues Team-App  (GitHub-Projekt: TVC-Blues-Team-App)
+
 TVC TEAM-APP (After-Action Review + Gear-Checkliste)
 GitHub Pages + Firebase (beides kostenlos). Dein Firebase-Projekt und deine config.js bleiben unverändert.
 
@@ -124,3 +126,22 @@ darunter "KI-Zusammenfassung" > "Zusammenfassen". Vorschläge mit "Übernehmen" 
 - Modellname: Feld "KI-Modell" (Standard gemini-3.5-flash-lite). Wenn Google ein Modell abschaltet,
   dort den aktuellen Namen aus der Firebase-Dokumentation eintragen. Gilt dann für alle Trainer.
 - Das KI-Modul (Firebase 12.5.0) wird erst beim Klick geladen. Der Rest der App bleibt auf 10.12.2.
+
+L) SPRACHE UND ZENTRALE TERMINE
+- Die Sprache wird nur noch oben neben "Abmelden" umgestellt (DE/EN) und gilt für die ganze App.
+- Gear-Liste und After-Action Review nutzen dieselben Termine aus dem Terminplan der Trainer.
+  Kommende Team-Termine erscheinen automatisch in der Gear-Liste, befüllt aus der Standardliste.
+  Verschiebt ein Trainer einen Termin, wandern Datum und Uhrzeit mit; Häkchen bleiben erhalten.
+  Abgesagte oder vom Spieler ausgeblendete Termine verschwinden. Eine eigene Uhrzeit des Spielers wird übernommen.
+- Team-Termine lassen sich in der Gear-Liste nicht löschen (nur im Terminplan der Trainer).
+- Selbst angelegte Termine (+ Spiel, Trainings planen) sind privat und nur im eigenen Konto gespeichert.
+- Melden sich mehrere Personen nacheinander auf demselben Gerät an, bekommt ein neues Konto eine frische
+  Liste statt der Daten der vorherigen Person.
+
+M) NAME UND GITHUB-PROJEKT
+- App-Name: "TVC Blues Team-App" (Browser-Tab, Startseite, installierte App). Kurzname auf dem Homescreen: "TVC Blues".
+- Die Adresse ist jetzt https://<dein-github-name>.github.io/TVC-Blues-Team-App/
+  Alte Links und Lesezeichen auf den früheren Projektnamen leiten bei GitHub Pages NICHT weiter.
+- Wer die App auf dem Handy installiert hat: bitte einmal unter der neuen Adresse öffnen und neu installieren.
+- Firebase: Die Domain (<dein-github-name>.github.io) bleibt gleich, unter Authentication > Settings >
+  Authorized domains ist nichts zu ändern. Konten und Daten bleiben erhalten.

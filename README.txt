@@ -145,3 +145,7 @@ M) NAME UND GITHUB-PROJEKT
 - Wer die App auf dem Handy installiert hat: bitte einmal unter der neuen Adresse öffnen und neu installieren.
 - Firebase: Die Domain (<dein-github-name>.github.io) bleibt gleich, unter Authentication > Settings >
   Authorized domains ist nichts zu ändern. Konten und Daten bleiben erhalten.
+
+N. Gear-Checkliste: editierbare Überschrift
+   Über der Liste steht im AAR-Stil "Spiel · Sa., 14.11.2026 · Gegner" bzw. "Training · Di., 17.11.2026 · Titel".
+   Antippen (✎) öffnet Datum/Notiz zum Bearbeiten. Änderungen betreffen nur die eigene Liste, nicht den zentralen Termin.

@@ -80,6 +80,7 @@ h3.cat{display:flex;justify-content:space-between;align-items:baseline}
 h3.cat .mv button{color:var(--ink)}
 .sgs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}.sgs button{padding:8px 12px;border-radius:999px;border:2px solid var(--ln);background:var(--bg);font-size:15px;font-weight:600}.sgs .on{border-color:var(--ac);background:var(--ac);color:var(--acx)}
 .tl{display:block;width:100%;text-align:left;background:none;border:0;padding:8px 0;color:var(--mut);font-size:15px}
+.tl.gh{color:var(--tx,inherit);font-size:17px;font-weight:700;line-height:1.3}
 
 .A .wrap{max-width:640px;margin:0 auto}
 .A .brand{display:flex;align-items:center;gap:12px;margin-bottom:12px;font-family:"Barlow Condensed",Impact,sans-serif;font-weight:600;font-size:20px;opacity:.95}
@@ -338,6 +339,9 @@ function accHTML(){
 }
 const cur=()=>S.lists.find(l=>l.id===S.act[S.tab]);
 const ds=dt=>new Date(dt+"T12:00:00").toLocaleDateString(lang==="de"?"de-DE":undefined,{weekday:"short",day:"numeric",month:"short",year:"numeric"});
+const gh=l=>{let d=l.dt;try{d=new Date(l.dt+"T12:00:00").toLocaleDateString(lang==="de"?"de-DE":"en-GB",{weekday:"short",day:"2-digit",month:"2-digit",year:"numeric"})}catch(e){}
+ const t=(l.note||"").replace(/^\d{1,2}:\d{2}\s*·\s*/,"").replace(/^vs\.\s+/i,"");
+ return [_(l.type==="game"?"Game":"Practice"),d,t].filter(Boolean).join(" · ")};
 const icn=i=>{if(i&&i.startsWith("img:")){const d=(S.icons||{})[i.slice(4)];return d?`<img src="${d}" alt="">`:"🎒"}return i};
 const igHTML=()=>Object.keys(S.icons||{}).map(k=>"img:"+k).concat(PICK).map(e=>`<button class="${e===ico?"on":""}" data-a="ico" data-id="${e}">${icn(e)}</button>`).join("");
 function prune(){
@@ -396,7 +400,7 @@ function R(){
   const l=cur(),n=l.items.filter(x=>x.d).length,t=l.items.length;
   h=`<div class="top"><h1>${_("Gear check")}</h1><div><button class="btn sm" data-a="edit">${edit?_("Done"):_("Edit")}</button></div></div>
   <div class="seg">${["game","practice"].map(k=>`<button class="${S.tab===k?"on":""}" data-a="tab" data-id="${k}">${tl(k)}</button>`).join("")}</div>
-  <button class="tl" data-a="ses">📅 ${ds(l.dt)}${l.note?" – "+esc(l.note):""} ✎</button>
+  <button class="tl gh" data-a="ses">${esc(gh(l))} ✎</button>
   <div class="bar"><i class="${t&&n===t?"ok":""}" style="width:${t?n/t*100:0}%"></i></div>
   <p class="sub">${t&&n===t?_("All packed. Ready to go."):_("{n} of {t} packed",{n,t})}</p>${edit?`<p class="sub">${_("Tap an item to rename it or change its icon.")}</p>`:""}`+
   itemsHTML(l)+

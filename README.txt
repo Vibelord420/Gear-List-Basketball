@@ -149,3 +149,12 @@ M) NAME UND GITHUB-PROJEKT
 N. Gear-Checkliste: editierbare Überschrift
    Über der Liste steht im AAR-Stil "Spiel · Sa., 14.11.2026 · Gegner" bzw. "Training · Di., 17.11.2026 · Titel".
    Antippen (✎) öffnet Datum/Notiz zum Bearbeiten. Änderungen betreffen nur die eigene Liste, nicht den zentralen Termin.
+
+O. Anmeldung
+   Angemeldet wird ausschließlich mit E-Mail-Adresse und Passwort. Der Benutzername ist nur Anzeigename.
+   (Login per Benutzername ist ohne Server nicht möglich, ohne E-Mails öffentlich abrufbar zu machen.)
+
+P. Passwortlänge
+   Neue Passwörter brauchen mindestens 8 Zeichen (Prüfung in der App bei der Registrierung).
+   Bestehende kürzere Passwörter funktionieren weiter. Für eine serverseitige Durchsetzung in der
+   Firebase-Konsole unter Authentication → Einstellungen die Passwortrichtlinie aktivieren (Mindestlänge 8).

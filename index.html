@@ -131,6 +131,7 @@ h3.cat .mv button{color:var(--ink)}
 .A .fbn{font-weight:700;margin-bottom:4px}
 .A .ftxt{white-space:pre-wrap;overflow-wrap:anywhere;margin:2px 0 6px}
 .A #pMine textarea{background:var(--card)}
+.A .st{display:flex;justify-content:space-between;gap:12px;padding:4px 0;border-bottom:1px solid var(--line);font-size:15px}.A .st strong{text-align:right;overflow-wrap:anywhere}.A .st span{color:var(--muted)}
 .A .who2{font-weight:700;font-size:13px;letter-spacing:.04em;text-transform:uppercase;margin:12px 0 0;color:var(--blue)}
 .A .who2.tm{color:var(--muted)}
 .A #pMine select{background:var(--card)}
@@ -751,11 +752,83 @@ function flushMine(then){
   if(mineDirty&&online()&&acur&&acur.id&&!Q('#aarApp').hidden&&tab==='mine'){mAct('save').then(function(ok){if(ok!==false)then()})}
   else then();
 }
+var AIV='https://www.gstatic.com/firebasejs/12.5.0/',aiMod=null,aiModel='gemini-3.5-flash-lite',aiCfg=false,aiRes={},aiBusy=false;
+var STOPW='aber alle allem allen aller alles also andere anderen auch beim bereits besser bisschen dabei dadurch dafür damit danach dann dass davon dazu deren diese diesem diesen dieser dieses doch dort durch eine einem einen einer eines einfach etwas euch falls fast ganz gegen genau gibt habe haben hatte hatten hier immer jede jedem jeden jeder jetzt kann kein keine keinen können konnte konnten mehr meine meinem meinen mich nach nicht nichts noch oder ohne schon sehr sein seine sich sind soll sollte sollten sondern über uns unser unsere unter viel viele vom wann waren weil wenig wenn werden wieder wird wurde wurden zwischen muss müssen machen macht gemacht wollen wollte haben wurde team spiel training spieler'.split(' ');
+function tmText(x){var t=[];if(x.ver===2){FK.forEach(function(f){if(x.team&&x.team[f[0]])t.push(x.team[f[0]])});if(x.happened)t.push(x.happened);(x.entries||[]).forEach(function(e){if(e.desc)t.push(e.desc);if(e.stat)t.push(e.stat)})}else{['happened','why','worked','fix'].forEach(function(k){if(x[k])t.push(x[k])})}return t.join(' ')}
+function fbStats(box,mine){
+  var n=mine.length,v2=mine.filter(function(x){return x.ver===2}),c=el('div','fb'),row=function(a,b){var r=el('div','st');r.appendChild(el('span',null,a));r.appendChild(el('strong',null,b));c.appendChild(r)};
+  c.appendChild(el('div','fbn','Auswertung'));
+  var nm=mine.filter(function(x){return x.uid}).length;
+  row('Rückmeldungen',n+' ('+nm+' mit Namen, '+(n-nm)+' anonym)');
+  row('Mit persönlichen Einträgen',v2.filter(function(x){return x.me}).length+' von '+n);
+  FK.forEach(function(f){row(f[1]+' (Team)',v2.filter(function(x){return x.team&&x.team[f[0]]}).length+' von '+n)});
+  var es=[];v2.forEach(function(x){(x.entries||[]).forEach(function(e){es.push(e)})});
+  if(es.length)row('Einträge zu „Was ist passiert“',es.length+' ('+es.filter(function(e){return e.kind==='clip'||!e.kind}).length+' Video, '+es.filter(function(e){return e.kind==='stat'}).length+' Statistik, '+es.filter(function(e){return e.kind==='note'}).length+' Beschreibung)');
+  var pv=v2.filter(function(x){return x.me&&x.me.prev});
+  if(pv.length)row('Frühere Verbesserung umgesetzt',pv.filter(function(x){return x.me.prev.done}).length+' von '+pv.length);
+  var df={};mine.forEach(function(x){var seen={};tmText(x).toLowerCase().split(/[^a-zäöüß]+/).forEach(function(w){if(w.length<5||STOPW.indexOf(w)>=0||seen[w])return;seen[w]=1;df[w]=(df[w]||0)+1})});
+  var top=Object.keys(df).filter(function(w){return df[w]>=2}).sort(function(a,b){return df[b]-df[a]||(a<b?-1:1)}).slice(0,8);
+  if(top.length)row('Häufige Begriffe (in mehreren Rückmeldungen)',top.map(function(w){return w+' ('+df[w]+')'}).join(', '));
+  box.appendChild(c);
+}
+function aiPrompt(mine){
+  var g=T[acur.type].vid,L=[];
+  mine.forEach(function(x,i){
+    var p=['Rückmeldung '+(i+1)+':'];
+    if(x.ver===2){
+      var tm=x.team||{};FK.forEach(function(f){if(tm[f[0]])p.push('- '+f[1]+': '+tm[f[0]])});
+      if(x.happened)p.push('- Was ist passiert: '+x.happened);
+      (x.entries||[]).forEach(function(e){var b=[];if(e.kind==='stat'&&e.stat)b.push('Statistik: '+e.stat);if(e.time)b.push('Video '+e.time);if(e.desc)b.push(e.desc);if(b.length)p.push('- Beobachtung: '+b.join(' | '))});
+    }else{if(x.happened)p.push('- Was ist passiert: '+x.happened);if(x.worked)p.push('- Was hat funktioniert: '+x.worked);if(x.why)p.push('- Was kann verbessert werden: '+x.why);if(x.fix)p.push('- Verbesserungsvorschlag: '+x.fix)}
+    if(p.length>1)L.push(p.join('\n'));
+  });
+  return 'Du hilfst dem Trainerteam einer Basketballmannschaft bei der Auswertung eines '+(g?'Spiels':'Trainings')+' (After-Action Review). Unten stehen anonyme Rückmeldungen der Spieler zum Team. Fasse sie sachlich und knapp zusammen, ohne Schuldzuweisung und ohne etwas zu erfinden. Nenne, wie viele Rückmeldungen einen Punkt stützen, wenn es mehrere sind. Antworte auf '+(lang==='de'?'Deutsch':'Englisch')+' und nur als JSON-Objekt mit genau diesen Schlüsseln (leerer Text, wenn es nichts gibt): "summary" (2 bis 4 Sätze Gesamtbild), "focus" (was das Team erreichen wollte), "happened" (wichtigste Beobachtungen), "worked" (was funktioniert hat), "why" (was das Team verbessern kann), "fix" (ein konkreter Vorschlag fürs Team), "owner" (vorgeschlagene verantwortliche Person oder leer), "cue" (ein kurzes Stichwort).\n\n'+L.join('\n\n');
+}
+async function aiRun(mine){
+  if(!aiMod){
+    var A=await import(AIV+'firebase-app.js'),G=await import(AIV+'firebase-ai.js'),app=A.initializeApp(window.FIREBASE_CONFIG,'tvc-ai');
+    if(window.FIREBASE_APPCHECK_KEY){var C=await import(AIV+'firebase-app-check.js');C.initializeAppCheck(app,{provider:new C.ReCaptchaV3Provider(window.FIREBASE_APPCHECK_KEY),isTokenAutoRefreshEnabled:true})}
+    aiMod={G:G,ai:G.getAI(app,{backend:new G.GoogleAIBackend()})};
+  }
+  var m=aiMod.G.getGenerativeModel(aiMod.ai,{model:aiModel,generationConfig:{responseMimeType:'application/json',temperature:0.2}});
+  var r=await m.generateContent(aiPrompt(mine)),t=r.response.text(),o=null;
+  try{o=JSON.parse(t.replace(/^```(?:json)?\s*|\s*```$/g,''))}catch(e){o=null}
+  if(!o||typeof o!=='object'||Array.isArray(o))o={summary:String(t||'').slice(0,4000)};
+  return o;
+}
+function fbAi(box,mine){
+  var c=el('div','fb'),id=acur.id;c.id='aiBox';
+  c.appendChild(el('div','fbn','KI-Zusammenfassung'));
+  c.appendChild(el('div','done','Gesendet werden nur die Teameinträge, ohne Namen, ohne persönliche Einträge und ohne Bilder. Die Texte gehen an Google (Gemini). Das Ergebnis ist ein Vorschlag: bitte prüfen, bevor du etwas übernimmst.'));
+  var out=el('div');out.id='aiOut';
+  var show=function(){
+    out.textContent='';var o=aiRes[id];if(!o)return;
+    var A=[['summary','Gesamtbild',null],['focus','Gesetzter Fokus','focus'],['happened','Was ist passiert','happened'],['worked','Was hat funktioniert','worked'],['why','Was kann das Team verbessern','why'],['fix','Verbesserungsvorschlag','fix'],['owner','Verantwortlich','owner'],['cue','Stichwort','cue']];
+    A.forEach(function(a){var t=o[a[0]];if(typeof t!=='string'||!t.trim())return;out.appendChild(el('div','lbl',a[1]));out.appendChild(el('div','ftxt',t.trim()));
+      if(a[2]){var b=el('button','btn ghost sm','Übernehmen');b.onclick=function(){adopt(a[2],t.trim())};out.appendChild(b)}});
+    if(!out.firstChild)out.appendChild(el('div','ftxt','Die KI hat keinen verwertbaren Text geliefert.'));
+  };
+  var msg=el('div','done','');msg.setAttribute('role','status');
+  var b=el('button','btn',aiRes[id]?'Neu zusammenfassen':'Zusammenfassen');b.style.margin='8px 0';
+  b.onclick=async function(){
+    if(aiBusy)return;aiBusy=true;b.disabled=true;msg.textContent='Die KI fasst zusammen ...';
+    try{aiRes[id]=await aiRun(mine);msg.textContent='';b.textContent='Neu zusammenfassen';show()}
+    catch(e){msg.textContent='Die Zusammenfassung hat nicht geklappt. Prüfe, ob „AI Logic“ in der Firebase-Konsole eingerichtet ist und der Modellname stimmt. Meldung: '+String(e&&e.message||e).slice(0,200)}
+    aiBusy=false;b.disabled=false;
+  };
+  c.appendChild(b);c.appendChild(msg);c.appendChild(out);
+  var ml=el('label','lbl','KI-Modell');var mi=document.createElement('input');mi.type='text';mi.maxLength=60;mi.value=aiModel;mi.setAttribute('aria-label','KI-Modell');
+  mi.onchange=async function(){var v=mi.value.trim();if(!v){mi.value=aiModel;return}aiModel=v;try{await cl.fb.F.setDoc(cl.fb.F.doc(cl.fb.db,'config','ai'),{model:v},{merge:true})}catch(e){}};
+  c.appendChild(ml);c.appendChild(mi);
+  box.appendChild(c);show();
+  if(!aiCfg){aiCfg=true;cl.fb.F.getDoc(cl.fb.F.doc(cl.fb.db,'config','ai')).then(function(d){if(d.exists()&&d.data().model){aiModel=d.data().model;var f=Q('#aiBox input');if(f)f.value=aiModel}}).catch(function(){})}
+}
 var FK=[['focus','Gesetzter Fokus','focus'],['worked','Was hat funktioniert','worked'],['improve','Was kann verbessert werden','why'],['fix','Verbesserungsvorschlag','fix'],['owner','Verantwortlich','owner'],['cue','Stichwort','cue']];
 async function renderFb(){
   var box=Q('#fbl');box.textContent='';Q('#fbm').textContent='';
   var mine=subs.filter(function(x){return x.termin===acur.id}).sort(function(a,b){return a.ts-b.ts});
   Q('#fbm').textContent=mine.length?mine.length+' Rückmeldung(en). Mit „Übernehmen“ fügst du einen Punkt in das Team-Review ein. Danach unter „Team-Review“ speichern.':'Noch keine Rückmeldungen von Spielern.';
+  if(mine.length){fbStats(box,mine);fbAi(box,mine)}
   mine.forEach(function(x){
     var c=el('div','fb');c.appendChild(el('div','fbn',x.uid?(x.name||'Spieler'):'Anonym'));
     if(x.ver===2){
@@ -943,6 +1016,20 @@ Q('#chips').onclick=function(e){var b=e.target.closest('button');if(!b)return;fl
 
 /* ===== i18n (Quelltexte sind Deutsch, Englisch wird per Wörterbuch eingesetzt) ===== */
 var EN={
+"Auswertung":"Evaluation",
+"Rückmeldungen":"Feedback",
+"Mit persönlichen Einträgen":"With personal entries",
+"Einträge zu „Was ist passiert“":"Entries for “What happened”",
+"Frühere Verbesserung umgesetzt":"Earlier improvement put into practice",
+"Häufige Begriffe (in mehreren Rückmeldungen)":"Frequent terms (in several feedback items)",
+"KI-Zusammenfassung":"AI summary",
+"Gesendet werden nur die Teameinträge, ohne Namen, ohne persönliche Einträge und ohne Bilder. Die Texte gehen an Google (Gemini). Das Ergebnis ist ein Vorschlag: bitte prüfen, bevor du etwas übernimmst.":"Only team entries are sent, without names, personal entries or images. The texts go to Google (Gemini). The result is a suggestion: please check it before you adopt anything.",
+"Zusammenfassen":"Summarise",
+"Neu zusammenfassen":"Summarise again",
+"Die KI fasst zusammen ...":"The AI is summarising ...",
+"Gesamtbild":"Overall picture",
+"KI-Modell":"AI model",
+"Die KI hat keinen verwertbaren Text geliefert.":"The AI did not return usable text.",
 "1. Gesetzter Fokus":"1. Focus set",
 "Gesetzter Fokus":"Focus set",
 "Was kann das Team verbessern? Keine Schuldzuweisung.":"What can the team improve? No blame.",
@@ -1128,6 +1215,10 @@ var EN={
 "Beobachtungen und Zahlen statt Meinungen.":"Observations and numbers instead of opinions.","Nach 6 Minuten ist Schluss. Eine Verbesserung schlägt fünf.":"Stop after 6 minutes. One improvement beats five."
 };
 var RX=[
+[/^(\d+) von (\d+)$/,function(m){return m[1]+' of '+m[2]}],
+[/^(\d+) \((\d+) mit Namen, (\d+) anonym\)$/,function(m){return m[1]+' ('+m[2]+' with name, '+m[3]+' anonymous)'}],
+[/^(\d+) \((\d+) Video, (\d+) Statistik, (\d+) Beschreibung\)$/,function(m){return m[1]+' ('+m[2]+' video, '+m[3]+' statistic, '+m[4]+' description)'}],
+[/^Die Zusammenfassung hat nicht geklappt\. .* Meldung: (.*)$/,function(m){return 'The summary did not work. Check that “AI Logic” is set up in the Firebase console and that the model name is correct. Message: '+m[1]}],
 [/^(Zurückgezogen\. )?(Ungespeicherte Änderungen\.|Zwischengespeichert am (.+)\.|Abgeschickt am (.+) \((anonym|mit Namen), (mit persönlichen Einträgen|nur Teameinträge)\)\.)?$/,function(m){var o=m[1]?'Withdrawn. ':'';if(m[2]==='Ungespeicherte Änderungen.')return o+'Unsaved changes.';if(m[3])return o+'Saved as draft on '+m[3]+'.';if(m[4])return o+'Sent on '+m[4]+' ('+(m[5]==='anonym'?'anonymous':'with name')+', '+(m[6]==='nur Teameinträge'?'team entries only':'including personal entries')+').';return o.trim()}],
 [/^(.+) · (Spiel|Training): (.*) · (meine Verbesserung \+ Team-Review|meine Verbesserung|Team-Review)$/,function(m){return m[1]+' · '+(m[2]==='Spiel'?'Game':'Training')+': '+m[3]+' · '+({'meine Verbesserung + Team-Review':'my improvement + team review','meine Verbesserung':'my improvement','Team-Review':'team review'}[m[4]])}],
 [/^(Spiel|Training): (.+)$/,function(m){return (m[1]==='Spiel'?'Game':'Training')+': '+m[2]}],

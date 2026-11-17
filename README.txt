@@ -92,3 +92,35 @@ I) GEAR-LISTE: VORSCHLÄGE, KATEGORIEN, REIHENFOLGE
   Kategorien gelten für alle Listen (Spiel und Training) und werden mit dem Konto synchronisiert.
 - Reihenfolge: "Bearbeiten" tippen, dann mit ▲ ▼ verschieben (innerhalb der Kategorie).
   "Als Standardliste speichern" übernimmt Reihenfolge und Kategorien für neue Listen.
+
+J) AFTER-ACTION REVIEW: TRAINER- UND SPIELERVERSION
+- Trainer sehen wie bisher das Team-Review mit Zeitstrahl, Vorbereitung und Regeln, dazu "Rückmeldungen".
+- Spieler wählen einen Termin aus der Liste (von den Trainern angelegt) und schreiben "Mein Review":
+  ohne Zeitstrahl, Vorbereitung und Regeln, mit Feldern "Für mich" und "Für die Mannschaft".
+- "Zwischenspeichern" legt einen privaten Entwurf im eigenen Konto ab. "Abschicken" sendet an die Trainer,
+  wahlweise nur die Teameinträge oder zusätzlich die persönlichen Einträge, mit Namen oder anonym.
+  Danach sind "Erneut senden" und "Zurückziehen" möglich.
+- Video-Link und Einträge unter "2. Was ist passiert" zählen zu den Teameinträgen.
+- "Diese Verbesserung ins nächste Training oder Spiel übernehmen": Im nächsten Review erscheint oben
+  "Aus früheren Terminen prüfen". Dort wählt der Spieler den früheren Termin. Angezeigt werden die eigene
+  Verbesserung und die Teamverbesserung aus dem freigegebenen Team-Review der Trainer.
+- Trainer: Unter "Rückmeldungen" stehen Team- und persönliche Einträge getrennt. "Übernehmen" fügt einen
+  Punkt ins Team-Review ein. Ältere Abgaben im bisherigen Format bleiben lesbar.
+- Die Firestore-Regeln müssen dafür nicht geändert werden.
+
+K) KI-ZUSAMMENFASSUNG DER RÜCKMELDUNGEN (GEMINI ÜBER FIREBASE)
+Einmalig einrichten:
+1. Firebase-Konsole > Projekt > "AI Logic" (unter KI-Dienste) > "Jetzt starten".
+2. Als Anbieter die "Gemini Developer API" wählen (kostenloses Kontingent). Den Schritten folgen.
+3. Für das kostenlose Kontingent muss das Projekt im Spark-Tarif sein (kein verknüpftes Rechnungskonto).
+4. Falls die Konsole dabei "App Check" erzwingt: entweder die Erzwingung für AI Logic ausschalten oder
+   reCAPTCHA v3 für die Web-App einrichten und den Website-Schlüssel in config.js ergänzen:
+     window.FIREBASE_APPCHECK_KEY = "DEIN_RECAPTCHA_V3_SCHLUESSEL";
+Benutzen: Als Trainer einen Termin öffnen > "Rückmeldungen". Oben steht die Auswertung (Zahlen, ohne KI),
+darunter "KI-Zusammenfassung" > "Zusammenfassen". Vorschläge mit "Übernehmen" ins Team-Review einfügen.
+- Gesendet werden nur Teameinträge: ohne Namen, ohne persönliche Einträge, ohne Bilder.
+- Die Texte gehen an Google. Im kostenlosen Kontingent darf Google sie nach meinem Stand zur Verbesserung
+  seiner Produkte verwenden. Bitte die aktuellen Bedingungen prüfen und das Team informieren.
+- Modellname: Feld "KI-Modell" (Standard gemini-3.5-flash-lite). Wenn Google ein Modell abschaltet,
+  dort den aktuellen Namen aus der Firebase-Dokumentation eintragen. Gilt dann für alle Trainer.
+- Das KI-Modul (Firebase 12.5.0) wird erst beim Klick geladen. Der Rest der App bleibt auf 10.12.2.

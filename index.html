@@ -114,8 +114,15 @@ h3.cat .mv button{color:var(--ink)}
 .A label.chk input{margin-top:5px;width:18px;height:18px;accent-color:var(--blue);flex:none}
 .A label.f{display:block;font-weight:600;margin:0 0 10px}
 .A input[type=date],.A input[type=text],.A select,.A textarea{width:100%;margin-top:6px;padding:10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit}
-.A textarea{min-height:64px;resize:vertical}
-.A .s textarea{min-height:44px}
+.A textarea{min-height:72px}
+/* Mobile Textfelder */
+textarea,input[type=text],input[type=email],input[type=password],input[type=number],input[type=date],input[type=time],input[type=search],input:not([type]),select{font-size:16px!important;min-height:48px;scroll-margin:90px 0 35vh}
+textarea{line-height:1.45!important;padding:12px!important;border-radius:10px!important;min-height:88px;resize:none;overflow-y:hidden;-webkit-appearance:none;appearance:none}
+.A .s textarea{min-height:56px}
+textarea::placeholder,input::placeholder{color:var(--mut);opacity:.85}
+.tcnt{display:block;text-align:right;font-size:13px;color:var(--mut);margin-top:2px}.tcnt.hi{color:#c0392b;font-weight:600}
+
+.A .s textarea{min-height:56px}
 .A input:focus-visible,.A textarea:focus,.A button:focus-visible{outline:3px solid var(--focus);outline-offset:1px}
 .A .rules{padding-left:18px;margin:8px 0 0}
 .A .rules li{margin:4px 0}
@@ -608,7 +615,7 @@ var pents=[],mineDirty=false,myDr={},ME='Für mich',TM='Für die Mannschaft';
 function mref(){var x=cl.fb;return x.F.doc(x.db,'users',cl.uid,'drafts',acur.id)}
 function ne(e){return e.stat||e.img||e.time||e.link||e.desc}
 function evLabel(t){return (t.type==='spiel'?'Spiel: ':'Training: ')+(t.title||'ohne Titel')}
-function mta(k,ph,small){return '<textarea data-m="'+k+'" aria-label="'+ph+'" placeholder="'+ph+'" maxlength="2000"'+(small?' style="min-height:44px"':'')+'></textarea>'}
+function mta(k,ph,small){return '<textarea data-m="'+k+'" aria-label="'+ph+'" placeholder="'+ph+'" maxlength="2000"'+(small?' style="min-height:56px"':'')+'></textarea>'}
 function who(t,cls){return '<div class="who2 '+cls+'">'+t+'</div>'}
 function pform(c){
   var g=!!c.vid,q2=g?'Verlinke das Spiel-Video. Halte pro Situation einen Eintrag fest: eine Stelle im Video, eine Statistik oder nur eine Beschreibung.':'Was ist dir aufgefallen? Nur beschreiben, nicht bewerten.';
@@ -950,7 +957,7 @@ function entEd(box,arr,vfn,onchg){
 }
 function renderEnts(){entEd(Q('#ent'),ents,function(){var v=Q('#form [data-f=video]');return v?v.value:''})}
 function sec(col,h,t,body){return '<section style="--c:var('+col+')"><h2>'+h+' <span>'+t+' Min</span></h2>'+body+'</section>'}
-function ta(f,ph,cls){return '<textarea data-f="'+f+'" aria-label="'+ph+'" placeholder="'+ph+'"'+(cls?' style="min-height:44px"':'')+'></textarea>'}
+function ta(f,ph,cls){return '<textarea data-f="'+f+'" aria-label="'+ph+'" placeholder="'+ph+'"'+(cls?' style="min-height:56px"':'')+'></textarea>'}
 function buildForm(c){
   var strip=c.strip.map(function(m,i){return '<div style="flex:'+m+';background:var(--p'+(i+1)+')">'+m+'<small>Min</small></div>'}).join('');
   var prep=c.prep.map(function(p){return '<label class="chk"><input type="checkbox"> '+p+'</label>'}).join('');
@@ -1401,7 +1408,7 @@ function gateView(kind){
     var go=function(id,fn){var e=c.querySelector('#'+id);if(e)e.onclick=fn};
     go('gLogin',doLogin);go('gToReg',function(){gateView('register')});go('gForgot',function(){gateView('reset')});
     go('gReg',doRegister);go('gBack',function(){gateView('login')});go('gReset',doReset);
-    c.querySelectorAll('input').forEach(function(i){i.onkeydown=function(e){if(e.key==='Enter'){var f=kind==='register'?doRegister:kind==='reset'?doReset:doLogin;f()}}});
+    var ins=[].slice.call(c.querySelectorAll('input'));ins.forEach(function(i,k){var last=k===ins.length-1;i.setAttribute('enterkeyhint',last?'go':'next');i.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();if(!last){ins[k+1].focus();return}var f=kind==='register'?doRegister:kind==='reset'?doReset:doLogin;f()}}});
   }
   g.appendChild(c);
 }
@@ -1801,4 +1808,31 @@ setLang(lang);
 
 gateView("load");cinit();
 if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+<script>
+/* Smartphone-freundliche Textfelder: Auto-Höhe, Tastatur-Hinweise, sichtbar beim Tippen, Zeichenzähler */
+(function(){
+ var touch=window.matchMedia&&matchMedia('(pointer:coarse)').matches;
+ function fit(t){if(!t||t.tagName!=='TEXTAREA'||!t.offsetParent)return;var cap=Math.round(innerHeight*.6);t.style.height='auto';var h=t.scrollHeight+2;t.style.height=Math.min(h,cap)+'px';t.style.overflowY=h>cap?'auto':'hidden'}
+ function cnt(t){var m=t.maxLength;if(!(m>0)||t.type==='password')return;var n=t.value.length,c=t.nextElementSibling&&t.nextElementSibling.classList&&t.nextElementSibling.classList.contains('tcnt')?t.nextElementSibling:null;
+  if(n<m*.8){if(c)c.remove();return}
+  if(!c){c=document.createElement('small');c.className='tcnt';t.insertAdjacentElement('afterend',c)}
+  c.textContent=n+' / '+m;c.classList.toggle('hi',n>=m)}
+ function prep(f){if(f._mob)return;f._mob=1;var ty=(f.type||'').toLowerCase();
+  if(f.tagName==='TEXTAREA'){f.setAttribute('autocapitalize','sentences');f.setAttribute('autocorrect','on');f.spellcheck=true;if(!f.hasAttribute('enterkeyhint'))f.setAttribute('enterkeyhint','enter')}
+  else if(ty==='email'){f.setAttribute('inputmode','email');f.setAttribute('autocapitalize','none');f.setAttribute('autocorrect','off');f.spellcheck=false}
+  else if(ty==='password'){f.setAttribute('autocapitalize','none');f.setAttribute('autocorrect','off');f.spellcheck=false}
+  else if(ty==='number'){if(!f.hasAttribute('inputmode'))f.setAttribute('inputmode','numeric')}
+  else if(ty==='url'||/video|link|url/i.test(f.placeholder||'')){f.setAttribute('inputmode','url');f.setAttribute('autocapitalize','none');f.setAttribute('autocorrect','off')}
+  else if(ty==='text'||!ty){if(!f.hasAttribute('autocapitalize'))f.setAttribute('autocapitalize','sentences');if(!f.hasAttribute('enterkeyhint'))f.setAttribute('enterkeyhint','done')}}
+ document.addEventListener('focusin',function(e){var f=e.target;if(!/^(INPUT|TEXTAREA|SELECT)$/.test(f.tagName))return;prep(f);fit(f);
+  if(touch&&f.tagName!=='SELECT')setTimeout(function(){if(document.activeElement===f)f.scrollIntoView({block:'center',behavior:'smooth'})},350)});
+ document.addEventListener('input',function(e){var f=e.target;if(f.tagName==='TEXTAREA')fit(f);if(f.tagName==='TEXTAREA'||f.tagName==='INPUT')cnt(f)});
+ /* Enter in einzeiligen Feldern: Tastatur schließen statt nichts zu tun (Login/Kategorien haben eigene Logik) */
+ document.addEventListener('keydown',function(e){var f=e.target;if(e.key==='Enter'&&touch&&f.tagName==='INPUT'&&f.getAttribute('enterkeyhint')==='done'&&!f.onkeydown&&f.id!=='ncat'&&!f.closest('form'))f.blur()});
+ var q=0;function all(){q=0;document.querySelectorAll('textarea').forEach(fit)}
+ new MutationObserver(function(){if(!q){q=1;requestAnimationFrame(all)}}).observe(document.body,{childList:true,subtree:true});
+ addEventListener('resize',function(){if(!q){q=1;requestAnimationFrame(all)}});
+ window.fitTA=all;
+})();
 </script></body></html>

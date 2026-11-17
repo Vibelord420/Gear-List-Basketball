@@ -158,3 +158,10 @@ P. Passwortlänge
    Neue Passwörter brauchen mindestens 8 Zeichen (Prüfung in der App bei der Registrierung).
    Bestehende kürzere Passwörter funktionieren weiter. Für eine serverseitige Durchsetzung in der
    Firebase-Konsole unter Authentication → Einstellungen die Passwortrichtlinie aktivieren (Mindestlänge 8).
+
+Q. Textfelder auf dem Smartphone
+   Textboxen wachsen beim Schreiben mit (max. 60 % der Bildschirmhöhe, danach scrollbar) und schrumpfen wieder.
+   Schrift 16 px (kein automatisches Hineinzoomen auf dem iPhone), größere Tippflächen (mind. 48 px).
+   Passende Tastatur: E-Mail-Tastatur beim Login, Großschreibung am Satzanfang und Rechtschreibprüfung in Textboxen.
+   Das aktive Feld wird beim Tippen über die Tastatur geschoben. Ab 80 % des Zeichenlimits erscheint ein Zähler.
+   Login: Enter springt ins nächste Feld, erst im letzten Feld wird angemeldet bzw. registriert.

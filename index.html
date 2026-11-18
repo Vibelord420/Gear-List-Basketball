@@ -193,6 +193,7 @@ textarea::placeholder,input::placeholder{color:var(--mut);opacity:.85}
   <div id="pMine" hidden></div>
   <div id="pFb" hidden><div id="fbm" class="note" role="status"></div><div id="fbl"></div></div>
   <div id="pView" hidden></div>
+  <div id="pSum" hidden></div>
   <div id="pTeam">
   <div id="form"></div>
   <div id="msg" role="status"></div>
@@ -597,19 +598,26 @@ function setupTabs(item){
   var tb=Q('#tabs');tb.textContent='';
   var multi=!!(online()&&item.id);tb.hidden=!multi;
   if(multi){
-    var defs=[['mine','Mein Review'],['team','Team-Review']];if(trainer)defs.push(['fb','Rückmeldungen']);
+    var defs=[['mine','Mein Review'],['team','Team-Review']];if(trainer)defs.push(['fb','Rückmeldungen']);defs.push(['sum','Zusammenfassung']);
     defs.forEach(function(d){var b=el('button',null,d[1]);b.dataset.t=d[0];b.onclick=function(){showTab(d[0])};tb.appendChild(b)});
     showTab(trainer?'team':'mine');
   }else showTab('team');
 }
 function showTab(t){
+  if(tab==='sum'&&t!=='sum'&&sumDirty)sumSave(true);
   tab=t;
   document.querySelectorAll('#tabs button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.t===t)});
   var multi=!!(online()&&acur&&acur.id);
-  Q('#pMine').hidden=t!=='mine';Q('#pFb').hidden=t!=='fb';
+  Q('#pMine').hidden=t!=='mine';Q('#pFb').hidden=t!=='fb';Q('#pSum').hidden=t!=='sum';
   Q('#pTeam').hidden=!(t==='team'&&(trainer||!multi));
   Q('#pView').hidden=!(t==='team'&&!trainer&&multi);
-  if(t==='mine')renderMine();if(t==='fb')renderFb();if(t==='team'&&!trainer&&multi)renderView();
+  if(t==='mine')renderMine();if(t==='fb')renderFb();if(t==='sum'){if(trainer)renderSum();else renderSumView()}if(t==='team'&&!trainer&&multi)renderView();
+}
+function evVideo(){if(!acur)return '';var t=termine.find(function(x){return x.id===acur.id});return (t&&t.video)||acur.video||''}
+function vidInfo(box){
+  if(!box)return;box.textContent='';var v=evVideo(),u=v?ytUrl(v):null;
+  if(u){var a=el('a','yl','Spiel-Video öffnen');a.href=u;a.target='_blank';a.rel='noopener noreferrer';box.appendChild(a);box.appendChild(el('p','note','Das Video legen die Trainer fest. Bei „Stelle im Video“ reicht der Zeitpunkt, der Link wird automatisch gebildet. Du kannst auch einen eigenen YouTube-Link zur genauen Stelle eintragen.'))}
+  else box.appendChild(el('p','note','Die Trainer haben noch kein Spiel-Video hinterlegt. Du kannst bei einem Eintrag einen eigenen YouTube-Link zur Stelle eintragen oder nur beschreiben.'));
 }
 var pents=[],mineDirty=false,myDr={},ME='Für mich',TM='Für die Mannschaft';
 function mref(){var x=cl.fb;return x.F.doc(x.db,'users',cl.uid,'drafts',acur.id)}
@@ -618,11 +626,11 @@ function evLabel(t){return (t.type==='spiel'?'Spiel: ':'Training: ')+(t.title||'
 function mta(k,ph,small){return '<textarea data-m="'+k+'" aria-label="'+ph+'" placeholder="'+ph+'" maxlength="2000"'+(small?' style="min-height:56px"':'')+'></textarea>'}
 function who(t,cls){return '<div class="who2 '+cls+'">'+t+'</div>'}
 function pform(c){
-  var g=!!c.vid,q2=g?'Verlinke das Spiel-Video. Halte pro Situation einen Eintrag fest: eine Stelle im Video, eine Statistik oder nur eine Beschreibung.':'Was ist dir aufgefallen? Nur beschreiben, nicht bewerten.';
+  var g=!!c.vid,q2=g?'Halte pro Situation einen Eintrag fest: eine Stelle im Video, eine Statistik oder nur eine Beschreibung.':'Was ist dir aufgefallen? Nur beschreiben, nicht bewerten.';
   return '<p class="note">Deine Einträge sind privat in deinem Konto gespeichert. Die Trainer sehen sie erst, wenn du sie abschickst. Bis dahin kannst du sie zwischenspeichern und weiter bearbeiten.</p>'+
   '<div id="pPrev"></div>'+
   sec('--p1','1. Gesetzter Fokus',1,'<p class="ask">Was wollte ich erreichen?</p>'+mta('focusMe',c.p1)+'<p class="ask">Was wollte das Team erreichen?</p>'+mta('focusTeam',c.p1))+
-  sec('--p2','2. Was ist passiert',c.t2,'<p class="ask">'+q2+'</p>'+(g?'<label class="f">Link zum YouTube-Video<input type="text" data-m="video" placeholder="https://www.youtube.com/watch?v=..." maxlength="300"></label><div id="pEnt"></div><button type="button" class="btn ghost" id="pAddE">+ Eintrag hinzufügen</button>':mta('happened',c.p2)))+
+  sec('--p2','2. Was ist passiert',c.t2,'<p class="ask">'+q2+'</p>'+(g?'<div id="pVid"></div><div id="pEnt"></div><button type="button" class="btn ghost" id="pAddE">+ Eintrag hinzufügen</button>':mta('happened',c.p2)))+
   sec('--p3','3. Warum ist es passiert',c.t3,
     '<p class="ask">Was hat funktioniert und sollten wir behalten?</p>'+who(ME,'me')+mta('workedMe',c.pk)+who(TM,'tm')+mta('workedTeam',c.pk)+
     '<p class="ask">Was kann ich bzw. das Team verbessern? Keine Schuldzuweisung.</p>'+who(ME,'me')+mta('improveMe',c.pw)+who(TM,'tm')+mta('improveTeam',c.pw))+
@@ -676,9 +684,8 @@ async function renderMine(){
   if(T[acur.type].vid){
     pents=(r.entries||[]).map(function(e){return Object.assign(newE(),e)});
     if(!pents.length)pents=[newE()];
-    var vf=function(){var v=Q('#pMine [data-m=video]');return v?v.value:''},draw=function(){entEd(Q('#pEnt'),pents,vf,setDirty)};
-    draw();Q('#pAddE').onclick=function(){pents.push(newE());draw();setDirty()};
-    Q('#pMine [data-m=video]').onchange=function(){(Q('#pEnt')._u||[]).forEach(function(f){f()})};
+    var vf=function(){return evVideo()},draw=function(){entEd(Q('#pEnt'),pents,vf,setDirty)};
+    vidInfo(Q('#pVid'));draw();Q('#pAddE').onclick=function(){pents.push(newE());draw();setDirty()};
   }
   rec=Object.assign({},rec);
   renderPrev(r);mBtns();mStat();
@@ -801,18 +808,51 @@ function fbStats(box,mine){
   if(top.length)row('Häufige Begriffe (in mehreren Rückmeldungen)',top.map(function(w){return w+' ('+df[w]+')'}).join(', '));
   box.appendChild(c);
 }
-function aiPrompt(mine){
-  var g=T[acur.type].vid,L=[];
+var TRK=[['focus','Gesetzter Fokus'],['happened','Was ist passiert'],['worked','Was hat funktioniert'],['why','Was kann das Team verbessern'],['fix','Verbesserungsvorschlag'],['owner','Verantwortlich'],['cue','Stichwort']];
+function teamDoc(){if(!acur)return {};var it=items.find(function(i){return i.id===acur.id});return Object.assign({},it||acur,{video:evVideo()})}
+function teamHas(t){return !!(t&&(TRK.some(function(k){return t[k[0]]})||(t.entries&&t.entries.length)))}
+function entLine(e){var b=[];if(e.kind==='stat'&&e.stat)b.push('Statistik: '+e.stat);if(e.time)b.push('Video '+e.time);if(e.desc)b.push(e.desc);return b.join(' | ')}
+function fbTeam(box){
+  var t=teamDoc(),c=el('div','fb');c.appendChild(el('div','fbn','Team-Review (Trainer)'));
+  c.appendChild(el('div','done',(t.pub==='ja'?'Für alle freigegeben':'Entwurf, nur Trainer sehen es')+'. Gezeigt wird der gespeicherte Stand.'));
+  var vu=t.video?ytUrl(t.video):null;if(vu){var a=el('a','yl','Spiel-Video öffnen');a.href=vu;a.target='_blank';a.rel='noopener noreferrer';c.appendChild(a)}
+  if(!teamHas(t)){c.appendChild(el('div','ftxt','Noch kein Team-Review gespeichert.'));box.appendChild(c);return}
+  TRK.forEach(function(k){
+    if(k[0]==='happened'){(t.entries||[]).forEach(function(e,i){var l=entLine(e);if(l){c.appendChild(el('div','lbl','Was ist passiert · Eintrag '+(i+1)));c.appendChild(el('div','ftxt',l))}})}
+    if(t[k[0]]){c.appendChild(el('div','lbl',k[1]));c.appendChild(el('div','ftxt',t[k[0]]))}
+  });
+  box.appendChild(c);
+}
+function aiData(mine,opt){
+  opt=opt||{};var L=[],t=teamDoc();
+  if(teamHas(t)){var p=['Team-Review der Trainer:'];TRK.forEach(function(k){if(k[0]==='happened')(t.entries||[]).forEach(function(e){var l=entLine(e);if(l)p.push('- Beobachtung: '+l)});if(t[k[0]])p.push('- '+k[1]+': '+t[k[0]])});L.push(p.join('\n'))}
   mine.forEach(function(x,i){
-    var p=['Rückmeldung '+(i+1)+':'];
+    var p=['Rückmeldung Spieler '+(i+1)+':'];
     if(x.ver===2){
-      var tm=x.team||{};FK.forEach(function(f){if(tm[f[0]])p.push('- '+f[1]+': '+tm[f[0]])});
+      var tm=x.team||{};FK.forEach(function(f){if(tm[f[0]])p.push('- '+f[1]+' (Team): '+tm[f[0]])});
       if(x.happened)p.push('- Was ist passiert: '+x.happened);
-      (x.entries||[]).forEach(function(e){var b=[];if(e.kind==='stat'&&e.stat)b.push('Statistik: '+e.stat);if(e.time)b.push('Video '+e.time);if(e.desc)b.push(e.desc);if(b.length)p.push('- Beobachtung: '+b.join(' | '))});
+      (x.entries||[]).forEach(function(e){var l=entLine(e);if(l)p.push('- Beobachtung: '+l)});
+      if(opt.me&&x.me)FK.forEach(function(f){if(x.me[f[0]])p.push('- '+f[1]+' (persönlich): '+x.me[f[0]])});
     }else{if(x.happened)p.push('- Was ist passiert: '+x.happened);if(x.worked)p.push('- Was hat funktioniert: '+x.worked);if(x.why)p.push('- Was kann verbessert werden: '+x.why);if(x.fix)p.push('- Verbesserungsvorschlag: '+x.fix)}
     if(p.length>1)L.push(p.join('\n'));
   });
-  return 'Du hilfst dem Trainerteam einer Basketballmannschaft bei der Auswertung eines '+(g?'Spiels':'Trainings')+' (After-Action Review). Unten stehen anonyme Rückmeldungen der Spieler zum Team. Fasse sie sachlich und knapp zusammen, ohne Schuldzuweisung und ohne etwas zu erfinden. Nenne, wie viele Rückmeldungen einen Punkt stützen, wenn es mehrere sind. Antworte auf '+(lang==='de'?'Deutsch':'Englisch')+' und nur als JSON-Objekt mit genau diesen Schlüsseln (leerer Text, wenn es nichts gibt): "summary" (2 bis 4 Sätze Gesamtbild), "focus" (was das Team erreichen wollte), "happened" (wichtigste Beobachtungen), "worked" (was funktioniert hat), "why" (was das Team verbessern kann), "fix" (ein konkreter Vorschlag fürs Team), "owner" (vorgeschlagene verantwortliche Person oder leer), "cue" (ein kurzes Stichwort).\n\n'+L.join('\n\n');
+  return L.join('\n\n');
+}
+function aiPrompt(mine,opt){
+  var g=T[acur.type].vid;
+  return 'Du hilfst dem Trainerteam einer Basketballmannschaft bei der Auswertung eines '+(g?'Spiels':'Trainings')+' (After-Action Review). Unten stehen das Team-Review der Trainer (falls vorhanden) und die Rückmeldungen der Spieler, ohne Namen. Fasse sie sachlich und knapp zusammen, ohne Schuldzuweisung und ohne etwas zu erfinden. Nenne, wie viele Rückmeldungen einen Punkt stützen, wenn es mehrere sind. Antworte auf '+(lang==='de'?'Deutsch':'Englisch')+' und nur als JSON-Objekt mit genau diesen Schlüsseln (leerer Text, wenn es nichts gibt): "short" (Kurzfassung der wichtigsten Punkte, höchstens 500 Zeichen), "summary" (2 bis 4 Sätze Gesamtbild), "focus" (was das Team erreichen wollte), "happened" (wichtigste Beobachtungen), "worked" (was funktioniert hat), "why" (was das Team verbessern kann), "fix" (ein konkreter Vorschlag fürs Team), "owner" (vorgeschlagene verantwortliche Person oder leer), "cue" (ein kurzes Stichwort).\n\n'+aiData(mine,opt);
+}
+function fbExport(box,mine){
+  var c=el('div','fb');c.appendChild(el('div','fbn','Export für externe KI'));
+  c.appendChild(el('div','done','Für ChatGPT, Claude, Gemini oder eine andere KI: Text kopieren oder herunterladen und dort einfügen. Die Antwort kannst du unter „Zusammenfassung“ einfügen. Namen werden nicht exportiert, Bilder auch nicht. Die Texte gehen an den Anbieter der KI, die du nutzt.'));
+  var cb=document.createElement('input');cb.type='checkbox';var cl3=el('label','chk');cl3.appendChild(cb);cl3.appendChild(document.createTextNode(' '));cl3.appendChild(el('span',null,'Persönliche Einträge der Spieler mitexportieren (ohne Namen)'));c.appendChild(cl3);
+  var txt=function(){return aiPrompt(mine,{me:cb.checked})},msg=el('div','done','');msg.setAttribute('role','status');
+  var r=el('div','row'),b1=el('button','btn','Kopieren'),b2=el('button','btn ghost','Als Datei herunterladen');
+  b1.onclick=async function(){var t=txt();try{await navigator.clipboard.writeText(t);msg.textContent='Kopiert. Jetzt in der KI einfügen.'}catch(e){var ta3=document.createElement('textarea');ta3.value=t;ta3.setAttribute('readonly','');ta3.style.minHeight='160px';c.appendChild(ta3);ta3.select();msg.textContent='Kopieren nicht möglich. Text unten markieren und kopieren.'}};
+  b2.onclick=function(){var t=acur,n='AAR-'+(t.date||'')+'-'+String(t.title||t.type).replace(/[^A-Za-z0-9ÄÖÜäöüß_-]+/g,'-').slice(0,40)+'.txt',bl=new Blob([txt()],{type:'text/plain;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download=n;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);msg.textContent='Datei gespeichert: '+n};
+  r.appendChild(b1);r.appendChild(b2);
+  if(navigator.share){var b3=el('button','btn ghost','Teilen');b3.onclick=function(){navigator.share({title:'After-Action Review',text:txt()}).catch(function(){})};r.appendChild(b3)}
+  c.appendChild(r);c.appendChild(msg);box.appendChild(c);
 }
 async function aiRun(mine){
   if(!aiMod){
@@ -829,14 +869,15 @@ async function aiRun(mine){
 function fbAi(box,mine){
   var c=el('div','fb'),id=acur.id;c.id='aiBox';
   c.appendChild(el('div','fbn','KI-Zusammenfassung'));
-  c.appendChild(el('div','done','Gesendet werden nur die Teameinträge, ohne Namen, ohne persönliche Einträge und ohne Bilder. Die Texte gehen an Google (Gemini). Das Ergebnis ist ein Vorschlag: bitte prüfen, bevor du etwas übernimmst.'));
+  c.appendChild(el('div','done','Gesendet werden das Team-Review und die Teameinträge der Spieler, ohne Namen, ohne persönliche Einträge und ohne Bilder. Die Texte gehen an Google (Gemini). Das Ergebnis ist ein Vorschlag: bitte prüfen, bevor du etwas übernimmst.'));
   var out=el('div');out.id='aiOut';
   var show=function(){
     out.textContent='';var o=aiRes[id];if(!o)return;
-    var A=[['summary','Gesamtbild',null],['focus','Gesetzter Fokus','focus'],['happened','Was ist passiert','happened'],['worked','Was hat funktioniert','worked'],['why','Was kann das Team verbessern','why'],['fix','Verbesserungsvorschlag','fix'],['owner','Verantwortlich','owner'],['cue','Stichwort','cue']];
+    var A=[['short','Kurzfassung',null],['summary','Gesamtbild',null],['focus','Gesetzter Fokus','focus'],['happened','Was ist passiert','happened'],['worked','Was hat funktioniert','worked'],['why','Was kann das Team verbessern','why'],['fix','Verbesserungsvorschlag','fix'],['owner','Verantwortlich','owner'],['cue','Stichwort','cue']];
     A.forEach(function(a){var t=o[a[0]];if(typeof t!=='string'||!t.trim())return;out.appendChild(el('div','lbl',a[1]));out.appendChild(el('div','ftxt',t.trim()));
       if(a[2]){var b=el('button','btn ghost sm','Übernehmen');b.onclick=function(){adopt(a[2],t.trim())};out.appendChild(b)}});
     if(!out.firstChild)out.appendChild(el('div','ftxt','Die KI hat keinen verwertbaren Text geliefert.'));
+    else{var bs=el('button','btn','In „Zusammenfassung“ übernehmen');bs.style.marginTop='10px';bs.onclick=function(){sumPending=o;showTab('sum')};out.appendChild(bs)}
   };
   var msg=el('div','done','');msg.setAttribute('role','status');
   var b=el('button','btn',aiRes[id]?'Neu zusammenfassen':'Zusammenfassen');b.style.margin='8px 0';
@@ -854,24 +895,107 @@ function fbAi(box,mine){
   if(!aiCfg){aiCfg=true;cl.fb.F.getDoc(cl.fb.F.doc(cl.fb.db,'config','ai')).then(function(d){if(d.exists()&&d.data().model){aiModel=d.data().model;var f=Q('#aiBox input');if(f)f.value=aiModel}}).catch(function(){})}
 }
 var FK=[['focus','Gesetzter Fokus','focus'],['worked','Was hat funktioniert','worked'],['improve','Was kann verbessert werden','why'],['fix','Verbesserungsvorschlag','fix'],['owner','Verantwortlich','owner'],['cue','Stichwort','cue']];
+var SK=[['summary','Gesamtbild'],['focus','Gesetzter Fokus'],['happened','Was ist passiert'],['worked','Was hat funktioniert'],['why','Was kann das Team verbessern'],['fix','Verbesserungsvorschlag'],['owner','Verantwortlich'],['cue','Stichwort']],sumDirty=false,sumPending=null,sumRec={};
+function sref(){return cl.fb.F.doc(cl.fb.db,'aarsum',acur.id)}
+function parseAi(t){
+  t=String(t||'').trim();if(!t)return null;var c=t.replace(/^```(?:json)?\s*|\s*```$/g,''),o=null;
+  try{o=JSON.parse(c)}catch(e){var i=c.indexOf('{'),j=c.lastIndexOf('}');if(i>=0&&j>i){try{o=JSON.parse(c.slice(i,j+1))}catch(e2){}}}
+  if(!o||typeof o!=='object'||Array.isArray(o))return {summary:t.slice(0,4000)};
+  return o;
+}
+function sumFill(o){
+  if(!o)return 0;var n=0;
+  [['short']].concat(SK).forEach(function(k){var v=o[k[0]];if(typeof v!=='string'||!v.trim())return;var f=Q('#pSum [data-s='+k[0]+']');if(!f)return;f.value=k[0]==='short'?v.trim().slice(0,500):v.trim();n++});
+  var sh=Q('#pSum [data-s=short]'),sm=Q('#pSum [data-s=summary]');if(sh&&!sh.value&&sm&&sm.value)sh.value=sm.value.slice(0,500);
+  sumCnt();if(n){sumDirty=true;sumStat('Übernommen. Bitte prüfen, anpassen und speichern.')}
+  if(window.fitTA)window.fitTA();return n;
+}
+function sumCnt(){var f=Q('#pSum [data-s=short]'),c=Q('#sumCnt');if(f&&c){c.textContent=f.value.length+' / 500 Zeichen';c.classList.toggle('hi',f.value.length>=500)}}
+function sumStat(pre){var m=Q('#sumMsg');if(!m)return;var t=sumDirty?'Ungespeicherte Änderungen.':sumRec.updated?'Gespeichert am '+stamp(sumRec.updated)+(sumRec.by?' von '+sumRec.by:'')+'.':'';m.textContent=(pre?pre+' ':'')+(pre&&sumDirty?'':t)}
+async function sumSave(quiet){
+  if(!acur||!acur.id)return;var o={updated:Date.now(),by:cl.user||''};
+  document.querySelectorAll('#pSum [data-s]').forEach(function(f){o[f.dataset.s]=f.value.trim()});
+  if(o.short.length>500)o.short=o.short.slice(0,500);
+  try{await cl.fb.F.setDoc(sref(),o);sumRec=o;sumDirty=false;if(!quiet)sumStat()}
+  catch(e){if(!quiet)sumStat(e&&e.code==='permission-denied'?'Kein Schreibrecht: Nur Trainer dürfen die Zusammenfassung bearbeiten.':'Speichern fehlgeschlagen. Bitte erneut versuchen.')}
+}
+async function renderSumView(){
+  var box=Q('#pSum');box.textContent='Lade ...';var r=null;
+  try{var d=await cl.fb.F.getDoc(sref());r=d.exists()?d.data():null}catch(e){r=null}
+  box.textContent='';
+  if(!r||r.pub!=='ja'){box.appendChild(el('p','empty','Die Zusammenfassung ist noch nicht freigegeben.'));return}
+  box.appendChild(el('p','note','Die Trainer fassen hier Team-Review und Rückmeldungen zusammen.'));
+  if(r.short){var ks=el('section');ks.style.setProperty('--c','var(--p1)');ks.appendChild(el('h2',null,'Kurzfassung'));ks.appendChild(el('div','ftxt',r.short));box.appendChild(ks)}
+  var ls=el('section'),n=0;ls.style.setProperty('--c','var(--p3)');ls.appendChild(el('h2',null,'Ausführlich'));
+  SK.forEach(function(k){if(!r[k[0]])return;n++;ls.appendChild(el('div','lbl',k[1]));ls.appendChild(el('div','ftxt',r[k[0]]))});
+  if(n)box.appendChild(ls);
+  if(!r.short&&!n)box.appendChild(el('p','empty','Die Zusammenfassung ist noch leer.'));
+  if(r.updated)box.appendChild(el('p','note','Stand: '+stamp(r.updated)));
+}
+async function renderSum(){
+  var box=Q('#pSum');box.textContent='Lade ...';sumDirty=false;sumRec={};
+  try{var d=await cl.fb.F.getDoc(sref());sumRec=d.exists()?d.data():{}}catch(e){sumRec={}}
+  box.textContent='';var id=acur.id;
+  box.appendChild(el('p','note','Fasst die wichtigsten Punkte aus Team-Review und Spieler-Rückmeldungen zusammen. Nur Trainer bearbeiten diese Seite. Nach der Freigabe sehen alle Spieler die Zusammenfassung. Alle Felder sind frei anpassbar.'));
+  // Füllen
+  var fs=el('section');fs.style.setProperty('--c','var(--muted)');fs.appendChild(el('h2',null,'Automatisch füllen'));
+  var mine=subs.filter(function(x){return x.termin===id}),fm=el('div','done','');fm.setAttribute('role','status');
+  var r1=el('div','row');
+  if(mine.length||teamHas(teamDoc())){
+    if(aiRes[id]){var bu=el('button','btn','Gemini-Ergebnis übernehmen');bu.onclick=function(){sumFill(aiRes[id])};r1.appendChild(bu)}
+    var bg=el('button',aiRes[id]?'btn ghost':'btn',aiRes[id]?'Neu mit Gemini zusammenfassen':'Mit Gemini zusammenfassen');
+    bg.onclick=async function(){if(aiBusy)return;aiBusy=true;bg.disabled=true;fm.textContent='Die KI fasst zusammen ...';
+      try{aiRes[id]=await aiRun(mine);fm.textContent='';sumFill(aiRes[id])}catch(e){fm.textContent='Die Zusammenfassung hat nicht geklappt. Prüfe, ob „AI Logic“ in der Firebase-Konsole eingerichtet ist. Meldung: '+String(e&&e.message||e).slice(0,200)}
+      aiBusy=false;bg.disabled=false};
+    r1.appendChild(bg);
+  }else fm.textContent='Noch keine Rückmeldungen und kein Team-Review. Du kannst die Felder trotzdem selbst ausfüllen.';
+  fs.appendChild(r1);fs.appendChild(fm);
+  var det=el('details');det.appendChild(el('summary',null,'Antwort einer externen KI einfügen'));
+  det.appendChild(el('p','note','Unter „Rückmeldungen“ den Export kopieren, in der KI einfügen und die Antwort hier einfügen. Erkannt wird das JSON-Format aus dem Export. Anderer Text landet im Gesamtbild.'));
+  var ext=document.createElement('textarea');ext.placeholder='Antwort der KI hier einfügen';ext.setAttribute('aria-label','Antwort der KI');det.appendChild(ext);
+  var be=el('button','btn','Einfügen');be.style.marginTop='8px';be.onclick=function(){var o=parseAi(ext.value);if(!o){fm.textContent='Bitte zuerst die Antwort einfügen.';return}if(sumFill(o)){ext.value='';det.open=false;fm.textContent=''}};det.appendChild(be);
+  fs.appendChild(det);box.appendChild(fs);
+  // Kurzfassung
+  var ks=el('section');ks.style.setProperty('--c','var(--p1)');ks.appendChild(el('h2',null,'Kurzfassung'));
+  ks.appendChild(el('p','ask','Die wichtigsten Punkte in höchstens 500 Zeichen, z. B. für die Team-Gruppe.'));
+  var sh=document.createElement('textarea');sh.dataset.s='short';sh.maxLength=500;sh.setAttribute('aria-label','Kurzfassung');sh.placeholder='Kurzfassung';sh.value=sumRec.short||'';ks.appendChild(sh);
+  var cn=el('small','tcnt');cn.id='sumCnt';cn.style.display='block';ks.appendChild(cn);
+  var bc=el('button','btn ghost sm','Kurzfassung kopieren');bc.onclick=async function(){try{await navigator.clipboard.writeText(sh.value);sumStat('Kopiert.')}catch(e){sh.select();sumStat('Bitte markierten Text kopieren.')}};ks.appendChild(bc);
+  box.appendChild(ks);
+  // Ausführlich
+  var ls=el('section');ls.style.setProperty('--c','var(--p3)');ls.appendChild(el('h2',null,'Ausführlich'));
+  SK.forEach(function(k){ls.appendChild(el('p','ask',k[1]));var f=document.createElement('textarea');f.dataset.s=k[0];f.maxLength=4000;f.setAttribute('aria-label',k[1]);f.value=sumRec[k[0]]||'';if(k[0]==='owner'||k[0]==='cue')f.style.minHeight='56px';ls.appendChild(f)});
+  box.appendChild(ls);
+  var ss=el('section');ss.style.setProperty('--c','var(--muted)');
+  var vs=document.createElement('select');vs.dataset.s='pub';[['','Entwurf (nur Trainer)'],['ja','Für alle Spieler freigeben']].forEach(function(o){var op=el('option',null,o[1]);op.value=o[0];vs.appendChild(op)});vs.value=sumRec.pub==='ja'?'ja':'';
+  ss.appendChild(lbl('Sichtbarkeit',vs));box.onchange=function(e){if(e.target===vs){sumDirty=true;sumStat()}};
+  var r2=el('div','row'),bsv=el('button','btn','Speichern');bsv.onclick=function(){sumSave()};r2.appendChild(bsv);ss.appendChild(r2);
+  var mm=el('div','pm');mm.id='sumMsg';mm.setAttribute('role','status');ss.appendChild(mm);box.appendChild(ss);
+  box.oninput=function(e){if(e.target.dataset&&e.target.dataset.s){sumDirty=true;sumStat()}if(e.target===sh)sumCnt()};
+  sumCnt();sumStat();
+  if(sumPending){var o=sumPending;sumPending=null;sumFill(o)}
+}
 async function renderFb(){
   var box=Q('#fbl');box.textContent='';Q('#fbm').textContent='';
   var mine=subs.filter(function(x){return x.termin===acur.id}).sort(function(a,b){return a.ts-b.ts});
-  Q('#fbm').textContent=mine.length?mine.length+' Rückmeldung(en). Mit „Übernehmen“ fügst du einen Punkt in das Team-Review ein. Danach unter „Team-Review“ speichern.':'Noch keine Rückmeldungen von Spielern.';
+  Q('#fbm').textContent=mine.length?mine.length+' Rückmeldung(en) von Spielern. Mit „Übernehmen“ fügst du einen Punkt in das Team-Review ein. Danach unter „Team-Review“ speichern.':'Noch keine Rückmeldungen von Spielern.';
+  fbTeam(box);
   if(mine.length){fbStats(box,mine);fbAi(box,mine)}
+  if(mine.length||teamHas(teamDoc()))fbExport(box,mine);
+  if(mine.length){var hh=el('div','fbn','Rückmeldungen der Spieler');hh.style.margin='18px 0 6px';box.appendChild(hh)}
   mine.forEach(function(x){
     var c=el('div','fb');c.appendChild(el('div','fbn',x.uid?(x.name||'Spieler'):'Anonym'));
     if(x.ver===2){
       c.appendChild(el('div','done',x.me?'Teameinträge und persönliche Einträge':'Nur Teameinträge'));
       var line=function(label,txt,fn){if(!txt)return;c.appendChild(el('div','lbl',label));c.appendChild(el('div','ftxt',txt));if(fn){var b=el('button','btn ghost sm','Übernehmen');b.onclick=fn;c.appendChild(b)}};
       var tm=x.team||{};
-      if(x.video){var vu=ytUrl(x.video);if(vu){var a=el('a','yl','Video öffnen');a.href=vu;a.target='_blank';a.rel='noopener noreferrer';c.appendChild(a)}}
+      if(x.video&&x.video!==evVideo()){var vu=ytUrl(x.video);if(vu){var a=el('a','yl','Eigenes Video des Spielers öffnen');a.href=vu;a.target='_blank';a.rel='noopener noreferrer';c.appendChild(a)}}
       (x.entries||[]).forEach(function(e,i){
         var d=el('div','ent');d.appendChild(el('strong',null,'Eintrag '+(i+1)+(e.kind==='stat'?' · Statistik':e.kind==='note'?' · Beschreibung':' · Stelle im Video')));
         if(e.stat)d.appendChild(el('div','ftxt',e.stat));
         if(/^data:image\/jpeg;base64,/.test(e.img||'')){var im=el('img','pv');im.src=e.img;im.alt='Statistik';d.appendChild(im)}
         if(e.time)d.appendChild(el('div','ftxt','Zeitpunkt: '+e.time));
-        var u=(e.kind==='clip'||!e.kind)?(ytUrl(e.link)||(secs(e.time)!=null&&x.video?ytUrl(x.video,secs(e.time)):null)):null;
+        var xv=x.video||evVideo(),u=(e.kind==='clip'||!e.kind)?(ytUrl(e.link)||(secs(e.time)!=null&&xv?ytUrl(xv,secs(e.time)):null)):null;
         if(u){var l=el('a','yl','Zur Stelle im Video öffnen');l.href=u;l.target='_blank';l.rel='noopener noreferrer';d.appendChild(l)}
         if(e.desc)d.appendChild(el('div','ftxt',e.desc));
         var b=el('button','btn ghost sm','Eintrag übernehmen');b.onclick=function(){adoptEntry(e)};d.appendChild(b);c.appendChild(d);
@@ -968,7 +1092,7 @@ function buildForm(c){
   '<div class="strip">'+strip+'</div><p class="note">Fokus setzen, was ist passiert, warum, nächster Schritt. Kurz halten und beim Team bleiben.</p>'+
   sec('--muted','Vorher: Vorbereitung',c.pt.replace(' Min',''),'<p class="ask">'+c.pa+'</p>'+prep)+
   (c.rf?rs:'')+sec('--p1','1. Gesetzter Fokus',1,'<p class="ask">'+c.q1+'</p>'+ta('focus',c.p1))+
-  sec('--p2','2. Was ist passiert',c.t2,'<p class="ask">'+c.q2+'</p>'+(c.vid?'<label class="f">Link zum YouTube-Video<input type="text" data-f="video" placeholder="https://www.youtube.com/watch?v=..." maxlength="300"></label><div id="ent"></div><button type="button" class="btn ghost" id="addE">+ Eintrag hinzufügen</button>':ta('happened',c.p2)))+
+  sec('--p2','2. Was ist passiert',c.t2,'<p class="ask">'+c.q2+'</p>'+(c.vid?'<label class="f">Link zum YouTube-Video (gilt für alle, auch für die Spieler-Reviews)<input type="text" data-f="video" placeholder="https://www.youtube.com/watch?v=..." maxlength="300"></label><div id="ent"></div><button type="button" class="btn ghost" id="addE">+ Eintrag hinzufügen</button>':ta('happened',c.p2)))+
   sec('--p3','3. Warum ist es passiert',c.t3,'<p class="ask">Was hat funktioniert und sollten wir behalten?</p>'+ta('worked',c.pk)+'<p class="ask">Was kann das Team verbessern? Keine Schuldzuweisung.</p>'+ta('why',c.pw))+
   '<div class="s">'+sec('--p4',c.h4,c.t4,'<p class="ask">Ein Vorschlag fürs Team, eine verantwortliche Person, ein Stichwort.</p>'+ta('fix','Verbesserung:')+ta('owner','Verantwortlich (Trainer oder Spieler):',1)+ta('cue',c.cue,1)+'<label class="chk" style="margin-top:8px"><input type="checkbox" data-f="next"> '+c.nx+'</label>')+'</div>'+
   (c.rf?'':rs);
@@ -1015,7 +1139,7 @@ async function asave(){
   if(JSON.stringify(o).length>230000){Q('#msg').textContent='Zu viele oder zu große Bilder. Bitte einzelne Bilder entfernen.';return}
   var id=acur.id||('t'+Date.now().toString(36)+Math.random().toString(36).slice(2,6));
   if(online()){
-    try{var x=cl.fb,Fz=x.F,meta={type:o.type,date:o.date,title:o.title||'',pub:o.pub||''},con=Object.assign({},o);delete con.type;delete con.date;delete con.title;delete con.id;con.pub=o.pub||'';await Fz.setDoc(Fz.doc(x.db,'termine',id),meta,{merge:true});await Fz.setDoc(Fz.doc(x.db,'aar',id),con)}
+    try{var x=cl.fb,Fz=x.F,meta={type:o.type,date:o.date,title:o.title||'',pub:o.pub||''},con=Object.assign({},o);if(T[o.type].vid)meta.video=o.video||'';delete con.video;delete con.type;delete con.date;delete con.title;delete con.id;con.pub=o.pub||'';await Fz.setDoc(Fz.doc(x.db,'termine',id),meta,{merge:true});await Fz.setDoc(Fz.doc(x.db,'aar',id),con)}
     catch(e){Q('#msg').textContent=e&&e.code==='permission-denied'?'Kein Schreibrecht: Nur Trainer dürfen Termine bearbeiten.':'Speichern fehlgeschlagen. Bitte erneut versuchen.';return}
   }else{
     o.id=id;var k=items.findIndex(function(i){return i.id===id});
@@ -1034,7 +1158,7 @@ async function aremove(){
 function nw(type){openEditor({type:type,date:today(),title:''})}
 Q('#newG').onclick=function(){nw('spiel')};
 Q('#newT').onclick=function(){nw('training')};
-Q('#back').onclick=function(){flushMine(showList)};
+Q('#back').onclick=function(){if(tab==='sum'&&sumDirty)sumSave(true);flushMine(showList)};
 Q('#save').onclick=asave;
 Q('#pMine').addEventListener('input',function(){setDirty()});
 Q('#pMine').addEventListener('change',function(){setDirty()});
@@ -1046,6 +1170,59 @@ Q('#chips').onclick=function(e){var b=e.target.closest('button');if(!b)return;fl
 
 /* ===== i18n (Quelltexte sind Deutsch, Englisch wird per Wörterbuch eingesetzt) ===== */
 var EN={
+"Fasst die wichtigsten Punkte aus Team-Review und Spieler-Rückmeldungen zusammen. Nur Trainer bearbeiten diese Seite. Nach der Freigabe sehen alle Spieler die Zusammenfassung. Alle Felder sind frei anpassbar.":"Summarises the key points from the team review and the player feedback. Only coaches edit this page. Once released, all players can see the summary. All fields can be edited freely.",
+"Entwurf (nur Trainer)":"Draft (coaches only)",
+"Für alle Spieler freigeben":"Release to all players",
+"Sichtbarkeit":"Visibility",
+"Die Zusammenfassung ist noch nicht freigegeben.":"The summary has not been released yet.",
+"Die Trainer fassen hier Team-Review und Rückmeldungen zusammen.":"Here the coaches summarise the team review and the feedback.",
+"Die Zusammenfassung ist noch leer.":"The summary is still empty.",
+"Zusammenfassung":"Summary",
+"Team-Review (Trainer)":"Team review (coaches)",
+"Für alle freigegeben. Gezeigt wird der gespeicherte Stand.":"Released to everyone. Showing the saved version.",
+"Entwurf, nur Trainer sehen es. Gezeigt wird der gespeicherte Stand.":"Draft, only coaches can see it. Showing the saved version.",
+"Noch kein Team-Review gespeichert.":"No team review saved yet.",
+"Spiel-Video öffnen":"Open game video",
+"Eigenes Video des Spielers öffnen":"Open the player's own video",
+"Rückmeldungen der Spieler":"Player feedback",
+"Was kann das Team verbessern":"What can the team improve",
+"Verantwortlich":"Responsible",
+"Export für externe KI":"Export for external AI",
+"Für ChatGPT, Claude, Gemini oder eine andere KI: Text kopieren oder herunterladen und dort einfügen. Die Antwort kannst du unter „Zusammenfassung“ einfügen. Namen werden nicht exportiert, Bilder auch nicht. Die Texte gehen an den Anbieter der KI, die du nutzt.":"For ChatGPT, Claude, Gemini or another AI: copy or download the text and paste it there. You can paste the answer under “Summary”. Names and images are not exported. The texts go to the provider of the AI you use.",
+"Persönliche Einträge der Spieler mitexportieren (ohne Namen)":"Also export players' personal entries (without names)",
+"Kopieren":"Copy",
+"Als Datei herunterladen":"Download as file",
+"Teilen":"Share",
+"Kopiert. Jetzt in der KI einfügen.":"Copied. Now paste it into the AI.",
+"Kopieren nicht möglich. Text unten markieren und kopieren.":"Copying not possible. Select the text below and copy it.",
+"Kurzfassung":"Short version",
+"In „Zusammenfassung“ übernehmen":"Adopt into “Summary”",
+"Gesendet werden das Team-Review und die Teameinträge der Spieler, ohne Namen, ohne persönliche Einträge und ohne Bilder. Die Texte gehen an Google (Gemini). Das Ergebnis ist ein Vorschlag: bitte prüfen, bevor du etwas übernimmst.":"The team review and the players' team entries are sent, without names, personal entries or images. The texts go to Google (Gemini). The result is a suggestion: please check it before you adopt anything.",
+"Fasst die wichtigsten Punkte aus Team-Review und Spieler-Rückmeldungen zusammen. Nur Trainer sehen und bearbeiten diese Seite. Alle Felder sind frei anpassbar.":"Summarises the key points from the team review and the player feedback. Only coaches see and edit this page. All fields can be edited freely.",
+"Automatisch füllen":"Fill automatically",
+"Gemini-Ergebnis übernehmen":"Adopt Gemini result",
+"Neu mit Gemini zusammenfassen":"Summarise again with Gemini",
+"Mit Gemini zusammenfassen":"Summarise with Gemini",
+"Noch keine Rückmeldungen und kein Team-Review. Du kannst die Felder trotzdem selbst ausfüllen.":"No feedback and no team review yet. You can still fill in the fields yourself.",
+"Antwort einer externen KI einfügen":"Paste the answer from an external AI",
+"Unter „Rückmeldungen“ den Export kopieren, in der KI einfügen und die Antwort hier einfügen. Erkannt wird das JSON-Format aus dem Export. Anderer Text landet im Gesamtbild.":"Copy the export under “Feedback”, paste it into the AI and paste the answer here. The JSON format from the export is recognised. Other text goes into the overall picture.",
+"Antwort der KI hier einfügen":"Paste the AI's answer here",
+"Antwort der KI":"AI answer",
+"Einfügen":"Paste",
+"Bitte zuerst die Antwort einfügen.":"Please paste the answer first.",
+"Die wichtigsten Punkte in höchstens 500 Zeichen, z. B. für die Team-Gruppe.":"The key points in at most 500 characters, e.g. for the team chat.",
+"Kurzfassung kopieren":"Copy short version",
+"Ausführlich":"Detailed",
+"Speichern":"Save",
+"Übernommen. Bitte prüfen, anpassen und speichern.":"Adopted. Please check, adjust and save.",
+"Kopiert.":"Copied.",
+"Bitte markierten Text kopieren.":"Please copy the selected text.",
+"Kein Schreibrecht: Nur Trainer dürfen die Zusammenfassung bearbeiten.":"No write access: only coaches can edit the summary.",
+"Link zum YouTube-Video (gilt für alle, auch für die Spieler-Reviews)":"Link to the YouTube video (applies to everyone, including player reviews)",
+"YouTube-Video zum Spiel (für das Review)":"YouTube video of the game (for the review)",
+"Das Video legen die Trainer fest. Bei „Stelle im Video“ reicht der Zeitpunkt, der Link wird automatisch gebildet. Du kannst auch einen eigenen YouTube-Link zur genauen Stelle eintragen.":"The coaches set the video. For “Point in the video” the time is enough, the link is created automatically. You can also enter your own YouTube link to the exact point.",
+"Die Trainer haben noch kein Spiel-Video hinterlegt. Du kannst bei einem Eintrag einen eigenen YouTube-Link zur Stelle eintragen oder nur beschreiben.":"The coaches have not added a game video yet. You can enter your own YouTube link for an entry or just describe it.",
+"Halte pro Situation einen Eintrag fest: eine Stelle im Video, eine Statistik oder nur eine Beschreibung.":"Record one entry per situation: a point in the video, a statistic or just a description.",
 "Auswertung":"Evaluation",
 "Rückmeldungen":"Feedback",
 "Mit persönlichen Einträgen":"With personal entries",
@@ -1245,6 +1422,12 @@ var EN={
 "Beobachtungen und Zahlen statt Meinungen.":"Observations and numbers instead of opinions.","Nach 6 Minuten ist Schluss. Eine Verbesserung schlägt fünf.":"Stop after 6 minutes. One improvement beats five."
 };
 var RX=[
+[/^Stand: (.+)$/,function(m){return 'As of: '+m[1]}],
+[/^Was ist passiert · Eintrag (\d+)$/,function(m){return 'What happened · Entry '+m[1]}],
+[/^(\d+) \/ 500 Zeichen$/,function(m){return m[1]+' / 500 characters'}],
+[/^(\d+) Rückmeldung\(en\) von Spielern\. (.*)$/,function(m){return m[1]+' player feedback item(s). With “Adopt” you add a point to the team review. Then save under “Team review”.'}],
+[/^(.*?)\s*Gespeichert am (.+?)( von (.+))?\.$/,function(m){return (m[1]?tr(m[1])+' ':'')+'Saved on '+m[2]+(m[4]?' by '+m[4]:'')+'.'}],
+[/^Datei gespeichert: (.+)$/,function(m){return 'File saved: '+m[1]}],
 [/^(\d+) von (\d+)$/,function(m){return m[1]+' of '+m[2]}],
 [/^(\d+) \((\d+) mit Namen, (\d+) anonym\)$/,function(m){return m[1]+' ('+m[2]+' with name, '+m[3]+' anonymous)'}],
 [/^(\d+) \((\d+) Video, (\d+) Statistik, (\d+) Beschreibung\)$/,function(m){return m[1]+' ('+m[2]+' video, '+m[3]+' statistic, '+m[4]+' description)'}],
@@ -1466,7 +1649,7 @@ function applyRole(){
   if(!Q('#hub').hidden)buildHub();
 }
 function rebuild(){
-  items=termine.map(function(t){return Object.assign({},t,aarDocs[t.id]||{},{id:t.id})});
+  items=termine.map(function(t){var a=aarDocs[t.id]||{};return Object.assign({},t,a,{id:t.id,video:t.video||a.video||''})});
   if(!Q('#aarApp').hidden&&!Q('#listView').hidden)renderList();
   if(!Q('#schedApp').hidden)sRender();
 }
@@ -1587,6 +1770,7 @@ function sDetail(b){
   ln('Datum:',fmt(e.date));ln('Uhrzeit:',(e.time||'–')+(e.time?' Uhr':''));
   if(e.type==='spiel'){ln('Heim:',e.homeTeam||'');ln('Gast:',e.awayTeam||'');if(e.home!=null)ln('Art:',e.home?'Heimspiel':'Auswärtsspiel');if(e.matchday)ln('Spieltag:',String(e.matchday))}
   if(e.cancelled)s.appendChild(el('p','pm','Abgesagt'));
+  var vy=e.video?ytUrl(e.video):null;if(vy){var av=el('a','yl','Spiel-Video öffnen');av.href=vy;av.target='_blank';av.rel='noopener noreferrer';s.appendChild(av)}
   var lk=safeLink(e.link);if(lk){var a=el('a','yl','Spiel auf basketball-bund.net öffnen');a.href=lk;a.target='_blank';a.rel='noopener noreferrer';s.appendChild(a)}
   b.appendChild(s);
   var p=el('section');p.style.setProperty('--c','var(--muted)');p.appendChild(el('h2',null,'Meine Anpassungen'));p.appendChild(el('p','note','Nur für dich sichtbar. Der Vereinstermin bleibt unverändert.'));
@@ -1609,9 +1793,9 @@ function sEdit(b){
   var ty=document.createElement('select');[['training','Training'],['spiel','Spiel']].forEach(function(o){var op=el('option',null,o[1]);op.value=o[0];ty.appendChild(op)});ty.value=e.type||'training';
   var di=mkIn('date',e.date),tm=mkIn('time',e.time||''),ti=mkIn('text',e.title||'','',null),ho=document.createElement('select');
   [['','Nicht angegeben'],['h','Heimspiel'],['a','Auswärtsspiel']].forEach(function(o){var op=el('option',null,o[1]);op.value=o[0];ho.appendChild(op)});ho.value=e.home==null?'':(e.home?'h':'a');
-  var md=mkIn('number',e.matchday||''),lk=mkIn('text',e.link||''),ca=document.createElement('input');ca.type='checkbox';ca.checked=!!e.cancelled;
+  var md=mkIn('number',e.matchday||''),lk=mkIn('text',e.link||''),vi=mkIn('text',e.video||'','https://www.youtube.com/watch?v=...'),ca=document.createElement('input');ca.type='checkbox';ca.checked=!!e.cancelled;
   s.appendChild(lbl('Art',ty));s.appendChild(lbl('Datum',di));s.appendChild(lbl('Uhrzeit',tm));
-  var gb=el('div');gb.appendChild(lbl('Gegner',ti));gb.appendChild(lbl('Heim/Auswärts',ho));gb.appendChild(lbl('Spieltag',md));gb.appendChild(lbl('Link zum Spiel',lk));s.appendChild(gb);
+  var gb=el('div');gb.appendChild(lbl('Gegner',ti));gb.appendChild(lbl('Heim/Auswärts',ho));gb.appendChild(lbl('Spieltag',md));gb.appendChild(lbl('Link zum Spiel',lk));gb.appendChild(lbl('YouTube-Video zum Spiel (für das Review)',vi));s.appendChild(gb);
   var cl2=el('label','chk');cl2.appendChild(ca);cl2.appendChild(document.createTextNode(' '));cl2.appendChild(el('span',null,'Termin ist abgesagt'));s.appendChild(cl2);
   var upd=function(){gb.hidden=ty.value!=='spiel'};ty.onchange=upd;upd();
   var r=el('div','row');r.style.marginTop='12px';var sv=el('button','btn','Speichern');r.appendChild(sv);
@@ -1619,9 +1803,10 @@ function sEdit(b){
   sv.onclick=async function(){
     if(!di.value){sSetMsg('Bitte ein Datum eintragen.');return}
     if(tm.value&&!TIMERX.test(tm.value)){sSetMsg('Bitte eine Uhrzeit als hh:mm eintragen.');return}
+    if(ty.value==='spiel'&&vi.value.trim()&&!ytUrl(vi.value)){sSetMsg('Bitte einen gültigen YouTube-Link eintragen.');return}
     var id=e.id||('e'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),x=cl.fb;
     var o={type:ty.value,date:di.value,time:tm.value||'',cancelled:ca.checked,title:ty.value==='spiel'?ti.value.trim():(e.title||'')};
-    if(ty.value==='spiel'){o.home=ho.value===''?null:ho.value==='h';o.matchday=md.value?+md.value:null;o.link=safeLink(lk.value.trim())}
+    if(ty.value==='spiel'){o.home=ho.value===''?null:ho.value==='h';o.matchday=md.value?+md.value:null;o.link=safeLink(lk.value.trim());o.video=vi.value.trim()?ytUrl(vi.value):''}
     if(!e.id)o.pub='';
     try{await x.F.setDoc(x.F.doc(x.db,'termine',id),o,{merge:true});sMode='list';sSel=null;sRender();sSetMsg('Gespeichert.')}
     catch(er){sSetMsg(er&&er.code==='permission-denied'?'Kein Schreibrecht: Nur Trainer dürfen Termine bearbeiten.':'Speichern fehlgeschlagen. Bitte erneut versuchen.')}
@@ -1814,7 +1999,7 @@ if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.s
 (function(){
  var touch=window.matchMedia&&matchMedia('(pointer:coarse)').matches;
  function fit(t){if(!t||t.tagName!=='TEXTAREA'||!t.offsetParent)return;var cap=Math.round(innerHeight*.6);t.style.height='auto';var h=t.scrollHeight+2;t.style.height=Math.min(h,cap)+'px';t.style.overflowY=h>cap?'auto':'hidden'}
- function cnt(t){var m=t.maxLength;if(!(m>0)||t.type==='password')return;var n=t.value.length,c=t.nextElementSibling&&t.nextElementSibling.classList&&t.nextElementSibling.classList.contains('tcnt')?t.nextElementSibling:null;
+ function cnt(t){var m=t.maxLength;if(!(m>0)||t.type==='password'||(t.dataset&&t.dataset.s==='short'))return;var n=t.value.length,c=t.nextElementSibling&&t.nextElementSibling.classList&&t.nextElementSibling.classList.contains('tcnt')?t.nextElementSibling:null;
   if(n<m*.8){if(c)c.remove();return}
   if(!c){c=document.createElement('small');c.className='tcnt';t.insertAdjacentElement('afterend',c)}
   c.textContent=n+' / '+m;c.classList.toggle('hi',n>=m)}

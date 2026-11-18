@@ -165,3 +165,16 @@ Q. Textfelder auf dem Smartphone
    Passende Tastatur: E-Mail-Tastatur beim Login, Großschreibung am Satzanfang und Rechtschreibprüfung in Textboxen.
    Das aktive Feld wird beim Tippen über die Tastatur geschoben. Ab 80 % des Zeichenlimits erscheint ein Zähler.
    Login: Enter springt ins nächste Feld, erst im letzten Feld wird angemeldet bzw. registriert.
+
+R. AAR: Video zentral, Rückmeldungen, Export, Zusammenfassung
+   Video: Den YouTube-Link pro Spiel legen nur die Trainer fest (im Team-Review oder unter Termine → Termin bearbeiten).
+     Er gilt für alle; Spieler sehen „Spiel-Video öffnen“ und tragen unter „2. Was ist passiert“ nur Zeitpunkte
+     oder eigene Links zu einzelnen Stellen ein.
+   Team-Review: eine Version pro Spiel/Training, nur Trainer bearbeiten. Mein Review: jede/r Spieler/in einzeln.
+   Rückmeldungen (Trainer): oben das gespeicherte Team-Review, dann Auswertung, Gemini, Export und die Spielerreviews.
+   Export für externe KI: Kopieren, als .txt herunterladen oder teilen. Ohne Namen und Bilder; persönliche Einträge
+     nur per Häkchen. Die Antwort der KI unter „Zusammenfassung“ einfügen.
+   Zusammenfassung (neuer Reiter, Trainer bearbeiten, Spieler lesen nach Freigabe): Kurzfassung (max. 500 Zeichen, kopierbar) und ausführliche Fassung.
+     Füllbar per Gemini oder per eingefügter Antwort einer externen KI, alle Felder anpassbar.
+   Sichtbarkeit: „Entwurf (nur Trainer)“ oder „Für alle Spieler freigeben“. Spieler sehen sie dann im selben Reiter, nur lesend.
+   WICHTIG: firestore.rules neu veröffentlichen (Sammlung „aarsum“: Trainer schreiben, alle lesen nach Freigabe).

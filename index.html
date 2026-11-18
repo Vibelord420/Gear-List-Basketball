@@ -36,10 +36,10 @@ h2{margin:0 0 12px;font-size:20px}
 .sub,.mut{color:var(--mut);font-size:14px;margin:8px 0}
 button{font-family:inherit;color:var(--ink)}
 .seg{display:flex;background:var(--ln);border-radius:14px;padding:3px;gap:3px}
-.seg button{flex:1;border:0;background:none;color:var(--mut);font-weight:700;font-size:16px;padding:11px;border-radius:11px}
+.seg button{flex:1;border:0;background:none;color:var(--ink);font-weight:700;font-size:16px;padding:11px;border-radius:11px}
 .seg .on{background:var(--ac);color:var(--acx)}
 .bar{height:10px;background:var(--ln);border-radius:5px;overflow:hidden}
-.bar i{display:block;height:100%;background:var(--ac);transition:width .2s}
+.bar i{display:block;height:100%;width:100%;background:var(--ac);transform-origin:left center;transition:transform .2s}
 .bar i.ok{background:var(--ok)}
 .row{display:flex;align-items:center;gap:12px;background:var(--sf);border:1px solid var(--ln);border-radius:14px;padding:10px 12px;margin:8px 0}
 .row.done{background:var(--okbg);border-color:transparent}
@@ -60,8 +60,8 @@ button{font-family:inherit;color:var(--ink)}
 .dock div{display:flex;gap:8px;max-width:560px;margin:0 auto}
 .hc{background:var(--sf);border:1px solid var(--ln);border-radius:14px;padding:12px;margin:8px 0}
 .acts{display:flex;gap:8px;margin-top:10px}
-.ov{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;z-index:5}
-.sh{background:var(--sf);width:100%;max-width:560px;border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));max-height:92vh;overflow:auto}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;z-index:5;overscroll-behavior:contain}
+.sh{background:var(--sf);width:100%;max-width:560px;border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));max-height:92vh;max-height:92dvh;overflow:auto;overscroll-behavior:contain}
 .in{width:100%;padding:12px;border-radius:12px;border:1px solid var(--ln);background:var(--bg);color:var(--ink);font-size:16px;font-family:inherit}
 .qr{display:flex;justify-content:space-between;align-items:center;margin:12px 0}
 .ig{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-bottom:12px;max-height:240px;overflow:auto}
@@ -94,11 +94,40 @@ h3.cat .mv button{color:var(--ink)}
 .A .btn.warn{background:#b3261e;color:#fff}
 .A .row{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
 .A .chips button{font:500 15px Barlow,system-ui,sans-serif;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 14px;cursor:pointer}
-.A .chips button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.A .chips button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:var(--acx)}
 .A .grp{color:var(--muted);font-weight:600;margin:18px 0 6px}
 .A .item{display:flex;width:100%;text-align:left;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:8px;padding:12px 14px;margin:0 0 8px;color:var(--ink);font:inherit;cursor:pointer}
 .A .item .d{font-weight:600;min-width:112px}
 .A .item .t{flex:1;min-width:0;overflow-wrap:anywhere}
+.A .cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 8px;align-items:start}
+.A .col{min-width:0}
+.A .col .empty{margin:4px 0 12px;font-size:14px}
+.A .cols .grp .gs,.A .cols .item .dsh{display:none}
+@media (max-width:599px){
+ .A .cols .grp{font-size:14px;margin:12px 0 6px}
+ .A .cols .grp .gl,.A .cols .item .dl{display:none}
+ .A .cols .grp .gs,.A .cols .item .dsh{display:inline}
+ .A .cols .item{flex-direction:column;align-items:flex-start;gap:3px;padding:9px 10px;border-left-width:5px;font-size:14px;line-height:1.3;min-height:76px}
+ .A .cols .item .d{min-width:0;font-size:14px}
+ .A .cols .item .badge{font-size:11px;padding:1px 8px}
+ .A .cols .item .t{width:100%;font-size:15px}
+ .A .cols .item .done{font-size:12px;line-height:1.25;margin-top:2px}
+}
+@media (min-width:600px){
+ .A .cols{gap:0 16px;width:min(1000px,calc(100vw - 32px));position:relative;left:50%;transform:translateX(-50%)}
+ .A .cols .item{flex-wrap:wrap;gap:4px 10px}
+ .A .cols .item .d{min-width:0}
+ .A .cols .item .t{flex-basis:100%}
+}
+
+.A .exh{font-size:17px;margin:16px 0 4px}
+.A .ex input[type=text],.A .ex input[type=url]{width:100%;box-sizing:border-box}
+.A .exhd{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.A .extl{display:flex;gap:6px}.A .extl .btn{min-width:44px;min-height:40px;padding:4px 10px}
+.A .exg{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.A .exi{position:relative;display:block;width:calc(50% - 4px);max-width:220px}
+.A .exi img{width:100%;height:auto;border-radius:6px;display:block;border:1px solid var(--line)}
+.A .exrm{position:absolute;top:4px;right:4px;width:36px;height:36px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;font-size:16px;cursor:pointer}
 .A .badge{font-size:13px;font-weight:600;border-radius:999px;padding:2px 10px;color:#fff;background:var(--c)}
 .A .done{color:var(--muted);font-size:13px}
 .A .empty{color:var(--muted);padding:20px 0}
@@ -164,6 +193,72 @@ textarea::placeholder,input::placeholder{color:var(--mut);opacity:.85}
 .A .bar{height:10px;border-radius:5px;background:var(--line);overflow:hidden;margin:6px 0 14px}
 .A .bar>div{height:100%;background:var(--blue)}
 .A .pm{min-height:24px;font-weight:600;color:var(--blue);margin:8px 0}
+
+/* Barrierearmut: Touch-Ziele, Kontraste, Bewegung */
+button,.btn,select,summary{min-height:44px}
+.A .lang button{min-width:44px}
+.A .chips button{min-height:44px}
+.q button,.x{width:44px;height:44px}
+.tl.gh{min-height:44px}
+.A .exrm{width:44px;height:44px}
+.A .badge{min-height:0}
+.A .badge.lt{color:#06122a}
+.A .strip .s3{color:#06122a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .A .strip .s2{color:#06122a}}
+:root[data-theme="dark"] .A .strip .s2{color:#06122a}
+textarea{overscroll-behavior:contain}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+
+@media (max-width:480px){#hTitle{font-size:clamp(28px,9vw,44px)}}
+#hTitle{overflow-wrap:break-word}
+/* Bereichsfotos: hell = Foto im Kopfbereich, dunkel = Foto als Seitenhintergrund */
+html[data-area="aar"]{--ph:url(img/aar.jpg);--php:center 70%}
+html[data-area="sched"]{--ph:url(img/termine.jpg);--php:center 42%}
+html[data-area="gear"]{--ph:url(img/ausruestung.jpg);--php:center 52%}
+html[data-area="admin"]{--ph:url(img/benutzer.jpg);--php:center 48%}
+html.ph #hdr{background:linear-gradient(180deg,rgba(6,18,42,.6) 0%,rgba(11,79,179,.93) 80%),var(--ph) var(--php)/cover no-repeat #0b4fb3}
+html.ph #hdr button:not([aria-pressed="true"]){background-color:rgba(6,18,42,.45)}
+.hph{display:block;height:116px;background-size:cover;background-repeat:no-repeat;background-color:var(--ln)}
+.hph-aar{background-image:url(img/aar.jpg);background-position:center 70%}
+.hph-sched{background-image:url(img/termine.jpg);background-position:center 45%}
+.hph-gear{background-image:url(img/ausruestung.jpg);background-position:center 55%}
+.hph-admin{background-image:url(img/benutzer.jpg);background-position:center 50%}
+#hub{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:stretch}
+#hub>:not(.hubc){grid-column:1/-1}
+#hub .hubc:only-of-type{grid-column:1/-1}
+.A #hub .hubc{display:flex;flex-direction:column;margin:0;padding:0;overflow:hidden;border-left-width:1px;border-radius:14px}
+.A #hub .hubc .htx{display:block;padding:10px 12px 12px}
+.A #hub .hubc h2{font-size:21px;line-height:1.1}
+.A #hub .hubc p{font-size:14px;line-height:1.3}
+@media (prefers-color-scheme:dark){
+ :root:not([data-theme="light"]).ph{background:#0a1730}
+ :root:not([data-theme="light"]).ph body{background:transparent}
+ :root:not([data-theme="light"]).ph body::before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(rgba(10,23,48,.82),rgba(10,23,48,.82)),var(--ph) var(--php)/cover no-repeat #0a1730}
+ :root:not([data-theme="light"]).ph #hdr{background:transparent}
+ :root:not([data-theme="light"]) .hph{height:150px}
+}
+:root[data-theme="dark"].ph{background:#0a1730}
+:root[data-theme="dark"].ph body{background:transparent}
+:root[data-theme="dark"].ph body::before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(rgba(10,23,48,.82),rgba(10,23,48,.82)),var(--ph) var(--php)/cover no-repeat #0a1730}
+:root[data-theme="dark"].ph #hdr{background:transparent}
+:root[data-theme="dark"] .hph{height:150px}
+
+/* D: Anmeldung mit Vollbild-Foto */
+html.gph{background:#06122a}
+html.gph body{background:transparent}
+html.gph body::before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(6,18,42,.25) 0%,rgba(6,18,42,.6) 45%,rgba(6,18,42,.92) 100%),url(img/anmeldung.jpg) 30% center/cover no-repeat #06122a}
+html.gph #hdr{background:transparent}
+html.gph #hdr .brand{margin-top:16vh}
+html.gph #hdr button:not([aria-pressed="true"]){background-color:rgba(6,18,42,.45)}
+html.gph #gate section{border:0;border-radius:22px;padding:20px 18px}
+/* E: Fotos als Akzent */
+.alldone{display:flex;flex-direction:column;overflow:hidden;border-radius:14px;border:1px solid var(--ln);background:var(--sf);margin:10px 0 6px}
+.alldone .adp{display:block;height:150px;background:url(img/alles-drin.jpg) center 55%/cover no-repeat var(--ln)}
+.alldone .adt{display:flex;flex-direction:column;gap:2px;padding:12px 14px}
+.alldone b{font:700 23px/1.15 "Barlow Condensed",Impact,sans-serif;color:var(--ok)}
+.alldone .adt span{color:var(--mut)}
+.pic{display:flex;align-items:center;gap:14px}
+.pic::before{content:"";flex:none;width:64px;height:64px;border-radius:50%;background:url(img/leer.jpg) center/cover no-repeat var(--ln)}
 </style>
 </head><body>
 <header id="hdr" class="A"><div class="wrap">
@@ -209,7 +304,7 @@ const K="gearcheck.v1",$=id=>document.getElementById(id),uid=()=>Math.random().t
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const B=[["Basketball Shoes","👟"],["Jersey","🎽"],["Shorts","🩳"],["Boxer","🩲"],["Socks","🧦"],["T-Shirt","👕"],["Warm Top","🧶"],["Pants","👖"],["Small Towel","🧻"],["Big Towel","🛁"],["Slippers","👡"],["Shower Gel","🧴"],["Drinks","🥤"]];
 const PICK=["👟","🎽","👕","👚","🩳","🩲","🧦","🧥","🧶","👖","🧢","🎀","🛡️","🎒","🧻","🛁","🩴","👡","🥿","🧴","🧂","🥤","🍌","🏀","👛","🔑","🗝️","🔋","🎧","💳","⌚","🩹","🧊","📱","📷","📸","🕶️","🧳","👞","🥾","👠","🩰","🧤","🧣","👔","👗","🎩","👒","👓","🥽","🧷","⚽","🏈","🏐","🎾","🏓","🏸","🥅","🏋️","🤸","🏃","⛹️","🥇","🏆","🏅","⏱️","📣","🥊","🥋","🧼","🧽","🚿","🧺","🧹","💧","💊","🍎","🍊","🍇","🍫","🍪","🥜","🍞","🥪","🥛","🧃","☕","🍵","💻","🔌","🎥","💵","💰","📄","📓","🎫","🗺️","✏️","📎","🔦","🔒","🧭","☂️","✂️","🧵","📦","🧰","🔧","🚗","🚌","🚲","🏠","⭐","❤️","✅"];
-const DE={"Sessions":"Termine","+ Game":"+ Spiel","Plan practices":"Trainings planen","Upcoming":"Anstehend","Nothing planned yet.":"Noch nichts geplant.","Past":"Vergangen","No past sessions.":"Keine vergangenen Termine.","Backup":"Sicherung","Data is stored in this browser only. Export a backup to move it to another device.":"Die Daten werden nur in diesem Browser gespeichert. Exportiere eine Sicherung, um sie auf ein anderes Gerät zu übertragen.","Export backup":"Sicherung exportieren","Import backup":"Sicherung importieren","Back to list":"Zurück zur Liste","Game":"Spiel","Practice":"Training","game":"Spiel","practice":"Training","{n} of {t} packed":"{n} von {t} gepackt","Open":"Öffnen","Duplicate":"Duplizieren","Delete":"Löschen","Tap to confirm":"Zum Bestätigen tippen","Gear check":"Ausrüstungs-Check","Edit":"Bearbeiten","Done":"Fertig","All packed. Ready to go.":"Alles gepackt. Es kann losgehen.","Tap an item to rename it or change its icon.":"Tippe auf einen Eintrag, um ihn umzubenennen oder das Symbol zu ändern.","Less":"Weniger","More":"Mehr","Remove":"Entfernen","This list is empty. Add your first item.":"Diese Liste ist leer. Füge deinen ersten Eintrag hinzu.","Saved ✓":"Gespeichert ✓","Save as default {tab} list":"Als Standardliste speichern ({tab})","+ Add item":"+ Eintrag","New list":"Neue Liste","Edit item":"Eintrag bearbeiten","Add item":"Eintrag hinzufügen","Item name":"Name des Eintrags","Quantity":"Menge","Upload your own icon":"Eigenes Symbol hochladen","Also change it in the default list and upcoming {tab} sessions":"Auch in der Standardliste und in allen kommenden Terminen dieser Art ändern","Also add to the default {tab} list":"Auch zur Standardliste hinzufügen ({tab})","Save item":"Eintrag speichern","Add to list":"Zur Liste hinzufügen","Cancel":"Abbrechen","Close":"Schließen","Edit session":"Termin bearbeiten","New {tab} list":"Neue Liste ({tab})","Duplicate session":"Termin duplizieren","Add game":"Spiel hinzufügen","Name, e.g. opponent (optional)":"Name, z. B. Gegner (optional)","Save":"Speichern","Fresh from default list":"Neu aus der Standardliste","Copy of current list, unticked":"Kopie der aktuellen Liste, ohne Haken","Pick the weekdays. Sessions start today and use the default practice list. Days that already have a practice are skipped.":"Wähle die Wochentage. Die Termine beginnen heute und nutzen die Standardliste für Training. Tage mit bereits geplantem Training werden übersprungen.","Mon":"Mo","Tue":"Di","Wed":"Mi","Thu":"Do","Fri":"Fr","Sat":"Sa","Sun":"So","For the next":"Für die nächsten","{n} weeks":"{n} Wochen","Create practices":"Trainings erstellen","Account":"Konto","Online sync is not available. Add your Firebase settings to config.js (see the README) and check your connection.":"Die Online-Synchronisierung ist nicht verfügbar. Trage deine Firebase-Einstellungen in config.js ein (siehe README) und prüfe deine Verbindung.","Signed in as":"Angemeldet als","Syncing…":"Synchronisiere…","Last synced {time}":"Zuletzt synchronisiert: {time}","Sync failed. It will retry on your next change.":"Synchronisierung fehlgeschlagen. Beim nächsten Ändern wird es erneut versucht.","Sync failed. Check your connection.":"Synchronisierung fehlgeschlagen. Prüfe deine Verbindung.","Sync now":"Jetzt synchronisieren","Log out":"Abmelden","Logging out clears the data on this device. It stays safe in your account.":"Beim Abmelden werden die Daten auf diesem Gerät gelöscht. Sie bleiben in deinem Konto gespeichert.","Log in or register":"Anmelden oder registrieren","Username":"Benutzername","Password (min. 8 characters)":"Passwort (mind. 8 Zeichen)","Logging in to an existing account replaces the data on this device. Creating an account uploads this device’s data.":"Beim Anmelden bei einem bestehenden Konto werden die Daten auf diesem Gerät ersetzt. Beim Erstellen eines Kontos werden die Daten dieses Geräts hochgeladen.","Log in":"Anmelden","Create account":"Konto erstellen","Username: 3–20 characters, letters, digits, - or _.":"Benutzername: 3–20 Zeichen, Buchstaben, Ziffern, - oder _.","The password needs at least 8 characters.":"Das Passwort braucht mindestens 8 Zeichen.","Please wait…":"Einen Moment…","That username is taken.":"Dieser Benutzername ist bereits vergeben.","Wrong username or password.":"Benutzername oder Passwort falsch.","No connection.":"Keine Verbindung.","Something went wrong ({c}).":"Etwas ist schiefgelaufen ({c})."};
+const DE={"All in – {n} of {t} packed":"Alles drin – {n} von {t} gepackt","Good luck!":"Viel Erfolg!","Have a good practice!":"Gutes Training!","Ball falls through the net":"Ball fällt durch das Netz","Sessions":"Termine","+ Game":"+ Spiel","Plan practices":"Trainings planen","Upcoming":"Anstehend","Nothing planned yet.":"Noch nichts geplant.","Past":"Vergangen","No past sessions.":"Keine vergangenen Termine.","Backup":"Sicherung","Data is stored in this browser only. Export a backup to move it to another device.":"Die Daten werden nur in diesem Browser gespeichert. Exportiere eine Sicherung, um sie auf ein anderes Gerät zu übertragen.","Export backup":"Sicherung exportieren","Import backup":"Sicherung importieren","Back to list":"Zurück zur Liste","Game":"Spiel","Practice":"Training","game":"Spiel","practice":"Training","{n} of {t} packed":"{n} von {t} gepackt","Open":"Öffnen","Duplicate":"Duplizieren","Delete":"Löschen","Tap to confirm":"Zum Bestätigen tippen","Gear check":"Ausrüstungsliste","Edit":"Bearbeiten","Done":"Fertig","All packed. Ready to go.":"Alles gepackt. Es kann losgehen.","Tap an item to rename it or change its icon.":"Tippe auf einen Eintrag, um ihn umzubenennen oder das Symbol zu ändern.","Less":"Weniger","More":"Mehr","Remove":"Entfernen","This list is empty. Add your first item.":"Diese Liste ist leer. Füge deinen ersten Eintrag hinzu.","Saved ✓":"Gespeichert ✓","Save as default {tab} list":"Als Standardliste speichern ({tab})","+ Add item":"+ Eintrag","New list":"Neue Liste","Edit item":"Eintrag bearbeiten","Add item":"Eintrag hinzufügen","Item name":"Name des Eintrags","Quantity":"Menge","Upload your own icon":"Eigenes Symbol hochladen","Also change it in the default list and upcoming {tab} sessions":"Auch in der Standardliste und in allen kommenden Terminen dieser Art ändern","Also add to the default {tab} list":"Auch zur Standardliste hinzufügen ({tab})","Save item":"Eintrag speichern","Add to list":"Zur Liste hinzufügen","Cancel":"Abbrechen","Close":"Schließen","Edit session":"Termin bearbeiten","New {tab} list":"Neue Liste ({tab})","Duplicate session":"Termin duplizieren","Add game":"Spiel hinzufügen","Name, e.g. opponent (optional)":"Name, z. B. Gegner (optional)","Save":"Speichern","Fresh from default list":"Neu aus der Standardliste","Copy of current list, unticked":"Kopie der aktuellen Liste, ohne Haken","Pick the weekdays. Sessions start today and use the default practice list. Days that already have a practice are skipped.":"Wähle die Wochentage. Die Termine beginnen heute und nutzen die Standardliste für Training. Tage mit bereits geplantem Training werden übersprungen.","Mon":"Mo","Tue":"Di","Wed":"Mi","Thu":"Do","Fri":"Fr","Sat":"Sa","Sun":"So","For the next":"Für die nächsten","{n} weeks":"{n} Wochen","Create practices":"Trainings erstellen","Account":"Konto","Online sync is not available. Add your Firebase settings to config.js (see the README) and check your connection.":"Die Online-Synchronisierung ist nicht verfügbar. Trage deine Firebase-Einstellungen in config.js ein (siehe README) und prüfe deine Verbindung.","Signed in as":"Angemeldet als","Syncing…":"Synchronisiere…","Last synced {time}":"Zuletzt synchronisiert: {time}","Sync failed. It will retry on your next change.":"Synchronisierung fehlgeschlagen. Beim nächsten Ändern wird es erneut versucht.","Sync failed. Check your connection.":"Synchronisierung fehlgeschlagen. Prüfe deine Verbindung.","Sync now":"Jetzt synchronisieren","Log out":"Abmelden","Logging out clears the data on this device. It stays safe in your account.":"Beim Abmelden werden die Daten auf diesem Gerät gelöscht. Sie bleiben in deinem Konto gespeichert.","Log in or register":"Anmelden oder registrieren","Username":"Benutzername","Password (min. 8 characters)":"Passwort (mind. 8 Zeichen)","Logging in to an existing account replaces the data on this device. Creating an account uploads this device’s data.":"Beim Anmelden bei einem bestehenden Konto werden die Daten auf diesem Gerät ersetzt. Beim Erstellen eines Kontos werden die Daten dieses Geräts hochgeladen.","Log in":"Anmelden","Create account":"Konto erstellen","Username: 3–20 characters, letters, digits, - or _.":"Benutzername: 3–20 Zeichen, Buchstaben, Ziffern, - oder _.","The password needs at least 8 characters.":"Das Passwort braucht mindestens 8 Zeichen.","Please wait…":"Einen Moment…","That username is taken.":"Dieser Benutzername ist bereits vergeben.","Wrong username or password.":"Benutzername oder Passwort falsch.","No connection.":"Keine Verbindung.","Something went wrong ({c}).":"Etwas ist schiefgelaufen ({c})."};
 const DEN={"basketball shoes":"Basketballschuhe","jersey":"Trikot","shorts":"Shorts","boxer":"Unterwäsche","socks":"Socken","undershirt":"Unterhemd","undershorts":"Unterhose","shooting shirt":"Shooting-Shirt","track top":"Trainingsjacke","suspensorium":"Suspensorium","headband":"Stirnband","other accessories":"Sonstiges Zubehör","t-shirt":"T-Shirt","warm top":"Warmes Oberteil","pants":"Hose","hat":"Mütze","small towel":"Kleines Handtuch","big towel":"Großes Handtuch","slippers":"Badeschlappen","shower gel":"Duschgel","magnesium":"Magnesium","drinks":"Getränke","snacks":"Snacks","id card":"Ausweis","keys":"Schlüssel","wallet":"Geldbeutel","phone":"Handy","camera":"Kamera","camera equipment":"Kameraausrüstung","basketball":"Basketball","sport tights":"Sport-Tights","private keys":"Privatschlüssel","gym keys":"Hallenschlüssel","gelatin + vitamin c":"Gelatine + Vitamin C"};
 Object.assign(DE,{"Preparation":"Vorbereitung","Clothing":"Kleidung","Valuables":"Wertsachen","Afterwards":"Nachbereitung","Accessories":"Accessoires","Food":"Nahrung","Suggestions":"Vorschläge","or add your own":"oder eigener Eintrag","Category":"Kategorie","No category":"Ohne Kategorie","New category…":"Neue Kategorie …","Category name":"Name der Kategorie","Move up":"Nach oben","Move down":"Nach unten","Add selected ({n})":"Auswahl hinzufügen ({n})"});
 Object.assign(DE,{"Team date":"Team-Termin","own date (private)":"eigener Termin (privat)","Team dates come from the coaches' schedule and appear here automatically. Dates you add yourself are private and are not shared.":"Team-Termine kommen aus dem Terminplan der Trainer und erscheinen hier automatisch. Selbst angelegte Termine sind privat und werden nicht geteilt."});
@@ -409,8 +504,8 @@ function R(){
   h=`<div class="top"><h1>${_("Gear check")}</h1><div><button class="btn sm" data-a="edit">${edit?_("Done"):_("Edit")}</button></div></div>
   <div class="seg">${["game","practice"].map(k=>`<button class="${S.tab===k?"on":""}" data-a="tab" data-id="${k}">${tl(k)}</button>`).join("")}</div>
   <button class="tl gh" data-a="ses">${esc(gh(l))} ✎</button>
-  <div class="bar"><i class="${t&&n===t?"ok":""}" style="width:${t?n/t*100:0}%"></i></div>
-  <p class="sub">${t&&n===t?_("All packed. Ready to go."):_("{n} of {t} packed",{n,t})}</p>${edit?`<p class="sub">${_("Tap an item to rename it or change its icon.")}</p>`:""}`+
+  <div class="bar"><i class="${t&&n===t?"ok":""}" style="transform:scaleX(${t?n/t:0})"></i></div>
+  ${t&&n===t?`<div class="alldone"><span class="adp" role="img" aria-label="${_("Ball falls through the net")}"></span><span class="adt"><b>${_("All in – {n} of {t} packed",{n,t})}</b><span>${l.type==="game"?_("Good luck!"):_("Have a good practice!")}</span></span></div>`:`<p class="sub">${_("{n} of {t} packed",{n,t})}</p>`}${edit?`<p class="sub">${_("Tap an item to rename it or change its icon.")}</p>`:""}`+
   itemsHTML(l)+
   (t?"":`<p class="sub">${_("This list is empty. Add your first item.")}</p>`)+
   (edit?`<button class="btn w" data-a="sdef">${flash?_("Saved ✓"):_("Save as default {tab} list",{tab:_(S.tab)})}</button><button class="btn w" data-a="cats">${_("Manage categories")}</button>`:"");
@@ -564,29 +659,32 @@ training:{h:'After-Action Review: Training',badge:'Training',col:'--p3',ttl:'The
 var Q=function(s){return document.querySelector(s)};
 var items=[],acur=null,flt='alle',armed=false,KEY='tvc-termine';
 function fmt(d){try{return new Date(d+'T12:00:00').toLocaleDateString(lang==='de'?'de-DE':'en-GB',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'})}catch(e){return d}}
+function fmtS(d){try{return new Date(d+'T12:00:00').toLocaleDateString(lang==='de'?'de-DE':'en-GB',{weekday:'short',day:'2-digit',month:'2-digit',year:'2-digit'})}catch(e){return d}}
 function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
 
 function renderList(){
   var box=Q('#list');box.textContent='';
   var t=today(),rows=items.filter(function(i){return T[i.type]&&(flt==='alle'||i.type===flt)});
-  if(!rows.length){box.appendChild(el('p','empty',trainer?'Noch keine Einträge. Lege oben ein Spiel oder Training an.':'Noch keine Termine. Die Trainer legen Spiele und Trainings an.'));return}
+  if(!rows.length){box.appendChild(el('p','empty pic',trainer?'Noch keine Einträge. Lege oben ein Spiel oder Training an.':'Noch keine Termine. Die Trainer legen Spiele und Trainings an.'));return}
   var up=rows.filter(function(i){return i.date>=t}).sort(function(a,b){return a.date<b.date?-1:1});
   var past=rows.filter(function(i){return i.date<t}).sort(function(a,b){return a.date<b.date?1:-1});
-  [['Kommende Termine',up],['Vergangene Termine',past]].forEach(function(g){
-    if(!g[1].length)return;
-    box.appendChild(el('div','grp',g[0]));
+  var cols=el('div','cols');box.appendChild(cols);
+  [['Kommende Termine',up,'Keine kommenden Termine.','Kommend'],['Vergangene Termine',past,'Keine vergangenen Termine.','Vergangen']].forEach(function(g){
+    var col=el('div','col');cols.appendChild(col);
+    var gh=el('div','grp');gh.appendChild(el('span','gl',g[0]));gh.appendChild(el('span','gs',g[3]));gh.appendChild(el('span','gn',' ('+g[1].length+')'));col.appendChild(gh);
+    if(!g[1].length)col.appendChild(el('p','empty',g[2]));
     g[1].forEach(function(i){
       var c=T[i.type],b=el('button','item');b.style.setProperty('--c','var('+c.col+')');
-      b.appendChild(el('span','d',fmt(i.date)));
-      b.appendChild(el('span','badge',c.badge)).style.setProperty('--c','var('+c.col+')');
-      var mid=el('span','t',i.title||'(ohne Titel)');
+      var dd=el('span','d');dd.appendChild(el('span','dl',fmt(i.date)));dd.appendChild(el('span','dsh',fmtS(i.date)));b.appendChild(dd);
+      var bg2=el('span','badge'+(c.col==='--p3'?' lt':''),c.badge);bg2.style.setProperty('--c','var('+c.col+')');b.appendChild(bg2);
+      var mid=el('span','t',i.title||(i.type==='training'?'':'(ohne Titel)'));
       var has=i.focus||i.happened||i.why||i.fix||(i.entries&&i.entries.length);
       if(has&&trainer){mid.appendChild(el('div','done','AAR ausgefüllt'))}
       if(i.pub){mid.appendChild(el('div','done','Team-Review freigegeben'))}
       var md=myDr[i.id];if(md&&(md.subKind||md.updated)){mid.appendChild(el('div','done',md.subKind?'Mein Review abgeschickt':'Mein Entwurf gespeichert'))}
       b.appendChild(mid);
       b.onclick=function(){openEditor(i)};
-      box.appendChild(b);
+      col.appendChild(b);
     });
   });
 }
@@ -629,7 +727,7 @@ function pform(c){
   var g=!!c.vid,q2=g?'Halte pro Situation einen Eintrag fest: eine Stelle im Video, eine Statistik oder nur eine Beschreibung.':'Was ist dir aufgefallen? Nur beschreiben, nicht bewerten.';
   return '<p class="note">Deine Einträge sind privat in deinem Konto gespeichert. Die Trainer sehen sie erst, wenn du sie abschickst. Bis dahin kannst du sie zwischenspeichern und weiter bearbeiten.</p>'+
   '<div id="pPrev"></div>'+
-  sec('--p1','1. Gesetzter Fokus',1,'<p class="ask">Was wollte ich erreichen?</p>'+mta('focusMe',c.p1)+'<p class="ask">Was wollte das Team erreichen?</p>'+mta('focusTeam',c.p1))+
+  sec('--p1','1. Gesetzter Fokus',1,'<p class="ask">Was wollte ich erreichen?</p>'+mta('focusMe',c.p1)+'<p class="ask">Was wollte das Team erreichen?</p><div id="pEx"></div>'+mta('focusTeam',c.p1))+
   sec('--p2','2. Was ist passiert',c.t2,'<p class="ask">'+q2+'</p>'+(g?'<div id="pVid"></div><div id="pEnt"></div><button type="button" class="btn ghost" id="pAddE">+ Eintrag hinzufügen</button>':mta('happened',c.p2)))+
   sec('--p3','3. Warum ist es passiert',c.t3,
     '<p class="ask">Was hat funktioniert und sollten wir behalten?</p>'+who(ME,'me')+mta('workedMe',c.pk)+who(TM,'tm')+mta('workedTeam',c.pk)+
@@ -674,6 +772,7 @@ async function renderMine(){
   try{var d=await cl.fb.F.getDoc(mref());rec=d.exists()?d.data():{}}catch(e){rec={}}
   var r=mdef(rec);
   box.innerHTML=pform(T[acur.type]);
+  var exId=acur.id;loadEx(exId).then(function(l){if(acur&&acur.id===exId)exView(Q('#pEx'),l,true)});
   box.querySelectorAll('[data-m]').forEach(function(f){
     var k=f.dataset.m;
     if(f.type==='checkbox')f.checked=!!r[k];
@@ -816,6 +915,7 @@ function fbTeam(box){
   var t=teamDoc(),c=el('div','fb');c.appendChild(el('div','fbn','Team-Review (Trainer)'));
   c.appendChild(el('div','done',(t.pub==='ja'?'Für alle freigegeben':'Entwurf, nur Trainer sehen es')+'. Gezeigt wird der gespeicherte Stand.'));
   var vu=t.video?ytUrl(t.video):null;if(vu){var a=el('a','yl','Spiel-Video öffnen');a.href=vu;a.target='_blank';a.rel='noopener noreferrer';c.appendChild(a)}
+  var xb=el('div');c.appendChild(xb);loadEx(acur.id).then(function(l){exView(xb,l,false)});
   if(!teamHas(t)){c.appendChild(el('div','ftxt','Noch kein Team-Review gespeichert.'));box.appendChild(c);return}
   TRK.forEach(function(k){
     if(k[0]==='happened'){(t.entries||[]).forEach(function(e,i){var l=entLine(e);if(l){c.appendChild(el('div','lbl','Was ist passiert · Eintrag '+(i+1)));c.appendChild(el('div','ftxt',l))}})}
@@ -825,6 +925,7 @@ function fbTeam(box){
 }
 function aiData(mine,opt){
   opt=opt||{};var L=[],t=teamDoc();
+  var xl=exCache[acur.id]||[];if(xl.length)L.push('Geplante Übungen:\n'+xl.map(function(e,i){return '- '+(i+1)+'. '+(e.title||'Übung')+(e.text?': '+e.text.replace(/\s+/g,' ').slice(0,400):'')}).join('\n'));
   if(teamHas(t)){var p=['Team-Review der Trainer:'];TRK.forEach(function(k){if(k[0]==='happened')(t.entries||[]).forEach(function(e){var l=entLine(e);if(l)p.push('- Beobachtung: '+l)});if(t[k[0]])p.push('- '+k[1]+': '+t[k[0]])});L.push(p.join('\n'))}
   mine.forEach(function(x,i){
     var p=['Rückmeldung Spieler '+(i+1)+':'];
@@ -1028,7 +1129,9 @@ async function renderView(){
   if(!it.pub){box.appendChild(el('p','empty','Das Team-Review ist noch nicht freigegeben.'));return}
   if(online()&&!it.focus&&!it.why&&!it.entries&&!it.fix){try{var sn=await cl.fb.F.getDoc(cl.fb.F.doc(cl.fb.db,'aar',it.id));if(sn.exists())it=Object.assign({},it,sn.data())}catch(e){}}
   var add=function(h,t){if(!t)return;box.appendChild(el('div','lbl',h));box.appendChild(el('div','ftxt',t))};
-  add('Gesetzter Fokus',it.focus);add('Was ist passiert',it.happened);
+  add('Gesetzter Fokus',it.focus);
+  var exb=el('div');box.appendChild(exb);loadEx(it.id).then(function(l){exView(exb,l,false)});
+  add('Was ist passiert',it.happened);
   var vu=it.video?ytUrl(it.video):null;
   if(vu){var a=el('a','yl','Video öffnen');a.href=vu;a.target='_blank';a.rel='noopener noreferrer';box.appendChild(a)}
   (it.entries||[]).forEach(function(e,i){
@@ -1083,7 +1186,7 @@ function renderEnts(){entEd(Q('#ent'),ents,function(){var v=Q('#form [data-f=vid
 function sec(col,h,t,body){return '<section style="--c:var('+col+')"><h2>'+h+' <span>'+t+' Min</span></h2>'+body+'</section>'}
 function ta(f,ph,cls){return '<textarea data-f="'+f+'" aria-label="'+ph+'" placeholder="'+ph+'"'+(cls?' style="min-height:56px"':'')+'></textarea>'}
 function buildForm(c){
-  var strip=c.strip.map(function(m,i){return '<div style="flex:'+m+';background:var(--p'+(i+1)+')">'+m+'<small>Min</small></div>'}).join('');
+  var strip=c.strip.map(function(m,i){return '<div class="s'+(i+1)+'" style="flex:'+m+';background:var(--p'+(i+1)+')">'+m+'<small>Min</small></div>'}).join('');
   var prep=c.prep.map(function(p){return '<label class="chk"><input type="checkbox"> '+p+'</label>'}).join('');
   var rules=c.rules.map(function(r){return '<li>'+r+'</li>'}).join('');
   var rs='<section style="--c:var(--muted)"><h2>Regeln fürs Debrief</h2><ul class="rules">'+rules+'</ul></section>';
@@ -1091,13 +1194,64 @@ function buildForm(c){
   '<section style="--c:var(--muted)"><label class="f">Datum<input type="date" data-f="date"></label><label class="f" style="margin:0">'+c.ttl+'<input type="text" data-f="title" placeholder="'+c.ttlPh+'" maxlength="80"></label><label class="f" style="margin:10px 0 0">Sichtbarkeit<select data-f="pub"><option value="">Entwurf (nur Trainer)</option><option value="ja">Für alle freigeben</option></select></label></section>'+
   '<div class="strip">'+strip+'</div><p class="note">Fokus setzen, was ist passiert, warum, nächster Schritt. Kurz halten und beim Team bleiben.</p>'+
   sec('--muted','Vorher: Vorbereitung',c.pt.replace(' Min',''),'<p class="ask">'+c.pa+'</p>'+prep)+
-  (c.rf?rs:'')+sec('--p1','1. Gesetzter Fokus',1,'<p class="ask">'+c.q1+'</p>'+ta('focus',c.p1))+
+  (c.rf?rs:'')+sec('--p1','1. Gesetzter Fokus',1,'<p class="ask">'+c.q1+'</p>'+ta('focus',c.p1)+'<h3 class="exh">Übungen</h3><p class="note">Welche Übungen sollen gemacht werden? Beschreibe sie mit Text, Bildern oder einem YouTube-Link. Die Spieler sehen sie in „Mein Review“ unter 1.</p><div id="exEd"></div><button type="button" class="btn ghost" id="addEx">+ Übung hinzufügen</button>')+
   sec('--p2','2. Was ist passiert',c.t2,'<p class="ask">'+c.q2+'</p>'+(c.vid?'<label class="f">Link zum YouTube-Video (gilt für alle, auch für die Spieler-Reviews)<input type="text" data-f="video" placeholder="https://www.youtube.com/watch?v=..." maxlength="300"></label><div id="ent"></div><button type="button" class="btn ghost" id="addE">+ Eintrag hinzufügen</button>':ta('happened',c.p2)))+
   sec('--p3','3. Warum ist es passiert',c.t3,'<p class="ask">Was hat funktioniert und sollten wir behalten?</p>'+ta('worked',c.pk)+'<p class="ask">Was kann das Team verbessern? Keine Schuldzuweisung.</p>'+ta('why',c.pw))+
   '<div class="s">'+sec('--p4',c.h4,c.t4,'<p class="ask">Ein Vorschlag fürs Team, eine verantwortliche Person, ein Stichwort.</p>'+ta('fix','Verbesserung:')+ta('owner','Verantwortlich (Trainer oder Spieler):',1)+ta('cue',c.cue,1)+'<label class="chk" style="margin-top:8px"><input type="checkbox" data-f="next"> '+c.nx+'</label>')+'</div>'+
   (c.rf?'':rs);
 }
 
+var exs=[],exLoaded=false,exCache={};
+function newX(){return {title:'',text:'',yt:'',imgs:[]}}
+function exClean(){return exs.map(function(e){return {title:(e.title||'').trim(),text:(e.text||'').trim(),yt:(e.yt||'').trim(),imgs:(e.imgs||[]).filter(function(u){return /^data:image\/jpeg;base64,/.test(u)})}}).filter(function(e){return e.title||e.text||e.yt||e.imgs.length})}
+async function loadEx(id,fresh){
+  if(!id)return [];
+  if(!online()){var it=items.find(function(i){return i.id===id});return (it&&it.ex)||[]}
+  if(!fresh&&exCache[id])return exCache[id];
+  try{var d=await cl.fb.F.getDoc(cl.fb.F.doc(cl.fb.db,'aarex',id));exCache[id]=d.exists()?(d.data().items||[]):[]}catch(e){exCache[id]=exCache[id]||[]}
+  return exCache[id];
+}
+function shrinkX(file,cb){var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var w=Math.min(900,im.width),h=Math.round(im.height*w/im.width);if(h>1200){h=1200;w=Math.round(im.width*h/im.height)}var c=document.createElement('canvas');c.width=w;c.height=h;var g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,w,h);g.drawImage(im,0,0,w,h);cb(c.toDataURL('image/jpeg',0.7))};im.onerror=function(){cb(null)};im.src=r.result};r.readAsDataURL(file)}
+function drawEx(){
+  var box=Q('#exEd');if(!box)return;box.textContent='';
+  if(!exs.length)box.appendChild(el('p','empty pic','Noch keine Übungen eingetragen.'));
+  exs.forEach(function(e,i){
+    var c=el('div','fb ex');var hd=el('div','exhd');hd.appendChild(el('div','fbn','Übung '+(i+1)));
+    var tl=el('div','extl');
+    var mk=function(t,lab,fn,dis){var b=el('button','btn ghost sm',t);b.type='button';b.setAttribute('aria-label',lab);b.title=lab;b.disabled=!!dis;b.onclick=fn;tl.appendChild(b)};
+    mk('↑','Nach oben',function(){exs.splice(i-1,0,exs.splice(i,1)[0]);drawEx()},i===0);
+    mk('↓','Nach unten',function(){exs.splice(i+1,0,exs.splice(i,1)[0]);drawEx()},i===exs.length-1);
+    mk('✕','Übung entfernen',function(){exs.splice(i,1);drawEx()});
+    hd.appendChild(tl);c.appendChild(hd);
+    var ti=document.createElement('input');ti.type='text';ti.maxLength=120;ti.placeholder='Name der Übung, z. B. 3-Mann-Weave';ti.setAttribute('aria-label','Name der Übung');ti.value=e.title||'';ti.oninput=function(){e.title=ti.value};c.appendChild(ti);
+    var tx=document.createElement('textarea');tx.maxLength=3000;tx.placeholder='Beschreibung: Ablauf, Ziel, Coaching-Punkte';tx.setAttribute('aria-label','Beschreibung der Übung');tx.value=e.text||'';tx.style.marginTop='8px';tx.oninput=function(){e.text=tx.value};c.appendChild(tx);
+    var yi=document.createElement('input');yi.type='url';yi.maxLength=300;yi.placeholder='YouTube-Link (optional)';yi.setAttribute('aria-label','YouTube-Link zur Übung');yi.value=e.yt||'';yi.style.marginTop='8px';yi.oninput=function(){e.yt=yi.value};c.appendChild(yi);
+    var gal=el('div','exg');
+    (e.imgs||[]).forEach(function(u,k){var w=el('div','exi');var im=el('img');im.src=u;im.alt='Bild '+(k+1)+' zur Übung';w.appendChild(im);var rb=el('button','exrm','✕');rb.type='button';rb.setAttribute('aria-label','Bild entfernen');rb.onclick=function(){e.imgs.splice(k,1);drawEx()};w.appendChild(rb);gal.appendChild(w)});
+    c.appendChild(gal);
+    if((e.imgs||[]).length<4){
+      var fi=document.createElement('input');fi.type='file';fi.accept='image/*';fi.multiple=true;fi.hidden=true;
+      var bb=el('button','btn ghost sm','+ Bild');bb.type='button';bb.onclick=function(){fi.click()};
+      fi.onchange=function(){var fs=[].slice.call(fi.files||[]).slice(0,4-(e.imgs||[]).length),n=fs.length;if(!n)return;e.imgs=e.imgs||[];
+        fs.forEach(function(f){shrinkX(f,function(u){if(u)e.imgs.push(u);if(--n===0)drawEx()})})};
+      c.appendChild(bb);c.appendChild(fi);
+    }
+    box.appendChild(c);
+  });
+}
+function exView(box,list,player){
+  if(!box)return;box.textContent='';list=list||[];
+  if(!list.length){if(player)box.appendChild(el('p','note pic','Die Trainer haben für diesen Termin noch keine Übungen eingetragen.'));return}
+  box.appendChild(el('div','lbl','Übungen der Trainer'));
+  list.forEach(function(e,i){
+    var c=el('div','fb ex');c.appendChild(el('div','fbn',(i+1)+'. '+(e.title||'Übung')));
+    if(e.text)c.appendChild(el('div','ftxt',e.text));
+    var u=e.yt?ytUrl(e.yt):null;if(u){var a=el('a','yl','Übung auf YouTube ansehen');a.href=u;a.target='_blank';a.rel='noopener noreferrer';c.appendChild(a)}
+    var imgs=(e.imgs||[]).filter(function(x){return /^data:image\/jpeg;base64,/.test(x)});
+    if(imgs.length){var g=el('div','exg');imgs.forEach(function(x,k){var a2=el('a','exi');a2.href=x;a2.target='_blank';a2.rel='noopener';var im=el('img');im.src=x;im.alt='Bild '+(k+1)+' zur Übung '+(e.title||'');a2.appendChild(im);a2.onclick=function(ev){ev.preventDefault();var w=window.open();if(w){w.document.write('<title>Übung</title><img src="'+x+'" style="max-width:100%">');w.document.close()}};g.appendChild(a2)});c.appendChild(g)}
+    box.appendChild(c);
+  });
+}
 function openEditor(item){
   acur=item;armed=false;
   Q('#form').innerHTML=buildForm(T[item.type]);
@@ -1113,6 +1267,9 @@ function openEditor(item){
     Q('#addE').onclick=function(){ents.push(newE());renderEnts()};
     Q('#form [data-f=video]').onchange=function(){(Q('#ent')._u||[]).forEach(function(f){f()})};
   }
+  exs=(item.ex||[]).map(function(e){return Object.assign(newX(),e)});exLoaded=false;drawEx();
+  Q('#addEx').onclick=function(){exs.push(newX());drawEx();var t=Q('#exEd .ex:last-child input');if(t)t.focus()};
+  if(online()&&item.id){var xid=item.id;loadEx(xid,true).then(function(l){if(acur&&acur.id===xid){exs=l.map(function(e){return Object.assign(newX(),e)});exLoaded=true;drawEx()}})}
   Q('#msg').textContent='';
   Q('#del').hidden=!item.id;Q('#del').textContent='Löschen';Q('#del').className='btn ghost';
   setupTabs(item);
@@ -1123,6 +1280,7 @@ function collect(){
   var o={type:acur.type,updated:Date.now()};
   Q('#form').querySelectorAll('[data-f]').forEach(function(f){o[f.dataset.f]=f.type==='checkbox'?f.checked:f.value.trim()});
   if(T[acur.type].vid)o.entries=ents.filter(function(e){return e.stat||e.img||e.time||e.link||e.desc});
+  if(!online())o.ex=exClean();
   return o;
 }
 function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(items))}catch(e){}}
@@ -1136,10 +1294,13 @@ async function asave(){
     if(ee[q].kind==='clip'&&ee[q].time&&secs(ee[q].time)==null){Q('#msg').textContent='Eintrag '+(q+1)+': Zeitangabe bitte als hh:mm:ss.';return}
     if(ee[q].link&&!ytUrl(ee[q].link)){Q('#msg').textContent='Eintrag '+(q+1)+': Bitte einen gültigen YouTube-Link eintragen.';return}
   }
+  var xl=exClean();
+  for(var q2=0;q2<xl.length;q2++){if(xl[q2].yt&&!ytUrl(xl[q2].yt)){Q('#msg').textContent='Übung '+(q2+1)+': Bitte einen gültigen YouTube-Link eintragen.';return}}
+  if(JSON.stringify(xl).length>900000){Q('#msg').textContent='Die Übungen enthalten zu viele oder zu große Bilder. Bitte einzelne Bilder entfernen.';return}
   if(JSON.stringify(o).length>230000){Q('#msg').textContent='Zu viele oder zu große Bilder. Bitte einzelne Bilder entfernen.';return}
   var id=acur.id||('t'+Date.now().toString(36)+Math.random().toString(36).slice(2,6));
   if(online()){
-    try{var x=cl.fb,Fz=x.F,meta={type:o.type,date:o.date,title:o.title||'',pub:o.pub||''},con=Object.assign({},o);if(T[o.type].vid)meta.video=o.video||'';delete con.video;delete con.type;delete con.date;delete con.title;delete con.id;con.pub=o.pub||'';await Fz.setDoc(Fz.doc(x.db,'termine',id),meta,{merge:true});await Fz.setDoc(Fz.doc(x.db,'aar',id),con)}
+    try{var x=cl.fb,Fz=x.F,meta={type:o.type,date:o.date,title:o.title||'',pub:o.pub||''},con=Object.assign({},o);if(T[o.type].vid)meta.video=o.video||'';delete con.video;delete con.type;delete con.date;delete con.title;delete con.id;con.pub=o.pub||'';await Fz.setDoc(Fz.doc(x.db,'termine',id),meta,{merge:true});await Fz.setDoc(Fz.doc(x.db,'aar',id),con);if(xl.length||exLoaded){await Fz.setDoc(Fz.doc(x.db,'aarex',id),{items:xl,updated:Date.now(),by:cl.user||''});exCache[id]=xl;exLoaded=true}}
     catch(e){Q('#msg').textContent=e&&e.code==='permission-denied'?'Kein Schreibrecht: Nur Trainer dürfen Termine bearbeiten.':'Speichern fehlgeschlagen. Bitte erneut versuchen.';return}
   }else{
     o.id=id;var k=items.findIndex(function(i){return i.id===id});
@@ -1150,7 +1311,7 @@ async function asave(){
 async function aremove(){
   if(!armed){armed=true;Q('#del').textContent='Wirklich löschen?';Q('#del').className='btn warn';return}
   try{
-    if(online()){var x=cl.fb;await x.F.deleteDoc(x.F.doc(x.db,'termine',acur.id));await x.F.deleteDoc(x.F.doc(x.db,'aar',acur.id))}
+    if(online()){var x=cl.fb;await x.F.deleteDoc(x.F.doc(x.db,'termine',acur.id));await x.F.deleteDoc(x.F.doc(x.db,'aar',acur.id));try{await x.F.deleteDoc(x.F.doc(x.db,'aarex',acur.id))}catch(e2){}}
     else{items=items.filter(function(i){return i.id!==acur.id});saveLocal()}
     showList();
   }catch(e){Q('#msg').textContent='Löschen fehlgeschlagen.'}
@@ -1170,6 +1331,29 @@ Q('#chips').onclick=function(e){var b=e.target.closest('button');if(!b)return;fl
 
 /* ===== i18n (Quelltexte sind Deutsch, Englisch wird per Wörterbuch eingesetzt) ===== */
 var EN={
+"Übungen":"Exercises",
+"Welche Übungen sollen gemacht werden? Beschreibe sie mit Text, Bildern oder einem YouTube-Link. Die Spieler sehen sie in „Mein Review“ unter 1.":"Which exercises should be done? Describe them with text, images or a YouTube link. Players see them in “My review” under 1.",
+"+ Übung hinzufügen":"+ Add exercise",
+"Noch keine Übungen eingetragen.":"No exercises yet.",
+"Nach oben":"Move up",
+"Nach unten":"Move down",
+"Übung entfernen":"Remove exercise",
+"Name der Übung, z. B. 3-Mann-Weave":"Exercise name, e.g. 3-man weave",
+"Name der Übung":"Exercise name",
+"Beschreibung: Ablauf, Ziel, Coaching-Punkte":"Description: sequence, goal, coaching points",
+"Beschreibung der Übung":"Exercise description",
+"YouTube-Link (optional)":"YouTube link (optional)",
+"YouTube-Link zur Übung":"YouTube link for the exercise",
+"Bild entfernen":"Remove image",
+"+ Bild":"+ Image",
+"Übungen der Trainer":"Coaches' exercises",
+"Übung auf YouTube ansehen":"Watch exercise on YouTube",
+"Die Trainer haben für diesen Termin noch keine Übungen eingetragen.":"The coaches have not added any exercises for this date yet.",
+"Übung":"Exercise",
+"Die Übungen enthalten zu viele oder zu große Bilder. Bitte einzelne Bilder entfernen.":"The exercises contain too many or too large images. Please remove some images.",
+"Kommend":"Upcoming","Vergangen":"Past",
+"Keine kommenden Termine.":"No upcoming dates.",
+"Keine vergangenen Termine.":"No past dates.",
 "Fasst die wichtigsten Punkte aus Team-Review und Spieler-Rückmeldungen zusammen. Nur Trainer bearbeiten diese Seite. Nach der Freigabe sehen alle Spieler die Zusammenfassung. Alle Felder sind frei anpassbar.":"Summarises the key points from the team review and the player feedback. Only coaches edit this page. Once released, all players can see the summary. All fields can be edited freely.",
 "Entwurf (nur Trainer)":"Draft (coaches only)",
 "Für alle Spieler freigeben":"Release to all players",
@@ -1332,10 +1516,10 @@ var EN={
 "Bestätigungs-E-Mail erneut senden":"Resend confirmation email","Passwort zurücksetzen (Link per E-Mail)":"Reset password (link by email)","E-Mail gesendet.":"Email sent.",
 "Bestätigungs-E-Mail gesendet. Nach dem Klick auf den Link gilt die neue Adresse. Melde dich danach mit der E-Mail an.":"Confirmation email sent. The new address applies once you click the link. Then log in with the email.",
 "Abmelden":"Log out",
-"Melde dich an oder registriere dich, um das After-Action Review und die Gear-Checkliste zu nutzen.":"Log in or register to use the After-Action Review and the gear checklist.",
+"Melde dich an oder registriere dich, um das After-Action Review und die Ausrüstungsliste zu nutzen.":"Log in or register to use the After-Action Review and the gear checklist.",
 "Die Online-Verbindung ist nicht verfügbar. Prüfe config.js (siehe README) und deine Verbindung.":"The online connection is not available. Check config.js (see the README) and your connection.",
-"Offline fortfahren (nur Gear-Checkliste auf diesem Gerät)":"Continue offline (gear checklist on this device only)",
-"Offline-Modus: Nur die Gear-Checkliste ist auf diesem Gerät verfügbar.":"Offline mode: only the gear checklist is available on this device.",
+"Offline fortfahren (nur Ausrüstungsliste auf diesem Gerät)":"Continue offline (gear checklist on this device only)",
+"Offline-Modus: Nur die Ausrüstungsliste ist auf diesem Gerät verfügbar.":"Offline mode: only the gear checklist is available on this device.",
 "Admins werden in der Firebase-Konsole festgelegt (Sammlung „admins“, siehe README). Alle anderen sind standardmäßig Spieler, hier kannst du sie zu Trainern machen.":"Admins are set in the Firebase console (collection “admins”, see the README). Everyone else is a player by default; here you can make them coaches.",
 "Kein Schreibrecht: Nur Trainer dürfen Termine bearbeiten.":"No write permission: only coaches may edit dates.",
 "Deine Punkte sind privat in deinem Konto gespeichert. Erst mit „An Trainer senden“ sehen die Trainer sie.":"Your points are saved privately in your account. The coaches only see them once you tap “Send to coaches”.",
@@ -1347,10 +1531,10 @@ var EN={
 "← Zur Liste":"← Back to list","Speichern":"Save","Löschen":"Delete","Wirklich löschen?":"Really delete?","Entfernen":"Remove","Bearbeiten":"Edit","Fertig":"Done","Hinzufügen":"Add",
 "Grundlage: Keiser & Arthur (2021), Journal of Applied Psychology.":"Based on Keiser & Arthur (2021), Journal of Applied Psychology.",
 "Nicht angemeldet: Einträge werden nur auf diesem Gerät gespeichert.":"Not signed in: entries are only saved on this device.",
-"Willkommen":"Welcome","Melde dich an, um das After-Action Review und die Gear-Checkliste zu nutzen.":"Sign in to use the After-Action Review and the gear checklist.",
+"Willkommen":"Welcome","Melde dich an, um das After-Action Review und die Ausrüstungsliste zu nutzen.":"Sign in to use the After-Action Review and the gear checklist.",
 "Team-App":"Team app","TVC Blues Team-App":"TVC Blues Team App","Wähle einen Bereich.":"Choose an area.",
 "Spiele und Trainings in einer Liste: Termin eintragen, kurz auswerten, später nachschlagen.":"Games and trainings in one list: add a date, review briefly, look it up later.",
-"Gear-Checkliste":"Gear checklist","Ausrüstung für Spiele und Training vorbereiten.":"Get your gear ready for games and training.",
+"Ausrüstungsliste":"Gear checklist","Ausrüstung für Spiele und Training vorbereiten.":"Get your gear ready for games and training.",
 "Benutzerverwaltung":"User management","Neue Konten sind Spieler. Trainer legt ein Admin fest.":"New accounts are players. An admin assigns coaches.",
 "Bitte öffne diese Seite angemeldet in Claude, um ein Konto zu nutzen.":"Please open this page while signed in to Claude to use an account.",
 "Ohne Konto auf diesem Gerät fortfahren":"Continue without an account on this device",
@@ -1422,6 +1606,9 @@ var EN={
 "Beobachtungen und Zahlen statt Meinungen.":"Observations and numbers instead of opinions.","Nach 6 Minuten ist Schluss. Eine Verbesserung schlägt fünf.":"Stop after 6 minutes. One improvement beats five."
 };
 var RX=[
+[/^Übung (\d+)$/,function(m){return 'Exercise '+m[1]}],
+[/^Übung (\d+): Bitte einen gültigen YouTube-Link eintragen\.$/,function(m){return 'Exercise '+m[1]+': please enter a valid YouTube link.'}],
+[/^Bild (\d+) zur Übung(.*)$/,function(m){return 'Image '+m[1]+' of exercise'+m[2]}],
 [/^Stand: (.+)$/,function(m){return 'As of: '+m[1]}],
 [/^Was ist passiert · Eintrag (\d+)$/,function(m){return 'What happened · Entry '+m[1]}],
 [/^(\d+) \/ 500 Zeichen$/,function(m){return m[1]+' / 500 characters'}],
@@ -1487,10 +1674,10 @@ var obs=new MutationObserver(function(ms){
 var admin=false,prof={role:'player'},trainer=false,termine=[],termOk=false,aarDocs={},profs=[],trSubs=false,entered=false,offline=false,gk='load',gateNote='',pendingName='',regBusy=false,hubNote='';
 function online(){return !!(cl.fb&&cl.uid)}
 var SCR={
-  gate:['Willkommen','Melde dich an oder registriere dich, um das After-Action Review und die Gear-Checkliste zu nutzen.'],
+  gate:['Willkommen','Melde dich an oder registriere dich, um das After-Action Review und die Ausrüstungsliste zu nutzen.'],
   hub:['TVC Blues Team-App','Wähle einen Bereich.'],
   aar:['After-Action Review','Spiele und Trainings in einer Liste: Termin eintragen, kurz auswerten, später nachschlagen.'],
-  gear:['Gear-Checkliste','Ausrüstung für Spiele und Training vorbereiten.'],
+  gear:['Ausrüstungsliste','Ausrüstung für Spiele und Training vorbereiten.'],
   admin:['Benutzerverwaltung','Neue Konten sind Spieler. Trainer legt ein Admin fest.'],
   account:['Konto','Dein Konto und deine E-Mail-Adresse.'],
   sched:['Termine','Trainings und Spiele des Vereins.']
@@ -1501,6 +1688,7 @@ function show(n){
   Object.keys(m).forEach(function(k){Q('#'+m[k]).hidden=k!==n});
   Q('#shell').hidden=(n==='gear');
   Q('#hTitle').textContent=SCR[n][0];Q('#hSub').textContent=SCR[n][1];
+  var de=document.documentElement;de.dataset.area=n;de.classList.toggle('ph',/^(aar|sched|gear|admin)$/.test(n));de.classList.toggle('gph',n==='gate');
   Q('#menuBtn').hidden=(n==='gate'||n==='hub');Q('#outBtn').hidden=!cl.user;window.scrollTo(0,0);
 }
 function roleLabel(){return admin?'Admin':trainer?'Trainer':'Spieler'}
@@ -1508,12 +1696,12 @@ function updWho(){var w=Q('#who');w.textContent='';w.hidden=!cl.user;if(!cl.user
 Q('#who').onclick=function(){accountRender();show('account')};
 function buildHub(){
   var h=Q('#hub');h.textContent='';
-  function card(t,d,fn){var b=el('button','hubc');b.appendChild(el('h2',null,t));b.appendChild(el('p',null,d));b.onclick=fn;h.appendChild(b)}
-  if(online())card('After-Action Review',trainer?'Spiele und Trainings auswerten, Reviews sammeln und freigeben.':'Wähle einen Termin und schreibe dein Review für die Trainer.',function(){showList();show('aar')});
-  if(online())card('Termine','Trainings und Spiele des Vereins, mit deinen persönlichen Anpassungen.',function(){sMode='list';sSel=null;sRender();show('sched')});
-  card('Gear-Checkliste','Ausrüstung für Spiele und Training vorbereiten.',function(){R();show('gear')});
-  if(admin)card('Benutzerverwaltung','Konten ansehen und Rollen festlegen.',function(){adminRender();show('admin')});
-  if(!online())h.appendChild(el('p','note','Offline-Modus: Nur die Gear-Checkliste ist auf diesem Gerät verfügbar.'));
+  function card(t,d,fn,ar){var b=el('button','hubc');if(ar){var f=el('span','hph hph-'+ar);f.setAttribute('aria-hidden','true');b.appendChild(f)}var tx=el('span','htx');tx.appendChild(el('h2',null,t));tx.appendChild(el('p',null,d));b.appendChild(tx);b.onclick=fn;h.appendChild(b)}
+  if(online())card('After-Action Review',trainer?'Spiele und Trainings auswerten, Reviews sammeln und freigeben.':'Wähle einen Termin und schreibe dein Review für die Trainer.',function(){showList();show('aar')},'aar');
+  if(online())card('Termine','Trainings und Spiele des Vereins, mit deinen persönlichen Anpassungen.',function(){sMode='list';sSel=null;sRender();show('sched')},'sched');
+  card('Ausrüstungsliste','Ausrüstung für Spiele und Training vorbereiten.',function(){R();show('gear')},'gear');
+  if(admin)card('Benutzerverwaltung','Konten ansehen und Rollen festlegen.',function(){adminRender();show('admin')},'admin');
+  if(!online())h.appendChild(el('p','note','Offline-Modus: Nur die Ausrüstungsliste ist auf diesem Gerät verfügbar.'));
   if(hubNote)h.insertBefore(el('p','pm',hubNote),h.firstChild);
   if(online()&&legacyMail()){
     var w=el('section');w.style.setProperty('--c','var(--p4)');
@@ -1585,7 +1773,7 @@ function gateView(kind){
   if(kind==='load')c.appendChild(el('p',null,'Lade ...'));
   else if(kind==='off'){
     c.appendChild(el('p',null,'Die Online-Verbindung ist nicht verfügbar. Prüfe config.js (siehe README) und deine Verbindung.'));
-    var b=el('button','btn ghost','Offline fortfahren (nur Gear-Checkliste auf diesem Gerät)');b.onclick=function(){offline=true;showHub()};c.appendChild(b);
+    var b=el('button','btn ghost','Offline fortfahren (nur Ausrüstungsliste auf diesem Gerät)');b.onclick=function(){offline=true;showHub()};c.appendChild(b);
   }else{
     c.innerHTML=loginHTML(kind);gateNote='';
     var go=function(id,fn){var e=c.querySelector('#'+id);if(e)e.onclick=fn};
@@ -1746,7 +1934,7 @@ function sRender(){
     g[1].forEach(function(e){
       var m=myEv(e),col=e.type==='spiel'?'--p1':'--p3',bt=el('button','item');bt.style.setProperty('--c','var('+col+')');if(m.hide)bt.style.opacity='.55';
       var d=el('span','d',fmt(e.date));d.appendChild(el('div','done',m.time?m.time+' Uhr':'–'));bt.appendChild(d);
-      var bd=el('span','badge',e.type==='spiel'?'Spiel':'Training');bd.style.setProperty('--c','var('+col+')');bt.appendChild(bd);
+      var bd=el('span','badge'+(col==='--p3'?' lt':''),e.type==='spiel'?'Spiel':'Training');bd.style.setProperty('--c','var('+col+')');bt.appendChild(bd);
       var mid=el('span','t',e.type==='spiel'?evTitle(e):'');
       var sub=[];if(e.type==='spiel'&&e.home!=null)sub.push(e.home?'Heimspiel':'Auswärtsspiel');if(e.matchday)sub.push(e.matchday+'. Spieltag');
       if(sub.length)mid.appendChild(el('div','done',sub.join(' · ')));
@@ -1993,6 +2181,31 @@ setLang(lang);
 
 gateView("load");cinit();
 if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
+
+/* Zurück-Taste / Zurück-Geste: jede Ebene bekommt einen Verlaufseintrag */
+var curView='gate',navDepth=0,navIgnore=0;
+function navLevel(){var v=curView,l;if(!v||v==='gate'||v==='hub')return 0;l=1;
+  if(v==='aar'&&!Q('#editView').hidden)l++;
+  if(v==='sched'&&sMode!=='list')l++;
+  if(v==='gear'){if(view!=='l')l++;if(sheet)l++}
+  return l}
+function navSync(){var t=navLevel();
+  while(navDepth<t){navDepth++;try{history.pushState({tvc:navDepth},'')}catch(e){}}
+  if(navDepth>t){var k=navDepth-t;navDepth=t;navIgnore++;history.go(-k)}}
+function navUp(){var v=curView;
+  if(v==='gear'){if(sheet){sheet=null;R();return}if(view!=='l'){view='l';R();return}}
+  if(v==='aar'&&!Q('#editView').hidden){Q('#back').onclick();return}
+  if(v==='sched'&&sMode!=='list'){sMode='list';sSel=null;sRender();return}
+  if(v!=='hub'&&v!=='gate')Q('#menuBtn').onclick()}
+addEventListener('popstate',function(e){var d=(e.state&&e.state.tvc)||0;
+  if(navIgnore>0){navIgnore--;navDepth=d;return}
+  navDepth=d;if(navLevel()>d)navUp()});
+try{history.replaceState({tvc:0},'')}catch(e){}
+show=(function(o){return function(n){curView=n;var r=o.apply(this,arguments);navSync();return r}})(show);
+R=(function(o){return function(){var r=o.apply(this,arguments);if(curView==='gear')navSync();return r}})(R);
+sRender=(function(o){return function(){var r=o.apply(this,arguments);navSync();return r}})(sRender);
+openEditor=(function(o){return function(){var r=o.apply(this,arguments);navSync();return r}})(openEditor);
+showList=(function(o){return function(){var r=o.apply(this,arguments);navSync();return r}})(showList);
 </script>
 <script>
 /* Smartphone-freundliche Textfelder: Auto-Höhe, Tastatur-Hinweise, sichtbar beim Tippen, Zeichenzähler */
@@ -2011,7 +2224,7 @@ if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.s
   else if(ty==='url'||/video|link|url/i.test(f.placeholder||'')){f.setAttribute('inputmode','url');f.setAttribute('autocapitalize','none');f.setAttribute('autocorrect','off')}
   else if(ty==='text'||!ty){if(!f.hasAttribute('autocapitalize'))f.setAttribute('autocapitalize','sentences');if(!f.hasAttribute('enterkeyhint'))f.setAttribute('enterkeyhint','done')}}
  document.addEventListener('focusin',function(e){var f=e.target;if(!/^(INPUT|TEXTAREA|SELECT)$/.test(f.tagName))return;prep(f);fit(f);
-  if(touch&&f.tagName!=='SELECT')setTimeout(function(){if(document.activeElement===f)f.scrollIntoView({block:'center',behavior:'smooth'})},350)});
+  if(touch&&f.tagName!=='SELECT')setTimeout(function(){if(document.activeElement===f)f.scrollIntoView({block:'center',behavior:(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)?'auto':'smooth'})},350)});
  document.addEventListener('input',function(e){var f=e.target;if(f.tagName==='TEXTAREA')fit(f);if(f.tagName==='TEXTAREA'||f.tagName==='INPUT')cnt(f)});
  /* Enter in einzeiligen Feldern: Tastatur schließen statt nichts zu tun (Login/Kategorien haben eigene Logik) */
  document.addEventListener('keydown',function(e){var f=e.target;if(e.key==='Enter'&&touch&&f.tagName==='INPUT'&&f.getAttribute('enterkeyhint')==='done'&&!f.onkeydown&&f.id!=='ncat'&&!f.closest('form'))f.blur()});

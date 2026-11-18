@@ -178,3 +178,40 @@ R. AAR: Video zentral, Rückmeldungen, Export, Zusammenfassung
      Füllbar per Gemini oder per eingefügter Antwort einer externen KI, alle Felder anpassbar.
    Sichtbarkeit: „Entwurf (nur Trainer)“ oder „Für alle Spieler freigeben“. Spieler sehen sie dann im selben Reiter, nur lesend.
    WICHTIG: firestore.rules neu veröffentlichen (Sammlung „aarsum“: Trainer schreiben, alle lesen nach Freigabe).
+
+S. AAR-Terminübersicht in zwei Spalten
+   Links „Kommende Termine“, rechts „Vergangene Termine“, jeweils mit Anzahl – auf allen Bildschirmen.
+   Auf Smartphones kompakt: kurzes Datum (Sa., 14.11.26), kleines Typ-Etikett, Titel darunter, Überschriften „Kommend“/„Vergangen“.
+
+T. Übungen im Team-Review (1. Gesetzter Fokus)
+   Trainer tragen unter 1. beliebig viele Übungen ein: Name, Beschreibung, YouTube-Link (optional) und bis zu 4 Bilder
+   (werden automatisch verkleinert). Reihenfolge per ↑/↓ änderbar. Gespeichert wird mit „Speichern“ im Team-Review.
+   Spieler sehen die Übungen sofort (auch vor Freigabe des Team-Reviews) in „Mein Review“ unter 1.
+   bei „Was wollte das Team erreichen?“ – nur lesend. Auch im freigegebenen Team-Review und in den Rückmeldungen sichtbar.
+   Neue Sammlung „aarex“: alle Angemeldeten lesen, nur Trainer schreiben → firestore.rules neu veröffentlichen.
+   AAR-Übersicht: Trainings ohne Titel zeigen keinen Platzhalter „(ohne Titel)“ mehr.
+
+U. Mobile Bedienbarkeit (nach UI-Muster-Prüfung)
+   Zurück-Taste/-Geste des Browsers bzw. Android: führt eine Ebene zurück (AAR-Termin → Liste → Start,
+     Gear-Sheet schließen, Gear-Terminübersicht → Liste, Termin-Detail → Terminliste) statt die App zu verlassen.
+     Ungespeicherte Eingaben in „Mein Review“ und „Zusammenfassung“ werden dabei gesichert.
+   Tippflächen mind. 44 × 44 px (Kopfzeile, DE/EN, Reiter, Filter, −/+, kleine Knöpfe).
+   Kontraste nach WCAG AA (≥ 4,5:1) in Hell- und Dunkelmodus: Etiketten, aktive Reiter/Filter, Minutenleiste.
+   „Bewegung reduzieren“ (Systemeinstellung) schaltet Übergänge und weiches Scrollen ab;
+     der Fortschrittsbalken animiert per transform statt width.
+   Sheets nutzen 92dvh und scrollen die Seite dahinter nicht mit (overscroll-behavior: contain).
+
+V. Bereichsfotos und neuer Name „Ausrüstungsliste“
+   Die Gear-Checkliste heißt auf Deutsch jetzt „Ausrüstungsliste“ (englisch weiter „Gear checklist“); die Icons bleiben.
+   Jeder Bereich hat ein eigenes Foto (Ordner img/ – bitte mit hochladen):
+     After-Action Review = Plätze von oben (img/aar.jpg), Termine = Korb im Abendlicht (img/termine.jpg),
+     Ausrüstungsliste = Ball auf dem Hartplatz (img/ausruestung.jpg), Benutzerverwaltung = blauer Hallenboden (img/benutzer.jpg).
+   Heller Modus: Foto im Kopfbereich unter einem blauen Verlauf. Dunkler Modus: Foto als stark abgedunkelter Seitenhintergrund,
+     Karten und Listen bleiben auf festen Flächen. Die Startseite zeigt die Bereiche als 2×2-Bildkacheln.
+   Fotos: Unsplash (freie Lizenz). Ein Foto tauschen = gleichnamige Datei in img/ ersetzen (ca. 900–1000 px, JPEG).
+
+W. Anmeldung mit Foto und Fotos als Akzent
+   Anmeldung: Vollbild-Foto (Korb im Gegenlicht, blau eingefärbt, img/anmeldung.jpg), das Anmeldefeld liegt auf einer festen Fläche.
+   Ausrüstungsliste: Ist alles abgehakt, erscheint „Alles drin – x von x gepackt“ mit Foto (img/alles-drin.jpg)
+     und „Viel Erfolg!“ (Spiel) bzw. „Gutes Training!“ (Training).
+   Leere Zustände (keine Termine im AAR, keine Übungen) zeigen ein kleines rundes Bild (img/leer.jpg).
